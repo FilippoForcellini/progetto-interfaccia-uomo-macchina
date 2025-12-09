@@ -11,7 +11,7 @@ namespace Pianificazioneturni.Web
             // Registration of all the database services you have
             container.AddScoped<SharedService>();
 
-            // Registration of SignalR events
+            // Registration of SignalR events prova
             container.AddScoped<IPublishDomainEvents, SignalrPublishDomainEvents>();
         }
     }
