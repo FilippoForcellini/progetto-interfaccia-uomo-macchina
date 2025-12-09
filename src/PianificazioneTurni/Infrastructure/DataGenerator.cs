@@ -19,7 +19,7 @@ namespace PianificazioneTurni.Infrastructure
                 {
                     Id = Guid.Parse("3de6883f-9a0b-4667-aa53-0fbc52c4d300"), // Forced to specific Guid for tests prova
                     Email = "email1@test.it",
-                    Password = "M0Cuk9OsrcS/rTLGf5SY6DUPqU2rGc1wwV2IL88GVGo=", // SHA-256 of text "Prova"
+                    Password = "M0Cuk9OsrcS/rTLGf5SY6DUPqU2rGc1wwV2IL88GVGo=", // SHA-256 of teoooooo
                     FirstName = "Nome1",
                     LastName = "Cognome1",
                     NickName = "Nickname1"
