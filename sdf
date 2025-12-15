@@ -1,0 +1,78 @@
+[33mcommit 3add18f3b0a84aacfd4a70d9418b8b18c286a882[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: gianninimatteo <matteogiannini294@gmail.com>
+Date:   Mon Dec 15 14:05:38 2025 +0100
+
+    prova2
+
+[33mcommit 979ecf400b1233505979e974cc2c9a4fc8a47a06[m
+Author: gianninimatteo <matteogiannini294@gmail.com>
+Date:   Mon Dec 15 14:02:21 2025 +0100
+
+    prova
+
+[33mcommit c075dd96bf056d75f5c001d1369d606ecf4a8474[m
+Merge: a26a09c 5d083d2
+Author: filippo forcellini <filippo.forcellini@studio.unibo.it>
+Date:   Tue Dec 9 16:17:44 2025 +0100
+
+    Merge branch 'main' of https://github.com/FilippoForcellini/progetto-interfaccia-uomo-macchina
+
+[33mcommit a26a09c9e1e0d7839866254c5b08aac52cfe1b83[m
+Author: filippo forcellini <filippo.forcellini@studio.unibo.it>
+Date:   Tue Dec 9 16:17:30 2025 +0100
+
+    provas
+
+[33mcommit 5d083d21f2d2e679bf21be8384568f1123ecd8dd[m
+Author: gianninimatteo <matteogiannini294@gmail.com>
+Date:   Tue Dec 9 15:28:00 2025 +0100
+
+    prova
+
+[33mcommit 77035f3c4706e9fe1dbb45f07f9bc13490c11043[m
+Author: filippo forcellini <filippo.forcellini@studio.unibo.it>
+Date:   Tue Dec 9 15:04:44 2025 +0100
+
+    modifica 2
+
+[33mcommit 2f2f6620cc4189aa478e2d667e036a30d9d32c3d[m
+Author: gianninimatteo <matteogiannini294@gmail.com>
+Date:   Tue Dec 9 14:53:18 2025 +0100
+
+    Scheletro progetto da template
+
+[33mcommit 106f118c5b7f953d82f1288f05fddcfff8d5a075[m
+Author: gianninimatteo <matteogiannini294@gmail.com>
+Date:   Tue Dec 9 14:38:19 2025 +0100
+
+    Add .gitignore for Visual Studio project files
+    
+    Add a comprehensive .gitignore file for Visual Studio projects.
+
+[33mcommit b146d488d2723a118b7101365d377e474614595e[m
+Author: gianninimatteo <matteogiannini294@gmail.com>
+Date:   Tue Dec 9 14:17:49 2025 +0100
+
+    Clean up README by removing placeholder text
+    
+    Removed placeholder text from README
+
+[33mcommit 7e72667df1d026db949b821b5e33314a58ac568c[m
+Author: gianninimatteo <matteogiannini294@gmail.com>
+Date:   Tue Dec 9 14:07:43 2025 +0100
+
+    Update README with additional text
+
+[33mcommit 1aa914be064d1d4a88fd00994b365418d1e8d049[m
+Author: Filippo <filippo.forcellini@studio.unibo.it>
+Date:   Tue Dec 9 14:05:57 2025 +0100
+
+    Update README with additional description
+    
+    Added a brief description to the README.
+
+[33mcommit 4a7019483d93f55a5d912e801d97e42c169ba098[m
+Author: gianninimatteo <matteogiannini294@gmail.com>
+Date:   Tue Dec 9 14:01:56 2025 +0100
+
+    Initial commit
