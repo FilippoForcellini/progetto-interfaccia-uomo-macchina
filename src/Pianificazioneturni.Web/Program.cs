@@ -17,7 +17,7 @@ namespace Pianificazioneturni.Web
                     webBuilder.ConfigureKestrel(kestrel =>
                     {
                         kestrel.AddServerHeader = false; // OWASP: Remove Kestrel response header 
-                    });
+                    });//SECONDA PROVA
 
                     webBuilder.UseStartup<Startup>();
                 });
