@@ -1,22 +1,27 @@
 ﻿@inject IHtmlLocalizer<Pianificazioneturni.Web.Areas.Example.Users.IndexViewModel> ModelLocalizer
 @model Pianificazioneturni.Web.Areas.Example.Users.IndexViewModel
-@{
-    ViewData["Title"] = "Utenti";
-}
+
 @section pageTitle{
-    <nav class="navbar navbar-expand navbar-light flex-wrap onit-page-title">
-        <a class="navbar-brand">
-            @ViewData["Title"] <small class="text-muted" title="numero di elementi individuati con i filtri attuali">(@Model.TotalItems.ToString("N0"))</small>
-        </a>
-        <ul class="navbar-nav flex-wrap ms-auto">
-            <li>
-                <a class="btn btn-light ms-2" href="@Url.Action(MVC.Example.Users.New())" title="Inserisci un nuovo elemento">
-                    <i class="fa-solid fa-plus"></i>&nbsp;Nuovo
-                </a>
-            </li>
-        </ul>
-    </nav>
+    <ul class="navbar-nav flex-wrap ms-auto">
+        <li>
+            <a class="btn btn-light ms-2" href="@Url.Action(MVC.Example.Users.New())" title="Inserisci un nuovo elemento">
+                <i class="fa-solid fa-plus"></i>&nbsp;Nuovo
+            </a>
+        </li>
+    </ul>
 }
+
+@section navbar{
+
+}
+
+
+
+
+
+
+
+
 @section pageSubtitle{
     <nav class="navbar navbar-expand navbar-light flex-wrap onit-page-subtitle">
         <form method="get" id="annullaRicerca">
