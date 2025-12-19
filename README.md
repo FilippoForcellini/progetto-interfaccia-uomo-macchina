@@ -1,2 +1,2 @@
-# progetto-interfaccia-uomo-macchina
+# Progetto Interfaccia Uomo-Macchina
 
