@@ -10,9 +10,7 @@
 @section styles{
     @RenderSection("styles", false)
 }
-@{
-    ViewData["Title"] = "Pianificazione Turni";
-}
+
 <div id="pageId" class="onit-page">
     <div class="onit-page-sticky-top" id="onit-page-sticky-top">
         <nav class="navbar navbar-expand-lg navbar-dark onit-page-menu">
@@ -23,10 +21,6 @@
      
              
 
-                    <div class="position-absolute top-50 start-50 translate-middle">
-                        @ViewData["Title"]
-                        <small class="text-muted" title="numero di elementi individuati con i filtri attuali"></small>
-                    </div>
 
                     <ul class="nav navbar-nav ms-auto onit-page-menu-user">
                             <li class="nav-item dropdown">
@@ -46,7 +40,6 @@
         </nav>
         @RenderSection("pageTitle", false)
     </div>
-    @RenderSection("pageSubtitle", false)
     @RenderSection("navbar", false)
     @RenderBody()
 </div>
