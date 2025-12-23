@@ -40,29 +40,137 @@
 }
 
 <!-- Tabella -->
-<div class="table-responsive">
-    <table class="table table-bordered">
+<div style="display: flex; gap: 20px; text-align:center; justify-content:center">
+    <!--  Navi Oggi -->
+    <table class="table table-bordered" style="width: 48%;">
         <thead>
-            <tr>
-                <th>Nome</th>
-                <th>Cognome</th>
-                <th>Email</th>
+            <tr> <!-- riga -->
+                <th></th> <!-- intestazione -->
+                <th>Data</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>Mario</td>
-                <td>Rossi</td>
-                <td>mario.rossi@email.com</td>
+                <th>Nome Nave</th>
+                <th>Pontile</th>
+                <th>Orari e Dipendenti</th>
             </tr>
             <tr>
-                <td>Luigi</td>
-                <td>Bianchi</td>
-                <td>luigi.bianchi@email.com</td>
+                <td></td> <!-- cella di dati -->
+                <td></td>
+                <th>
+                    <div class="row text-center">
+                        <div class="col border-end">00:00 – 08:00</div>
+                        <div class="col border-end">08:00  –16:00</div>
+                        <div class="col">16:00 – 00:00</div>
+                    </div>
+                </th>
+            </tr>
+            <tr>
+                <td>nave 1...</td>
+                <td>10</td>
+                <td>
+                    <table class="w-100 text-center">
+                        <tbody>
+                            <tr>
+                                <td class="border-end border-bottom">Dip1</td>
+                                <td class="border-end border-bottom">Dip2</td>
+                                <td class="border-bottom">Dip3</td>
+                            </tr>
+                            <tr>
+                                <td class="border-end border-bottom">Dip4</td>
+                                <td class="border-end border-bottom">Dip5</td>
+                                <td class="border-bottom">Dip6</td>
+                            </tr>
+                            <tr>
+                                <td class="border-end border-bottom">Dip7</td>
+                                <td class="border-end border-bottom">Dip8</td>
+                                <td class="border-bottom">Dip9</td>
+                            </tr>
+                            <tr>
+                                <td class="border-end border-bottom">Dip10</td>
+                                <td class="border-end border-bottom">Dip11</td>
+                                <td class="border-bottom">Dip12</td>
+                            </tr>
+                            <tr>
+                                <td class="border-end">Dip13</td>
+                                <td class="border-end">Dip14</td>
+                                <td>Dip15</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!--  Navi Domani -->
+    <table class="table table-bordered" style="width: 48%;">
+        <thead>
+            <tr>
+                <!-- riga -->
+                <th></th> <!-- intestazione -->
+                <th>Data</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>Nome Nave</th>
+                <th>Pontile</th>
+                <th>Orari e Dipendenti</th>
+            </tr>
+            <tr>
+                <td></td> <!-- cella di dati -->
+                <td></td>
+                <th>
+                    <div class="row text-center">
+                        <div class="col border-end">00:00 – 08:00</div>
+                        <div class="col border-end">08:00  –16:00</div>
+                        <div class="col">16:00 – 00:00</div>
+                    </div>
+                </th>
+            </tr>
+            <tr>
+                <td>nave 1...</td>
+                <td>10</td>
+                <td>
+                    <table class=" w-100 text-center">
+                        <tbody>
+                            <tr>
+                                <td class="border-end border-bottom">Dip1</td>
+                                <td class="border-end border-bottom">Dip2</td>
+                                <td class="border-bottom">Dip3</td>
+                            </tr>
+                            <tr>
+                                <td class="border-end border-bottom">Dip4</td>
+                                <td class="border-end border-bottom">Dip5</td>
+                                <td class="border-bottom">Dip6</td>
+                            </tr>
+                            <tr>
+                                <td class="border-end border-bottom">Dip7</td>
+                                <td class="border-end border-bottom">Dip8</td>
+                                <td class="border-bottom">Dip9</td>
+                            </tr>
+                            <tr>
+                                <td class="border-end border-bottom">Dip10</td>
+                                <td class="border-end border-bottom">Dip11</td>
+                                <td class="border-bottom">Dip12</td>
+                            </tr>
+                            <tr>
+                                <td class="border-end">Dip13</td>
+                                <td class="border-end">Dip14</td>
+                                <td>Dip15</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
             </tr>
         </tbody>
     </table>
 </div>
+
 
 <!--  Parte del prof che non serve -->
 <nav class="navbar navbar-expand navbar-light flex-wrap onit-page-subtitle">
