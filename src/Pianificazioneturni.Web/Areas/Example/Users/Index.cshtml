@@ -13,7 +13,7 @@
 }
 
 @section navbar{
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary justify-content-md-center mb-5">
         <div class="container-fluid">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -35,14 +35,18 @@
         </div>
     </nav>
 
-
-   
 }
 
 <!-- Tabella -->
-<div style="display: flex; gap: 20px; text-align:center; justify-content:center">
+<div class="d-flex justify-content-center gap-4">
     <!--  Navi Oggi -->
-    <table class="table table-bordered" style="width: 48%;">
+    <div class="d-flex flex-column" style="flex: 1; max-width: 48%;">
+        <h3 class="mb-3 text-center">Navi Oggi</h3>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-1">
+            <button class="btn btn-secondary btn-sm" type="button">Solo orari</button>
+            <button class="btn btn-secondary btn-sm" type="button">Solo variazioni</button>
+        </div>
+        <table class="table table-bordered  w-100" style="width: 48%;">
         <thead>
             <tr> <!-- riga -->
                 <th></th> <!-- intestazione -->
@@ -104,9 +108,15 @@
             </tr>
         </tbody>
     </table>
-
+    </div>
     <!--  Navi Domani -->
-    <table class="table table-bordered" style="width: 48%;">
+    <div class="d-flex flex-column" style="flex: 1; max-width: 48%;">
+        <h3 class="mb-3 text-center">Navi Domani</h3>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-1">
+            <button class="btn btn-secondary btn-sm" type="button">Solo orari</button>
+            <button class="btn btn-secondary btn-sm" type="button">Solo variazioni</button>
+        </div>
+        <table class="table table-bordered  w-100" style="width: 48%;">
         <thead>
             <tr>
                 <!-- riga -->
@@ -169,6 +179,7 @@
             </tr>
         </tbody>
     </table>
+    </div>
 </div>
 
 
@@ -263,6 +274,7 @@
                             }
                         }
                     </tbody>
+                    <!-- Footer -->
                     <tfoot>
                         <tr>
                             <td colspan="3">
