@@ -1,0 +1,16 @@
+.page-title {
+  top: 50px;
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.navi-container {
+  flex: 1;
+  max-width: 48%;
+}
+
+.navi-rows-columns {
+  width: 48%;
+}
+
+/*# sourceMappingURL=home.css.map */

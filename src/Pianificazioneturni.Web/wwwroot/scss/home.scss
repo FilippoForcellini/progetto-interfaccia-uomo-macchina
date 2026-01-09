@@ -1,0 +1,21 @@
+// Variabili
+$page-title-top: 50px;
+$page-title-size: 30px;
+
+// Titolo pagina
+.page-title {
+    top: $page-title-top;
+    font-size: $page-title-size;
+    font-weight: bold;
+}
+
+//Tabella
+.navi-container {
+    flex: 1;
+    max-width: 48%;
+}
+
+.navi-rows-columns {
+    width: 48%;
+}
+

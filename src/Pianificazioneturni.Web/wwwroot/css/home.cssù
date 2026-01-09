@@ -1,0 +1,50 @@
+.page-title {
+  top: 50px;
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.turni-container {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.navi-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  max-width: 48%;
+}
+
+.navi-container table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.navi-container th > .row > .col {
+  border-right: 1px solid #dee2e6;
+  text-align: center;
+  padding: 0.25rem;
+}
+
+.navi-container th > .row > .col:last-child {
+  border-right: none;
+}
+
+.navi-container td table td {
+  border-right: 1px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6;
+  text-align: center;
+  padding: 0.25rem;
+}
+
+.navi-container td table tr td:last-child {
+  border-right: none;
+}
+
+.navi-container td table tr:last-child td {
+  border-bottom: none;
+}
+
+/*# sourceMappingURL=home.css%C3%B9.map */
