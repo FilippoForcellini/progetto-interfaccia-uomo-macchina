@@ -100,5 +100,17 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
 
             return RedirectToAction(Actions.Index());
         }
+
+        [HttpGet]
+        public virtual IActionResult GestioneNavi()
+        {
+            return View("Gestione_Navi");
+        }
+
+        [HttpGet]
+        public virtual IActionResult GestioneDipendenti()
+        {
+            return View("Gestione_Dipendenti");
+        }
     }
 }
