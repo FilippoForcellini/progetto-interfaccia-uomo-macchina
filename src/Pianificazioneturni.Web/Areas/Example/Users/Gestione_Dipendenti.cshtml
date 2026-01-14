@@ -22,9 +22,159 @@
                     <li class="nav-item"><a class="nav-link" href="@Url.Action(MVC.Example.Users.GestioneNavi())">Gestione Navi</a></li>
                     <li class="nav-item"><a class="nav-link active" href="@Url.Action(MVC.Example.Users.GestioneDipendenti())">Gestione Dipendenti</a></li>
                 </ul>
+                <!-- Destra -->
+                <form class="d-flex ms-auto" role="search">
+                    <input class="form-control me-2" type="search" placeholder="Search" />
+                    <button class="btn btn-outline-success" type="submit">Search</button>
+                </form>
             </div>
         </div>
     </nav>
 }
 
-<h1>Gestione Dipendenti</h1>
+<!-- Tabella -->
+<div class="d-flex justify-content-center gap-4">
+    <div class="navi-container d-flex flex-column">
+        <h3 class="mb-3 text-center">Storico dipendenti</h3>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-1">
+            <button class="btn btn-secondary btn-sm" type="button">Patenti scadute</button>
+        </div>
+        <table class="navi-rows-columns table table-bordered  w-100 text-center">
+            <thead>
+                <tr>
+                    <!-- riga -->
+                    <th>Dipendente</th> <!-- intestazione -->
+                    <th>Ruolo</th>
+                    <th>Scadenza</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Rossi Mario</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Blu Matteo</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Bianchi Filippo</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Cortesi Giulia</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Gialli Monica</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Verdi Luca</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Azzurri Margherita</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Viola Riccardo</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Arancioni Sofia</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Celeste Lorenzo</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Rosa Alex</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Neri Federico</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Marroni Eleonora</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Grigi Roberto</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Lavanda Francesco</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Giannini Matteo</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Forcellini Filippo</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Limoni Marta</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Acqua Filomena</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Fuochi Davide</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Lampone Federica</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Agnelli Lucia</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Rinaldi Martina</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Tonelli Alessandro</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Nardelli Tommaso</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

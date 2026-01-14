@@ -21,7 +21,7 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <!-- Centro -->
                 <ul class="navbar-nav gap-5 position-absolute start-50 translate-middle-x">
-                    <li class="nav-item"><a class="nav-link" href="@Url.Action(MVC.Example.Users.Index())">Home</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="@Url.Action(MVC.Example.Users.Index())">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="@Url.Action(MVC.Example.Users.GestioneNavi())">Gestione Navi</a></li>
                     <li class="nav-item"><a class="nav-link" href="@Url.Action(MVC.Example.Users.GestioneDipendenti())">Gestione Dipendenti</a></li>
                 </ul>
@@ -40,12 +40,12 @@
 <div class="d-flex justify-content-center gap-4">
     <!--  Navi Oggi -->
     <div class="navi-container d-flex flex-column">
-        <h3 class="mb-3 text-center">Navi Oggi</h3>
+        <h3 class="mb-3 text-center">Navi oggi</h3>
         <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-1">
             <button class="btn btn-secondary btn-sm" type="button">Solo orari</button>
             <button class="btn btn-secondary btn-sm" type="button">Solo variazioni</button>
         </div>
-        <table class="navi-rows-columns table table-bordered  w-100">
+        <table class="navi-rows-columns table table-bordered  w-100 text-center">
             <thead>
                 <tr>
                     <!-- riga -->
@@ -111,12 +111,12 @@
     </div>
     <!--  Navi Domani -->
     <div class="navi-container d-flex flex-column">
-        <h3 class="mb-3 text-center">Navi Domani</h3>
+        <h3 class="mb-3 text-center">Navi domani</h3>
         <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-1">
             <button class="btn btn-secondary btn-sm" type="button">Solo orari</button>
             <button class="btn btn-secondary btn-sm" type="button">Solo variazioni</button>
         </div>
-        <table class="navi-rows-columns table table-bordered  w-100">
+        <table class="navi-rows-columns table table-bordered  w-100 text-center">
             <thead>
                 <tr>
                     <!-- riga -->

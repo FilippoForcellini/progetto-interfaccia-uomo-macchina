@@ -22,9 +22,118 @@
                     <li class="nav-item"><a class="nav-link active" href="@Url.Action(MVC.Example.Users.GestioneNavi())">Gestione Navi</a></li>
                     <li class="nav-item"><a class="nav-link" href="@Url.Action(MVC.Example.Users.GestioneDipendenti())">Gestione Dipendenti</a></li>
                 </ul>
+                <!-- Destra -->
+                <form class="d-flex ms-auto" role="search">
+                    <input class="form-control me-2" type="search" placeholder="Search" />
+                    <button class="btn btn-outline-success" type="submit">Search</button>
+                </form>
             </div>
         </div>
     </nav>
 }
 
-<h1>Gestione Navi</h1>
+<!-- Tabella -->
+<div class="d-flex justify-content-center gap-4">
+    <!--  Navi Oggi -->
+    <div class="navi-container d-flex flex-column">
+        <h3 class="mb-3 text-center">Navi oggi</h3>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-1">
+            <button class="btn btn-secondary btn-sm" type="button">Solo Gruisti</button>
+            <button class="btn btn-secondary btn-sm" type="button">Solo Mulettisti</button>
+        </div>
+        <table class="navi-rows-columns table table-bordered  w-100 text-center">
+            <thead>
+                <tr>
+                    <!-- riga -->
+                    <th></th> <!-- intestazione -->
+                    <th>Data</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>Nome Nave</th>
+                    <th>Orario</th>
+                    <th>Ruoli richiesti</th>
+                </tr>
+                <tr>
+                    <td></td> <!-- cella di dati -->
+                    <th>
+                        <div class="row text-center">
+                            <div class="col border-end">00:00 - 08:00</div>
+                            <div class="col border-end">08:00 - 16:00</div>
+                            <div class="col">16:00 - 00:00</div>
+                        </div>
+                    </th>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>nave 1...</td>
+                    <td>
+                        <table class=" w-100 text-center">
+                            <tbody>
+                                <tr>
+                                    <td class="border-end">.</td>
+                                    <td class="border-end">.</td>
+                                    <td class="">.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                    <td>Gruisti, Mulettisti</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <!--  Navi Domani -->
+    <div class="navi-container d-flex flex-column">
+        <h3 class="mb-3 text-center">Navi oggi</h3>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-1">
+            <button class="btn btn-secondary btn-sm" type="button">Solo Gruisti</button>
+            <button class="btn btn-secondary btn-sm" type="button">Solo Mulettisti</button>
+        </div>
+        <table class="navi-rows-columns table table-bordered  w-100 text-center">
+            <thead>
+                <tr>
+                    <!-- riga -->
+                    <th></th> <!-- intestazione -->
+                    <th>Data</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>Nome Nave</th>
+                    <th>Orario</th>
+                    <th>Ruoli richiesti</th>
+                </tr>
+                <tr>
+                    <td></td> <!-- cella di dati -->
+                    <th>
+                        <div class="row text-center">
+                            <div class="col border-end">00:00 - 08:00</div>
+                            <div class="col border-end">08:00 - 16:00</div>
+                            <div class="col">16:00 - 00:00</div>
+                        </div>
+                    </th>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>nave 1...</td>
+                    <td>
+                        <table class=" w-100 text-center">
+                            <tbody>
+                                <tr>
+                                    <td class="border-end">.</td>
+                                    <td class="border-end">.</td>
+                                    <td class="">.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                    <td>Gruisti, Mulettisti</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
