@@ -1,5 +1,5 @@
-﻿@inject IHtmlLocalizer<Pianificazioneturni.Web.Areas.Example.Users.IndexViewModel> ModelLocalizer
-@model Pianificazioneturni.Web.Areas.Example.Users.IndexViewModel
+@using Pianificazioneturni.Web.Areas.Example.Users
+@model IndexViewModel
 
 @{
     ViewData["Title"] = "Pianificazione Turni";
@@ -8,285 +8,224 @@
 @section pageTitle {
     <div class="page-title position-absolute start-50 translate-middle">
         @ViewData["Title"]
-        <small class="text-muted"></small>
     </div>
 }
 
+<style>
+    .dipendente { display: flex; align-items: center; gap: 5px; padding: 4px 8px; margin: 2px 0; background: #e3f2fd; cursor: pointer; border-radius: 3px; }
+    .dipendente:hover { background: #bbdefb; }
+    .dipendente.patente-scaduta { background: #ffeb3b; }
+    .dipendente img { width: 16px; height: 16px; }
+    .nave-stato { font-size: 0.85rem; }
+    .nave-stato img { width: 18px; height: 18px; vertical-align: middle; }
+    .col-fascia { vertical-align: top; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+    .modal-overlay.show { display: flex; }
+    .modal-box { background: #fff; padding: 20px; border-radius: 8px; min-width: 300px; }
+    .modal-title { font-weight: bold; margin-bottom: 15px; text-align: center; }
+    .modal-footer { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
+</style>
+
 @section navbar {
-    <nav class="navbar navbar-expand-lg bg-body-tertiary justify-content-md-center mb-5">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary justify-content-md-center mb-4">
         <div class="container-fluid">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <!-- Centro -->
-                <ul class="navbar-nav gap-5 position-absolute start-50 translate-middle-x">
-                    <li class="nav-item"><a class="nav-link active" href="@Url.Action(MVC.Example.Users.Index())">Home</a></li>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav gap-5 mx-auto">
+                    <li class="nav-item"><a class="nav-link active fw-bold" href="@Url.Action(MVC.Example.Users.Index())">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="@Url.Action(MVC.Example.Users.GestioneNavi())">Gestione Navi</a></li>
                     <li class="nav-item"><a class="nav-link" href="@Url.Action(MVC.Example.Users.GestioneDipendenti())">Gestione Dipendenti</a></li>
                 </ul>
-
-                <!-- Destra -->
-                <form class="d-flex ms-auto" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Search" />
-                    <button class="btn btn-outline-success" type="submit">Search</button>
-                </form>
             </div>
         </div>
     </nav>
 }
 
-<!-- Tabella -->
-<div class="d-flex justify-content-center gap-4">
-    <!--  Navi Oggi -->
-    <div class="navi-container d-flex flex-column">
-        <h3 class="mb-3 text-center">Navi oggi</h3>
-        <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-1">
-            <button class="btn btn-secondary btn-sm" type="button">Solo orari</button>
-            <button class="btn btn-secondary btn-sm" type="button">Solo variazioni</button>
-        </div>
-        <table class="navi-rows-columns table table-bordered  w-100 text-center">
-            <thead>
-                <tr>
-                    <!-- riga -->
-                    <th></th> <!-- intestazione -->
-                    <th>Data</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <th>Nome Nave</th>
-                    <th>Pontile</th>
-                    <th>Orari e Dipendenti</th>
-                </tr>
-                <tr>
-                    <td></td> <!-- cella di dati -->
-                    <td></td>
-                    <th>
-                        <div class="row text-center">
-                            <div class="col border-end">00:00 – 08:00</div>
-                            <div class="col border-end">08:00  –16:00</div>
-                            <div class="col">16:00 – 00:00</div>
-                        </div>
-                    </th>
-                </tr>
-                <tr>
-                    <td>nave 1...</td>
-                    <td>10</td>
-                    <td>
-                        <table class="w-100 text-center">
-                            <tbody>
-                                <tr>
-                                    <td class="border-end border-bottom">Dip1</td>
-                                    <td class="border-end border-bottom">Dip2</td>
-                                    <td class="border-bottom">Dip3</td>
-                                </tr>
-                                <tr>
-                                    <td class="border-end border-bottom">Dip4</td>
-                                    <td class="border-end border-bottom">Dip5</td>
-                                    <td class="border-bottom">Dip6</td>
-                                </tr>
-                                <tr>
-                                    <td class="border-end border-bottom">Dip7</td>
-                                    <td class="border-end border-bottom">Dip8</td>
-                                    <td class="border-bottom">Dip9</td>
-                                </tr>
-                                <tr>
-                                    <td class="border-end border-bottom">Dip10</td>
-                                    <td class="border-end border-bottom">Dip11</td>
-                                    <td class="border-bottom">Dip12</td>
-                                </tr>
-                                <tr>
-                                    <td class="border-end">Dip13</td>
-                                    <td class="border-end">Dip14</td>
-                                    <td>Dip15</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    <!--  Navi Domani -->
-    <div class="navi-container d-flex flex-column">
-        <h3 class="mb-3 text-center">Navi domani</h3>
-        <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-1">
-            <button class="btn btn-secondary btn-sm" type="button">Solo orari</button>
-            <button class="btn btn-secondary btn-sm" type="button">Solo variazioni</button>
-        </div>
-        <table class="navi-rows-columns table table-bordered  w-100 text-center">
-            <thead>
-                <tr>
-                    <!-- riga -->
-                    <th></th> <!-- intestazione -->
-                    <th>Data</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <th>Nome Nave</th>
-                    <th>Pontile</th>
-                    <th>Orari e Dipendenti</th>
-                </tr>
-                <tr>
-                    <td></td> <!-- cella di dati -->
-                    <td></td>
-                    <th>
-                        <div class="row text-center">
-                            <div class="col border-end">00:00 – 08:00</div>
-                            <div class="col border-end">08:00  –16:00</div>
-                            <div class="col">16:00 – 00:00</div>
-                        </div>
-                    </th>
-                </tr>
-                <tr>
-                    <td>nave 1...</td>
-                    <td>10</td>
-                    <td>
-                        <table class=" w-100 text-center">
-                            <tbody>
-                                <tr>
-                                    <td class="border-end border-bottom">Dip1</td>
-                                    <td class="border-end border-bottom">Dip2</td>
-                                    <td class="border-bottom">Dip3</td>
-                                </tr>
-                                <tr>
-                                    <td class="border-end border-bottom">Dip4</td>
-                                    <td class="border-end border-bottom">Dip5</td>
-                                    <td class="border-bottom">Dip6</td>
-                                </tr>
-                                <tr>
-                                    <td class="border-end border-bottom">Dip7</td>
-                                    <td class="border-end border-bottom">Dip8</td>
-                                    <td class="border-bottom">Dip9</td>
-                                </tr>
-                                <tr>
-                                    <td class="border-end border-bottom">Dip10</td>
-                                    <td class="border-end border-bottom">Dip11</td>
-                                    <td class="border-bottom">Dip12</td>
-                                </tr>
-                                <tr>
-                                    <td class="border-end">Dip13</td>
-                                    <td class="border-end">Dip14</td>
-                                    <td>Dip15</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-
-
-
-<!--  Parte del prof che non serve -->
-<nav class="navbar navbar-expand navbar-light flex-wrap onit-page-subtitle">
-    <form method="get" id="annullaRicerca">
-    </form>
-    <form class="onit-form-search" method="get" autocomplete="off">
-        <div class="row">
-            <div class="col-sm-auto onit-form-search-col-auto-2x">
-                <label asp-for="Filter"></label>
-                <div class="input-group onit-input-group-union">
-                    <span class="input-group-text"><i class="fa-solid fa-fw fa-magnifying-glass"></i></span>
-                    <input asp-for="Filter" class="form-control" />
+<div class="container-fluid">
+    <div class="row">
+        <!-- NAVI OGGI -->
+        <div class="col-md-6">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="fw-bold mb-0">NAVI OGGI</h5>
+                <div>
+                    <button class="btn btn-outline-secondary btn-sm">Solo Orari</button>
+                    <button class="btn btn-outline-secondary btn-sm">Solo Variazioni</button>
                 </div>
             </div>
-
-            <div class="col-sm-auto pt-2 mt-auto">
-                <button class="btn btn-primary" type="submit">
-                    Cerca
-                </button>
-                <button class="btn btn-link" type="button" title="Annulla tutti i parametri della ricerca" onclick="document.getElementById('annullaRicerca').submit();">
-                    Azzera ricerca
-                </button>
-            </div>
-
-            <div class="col-sm-auto ms-auto mt-2 pt-2 d-flex flex-row">
-                <partial name="@MVC.Shared.Views._PagingPartialFilter" model="Model" />
-            </div>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th colspan="5" class="text-center">@Model.DataOggi.ToString("dd/MM/yyyy")</th>
+                    </tr>
+                    <tr>
+                        <th>Nome Nave</th>
+                        <th>Pontile</th>
+                        <th colspan="3" class="text-center">Orari e Dipendenti</th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th class="text-center">00:00 - 08:00</th>
+                        <th class="text-center">08:00 - 16:00</th>
+                        <th class="text-center">16:00 - 24:00</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var nave in Model.NaviOggi)
+                    {
+                        <tr>
+                            <td>
+                                <div>@nave.Nome</div>
+                                <div class="nave-stato">@nave.StatoDescrizione <img src="~/images/@nave.StatoIcona" /></div>
+                            </td>
+                            <td>@nave.Pontile</td>
+                            @for (int i = 0; i < 3; i++)
+                            {
+                                var fascia = (FasciaOraria)i;
+                                <td class="col-fascia">
+                                    @if (nave.Fascia == fascia)
+                                    {
+                                        @foreach (var dip in nave.Dipendenti)
+                                        {
+                                            <div class="dipendente @(dip.PatenteScaduta ? "patente-scaduta" : "")" onclick="apriModal(this, @dip.Id)">
+                                                @if (dip.PatenteScaduta)
+                                                {
+                                                    <img src="~/images/patente.png" title="Patente scaduta" />
+                                                }
+                                                @if (dip.RichiedeVariazione)
+                                                {
+                                                    <img src="~/images/variazione.png" title="Richiesta variazione" />
+                                                }
+                                                <span>@dip.NomeCompleto</span>
+                                            </div>
+                                        }
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
 
-        <!-- Bottone 'Nuovo' -->
-        <ul class="navbar-nav flex-wrap ms-auto">
-            <li>
-                <a class="btn btn-light ms-2" href="@Url.Action(MVC.Example.Users.New())" title="Inserisci un nuovo elemento">
-                    <i class="fa-solid fa-plus"></i>&nbsp;Nuovo
-                </a>
-            </li>
-        </ul>
-
-    </form>
-</nav>
-
-
-
-<div>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12 p-0">
-                <table class="table table-hover table-sm table-striped">
-                    <thead>
-                        <tr>
-                            <th>
-                                <a href="javascript:utilities.navigateUrlWithoutHystory('@(Model.OrderbyUrl(Url, r => r.Email))')">
-                                    @ModelLocalizer["Email"]&nbsp;<span class="@Model.OrderbyCss(Context, r => r.Email)"></span>
-                                </a>
-                            </th>
-                            <th>
-                                <a href="javascript:utilities.navigateUrlWithoutHystory('@(Model.OrderbyUrl(Url, r => r.FirstName))')">
-                                    @ModelLocalizer["Nome"]&nbsp;<span class="@Model.OrderbyCss(Context, r => r.FirstName)"></span>
-                                </a>
-                            </th>
-                            <th>
-                                <a href="javascript:utilities.navigateUrlWithoutHystory('@(Model.OrderbyUrl(Url, r => r.LastName))')">
-                                    @ModelLocalizer["Cognome"]&nbsp;<span class="@Model.OrderbyCss(Context, r => r.LastName)"></span>
-                                </a>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (Model.Users.Any() == false)
-                        {
-                            <tr>
-                                <td colspan="3">Nessun elemento trovato con i filtri correnti</td>
-                            </tr>
-                        }
-                        else
-                        {
-                            @foreach (var user in Model.Users)
-                            {
-                                <tr class="onit-table-row-link" onclick="javascript:utilities.navigateUrlExcludeOnitNotNavigate('@Url.Action(MVC.Example.Users.Edit(user.Id))')" title="@ModelLocalizer["Modifica utente"] @user.Email">
-                                    <td scope="row" class="text-nowrap">
-                                        @user.Email
-                                    </td>
-                                    <td class="text-nowrap">
-                                        @user.FirstName
-                                    </td>
-                                    <td class="text-nowrap">
-                                        @user.LastName
-                                    </td>
-                                </tr>
-                            }
-                        }
-                    </tbody>
-                    <!-- Footer -->
-                    <tfoot>
-                        <tr>
-                            <td colspan="3">
-                                <nav class="navbar navbar-expand justify-content-md-center">
-                                    <ul class="navbar-nav flex-wrap"><partial name="@MVC.Shared.Views._PagingPartial" model="Model" /></ul>
-                                </nav>
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
+        <!-- NAVI DOMANI -->
+        <div class="col-md-6">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="fw-bold mb-0">NAVI DOMANI</h5>
+                <div>
+                    <button class="btn btn-outline-secondary btn-sm">Solo Orari</button>
+                    <button class="btn btn-outline-secondary btn-sm">Solo Variazioni</button>
+                </div>
             </div>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th colspan="5" class="text-center">@Model.DataDomani.ToString("dd/MM/yyyy")</th>
+                    </tr>
+                    <tr>
+                        <th>Nome Nave</th>
+                        <th>Pontile</th>
+                        <th colspan="3" class="text-center">Orari e Dipendenti</th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th class="text-center">00:00 - 08:00</th>
+                        <th class="text-center">08:00 - 16:00</th>
+                        <th class="text-center">16:00 - 24:00</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var nave in Model.NaviDomani)
+                    {
+                        <tr>
+                            <td>
+                                <div>@nave.Nome</div>
+                                <div class="nave-stato">@nave.StatoDescrizione <img src="~/images/@nave.StatoIcona" /></div>
+                            </td>
+                            <td>@nave.Pontile</td>
+                            @for (int i = 0; i < 3; i++)
+                            {
+                                var fascia = (FasciaOraria)i;
+                                <td class="col-fascia">
+                                    @if (nave.Fascia == fascia)
+                                    {
+                                        @foreach (var dip in nave.Dipendenti)
+                                        {
+                                            <div class="dipendente @(dip.PatenteScaduta ? "patente-scaduta" : "")" onclick="apriModal(this, @dip.Id)">
+                                                @if (dip.PatenteScaduta)
+                                                {
+                                                    <img src="~/images/patente.png" title="Patente scaduta" />
+                                                }
+                                                @if (dip.RichiedeVariazione)
+                                                {
+                                                    <img src="~/images/variazione.png" title="Richiesta variazione" />
+                                                }
+                                                <span>@dip.NomeCompleto</span>
+                                            </div>
+                                        }
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
+
+<!-- Modal cambio dipendente -->
+<div class="modal-overlay" id="modalCambio">
+    <div class="modal-box">
+        <div class="modal-title">Variazioni</div>
+        <label>Dipendente:</label>
+        <select id="selectDipendente" class="form-select mt-1">
+            @foreach (var dip in Model.TuttiDipendenti)
+            {
+                <option value="@dip.Id">@dip.NomeCompleto</option>
+            }
+        </select>
+        <div class="modal-footer">
+            <button class="btn btn-danger" onclick="eliminaDipendente()">Elimina</button>
+            <button class="btn btn-success" onclick="salvaCambio()">Salva</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    var elemCorrente = null;
+
+    function apriModal(el, idDip) {
+        elemCorrente = el;
+        document.getElementById('selectDipendente').value = idDip;
+        document.getElementById('modalCambio').classList.add('show');
+    }
+
+    function chiudiModal() {
+        document.getElementById('modalCambio').classList.remove('show');
+        elemCorrente = null;
+    }
+
+    function salvaCambio() {
+        if (elemCorrente) {
+            var select = document.getElementById('selectDipendente');
+            var nuovoNome = select.options[select.selectedIndex].text;
+            elemCorrente.classList.remove('patente-scaduta');
+            var imgs = elemCorrente.querySelectorAll('img');
+            imgs.forEach(function(img) { img.remove(); });
+            elemCorrente.querySelector('span').textContent = nuovoNome;
+        }
+        chiudiModal();
+    }
+
+    function eliminaDipendente() {
+        if (elemCorrente) {
+            elemCorrente.remove();
+        }
+        chiudiModal();
+    }
+
+    document.getElementById('modalCambio').onclick = function(e) {
+        if (e.target === this) chiudiModal();
+    };
+</script>
