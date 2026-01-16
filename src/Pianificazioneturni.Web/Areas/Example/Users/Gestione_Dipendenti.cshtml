@@ -1,3 +1,4 @@
+@model Pianificazioneturni.Web.Areas.Example.Users.GestioneDipendentiViewModel
 @{
     ViewData["Title"] = "Gestione Dipendenti";
 }
@@ -5,176 +6,182 @@
 @section pageTitle {
     <div class="page-title position-absolute start-50 translate-middle">
         @ViewData["Title"]
-        <small class="text-muted"></small>
     </div>
 }
 
+<style>
+    .dipendente-row { cursor: pointer; }
+    .dipendente-row:hover { background-color: #e3f2fd; }
+    .patente-scaduta { background-color: #ffeb3b !important; }
+    .patente-scaduta:hover { background-color: #ffeb3b !important; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+    .modal-overlay.show { display: flex; }
+    .modal-box { background: #fff; padding: 25px; border-radius: 8px; min-width: 350px; max-width: 400px; }
+    .modal-title { font-weight: bold; font-size: 1.2rem; margin-bottom: 20px; text-align: center; }
+    .btn-filter.active { background-color: #ffc107; border-color: #ffc107; color: #000; }
+    .campo-disabilitato { background-color: #e9ecef !important; pointer-events: none; }
+    .gruppo-disabilitato { opacity: 0.5; }
+</style>
+
 @section navbar {
-    <nav class="navbar navbar-expand-lg bg-body-tertiary justify-content-md-center mb-5">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary justify-content-md-center mb-4">
         <div class="container-fluid">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <!-- Centro -->
-                <ul class="navbar-nav gap-5 position-absolute start-50 translate-middle-x">
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav gap-5 mx-auto">
                     <li class="nav-item"><a class="nav-link" href="@Url.Action(MVC.Example.Users.Index())">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="@Url.Action(MVC.Example.Users.GestioneNavi())">Gestione Navi</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="@Url.Action(MVC.Example.Users.GestioneDipendenti())">Gestione Dipendenti</a></li>
+                    <li class="nav-item"><a class="nav-link active fw-bold" href="@Url.Action(MVC.Example.Users.GestioneDipendenti())">Gestione Dipendenti</a></li>
                 </ul>
-                <!-- Destra -->
-                <form class="d-flex ms-auto" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Search" />
-                    <button class="btn btn-outline-success" type="submit">Search</button>
-                </form>
             </div>
         </div>
     </nav>
 }
 
-<!-- Tabella -->
-<div class="d-flex justify-content-center gap-4">
-    <div class="navi-container d-flex flex-column">
-        <h3 class="mb-3 text-center">Storico dipendenti</h3>
-        <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-1">
-            <button class="btn btn-secondary btn-sm" type="button">Patenti scadute</button>
-        </div>
-        <table class="navi-rows-columns table table-bordered  w-100 text-center">
-            <thead>
-                <tr>
-                    <!-- riga -->
-                    <th>Dipendente</th> <!-- intestazione -->
-                    <th>Ruolo</th>
-                    <th>Scadenza</th>
+<div class="container">
+    <!-- DEBUG: Data di oggi = @DateTime.Today.ToString("dd/MM/yyyy") -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Storico Dipendenti</h4>
+        @if (Model.FiltroPatentiScadute)
+        {
+            <a href="@Url.Action(MVC.Example.Users.GestioneDipendenti(false))" class="btn btn-secondary btn-sm btn-filter active">
+                Patenti Scadute
+            </a>
+        }
+        else
+        {
+            <a href="@Url.Action(MVC.Example.Users.GestioneDipendenti(true))" class="btn btn-secondary btn-sm btn-filter">
+                Patenti Scadute
+            </a>
+        }
+    </div>
+
+    <table class="table table-bordered">
+        <thead class="table-light">
+            <tr>
+                <th>Dipendente</th>
+                <th>Ruolo</th>
+                <th>Scadenza</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var oggi = DateTime.Today;
+            }
+            @foreach (var dip in Model.GetDipendentiFiltrati())
+            {
+                var scaduta = dip.RichiedePatente && dip.Patente && dip.Scadenza.HasValue && dip.Scadenza.Value.Date < oggi;
+                <tr class="dipendente-row" style="@(scaduta ? "background-color: #ffeb3b;" : "")" onclick="apriModal(@dip.Id)">
+                    <td>@dip.Nome</td>
+                    <td>@(string.IsNullOrEmpty(dip.Ruolo) ? "-" : dip.Ruolo)</td>
+                    <td>
+                        @if (dip.RichiedePatente && dip.Patente && dip.Scadenza.HasValue)
+                        {
+                            @dip.ScadenzaFormattata
+                        }
+                        else
+                        {
+                            <text>-</text>
+                        }
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Rossi Mario</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Blu Matteo</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Bianchi Filippo</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Cortesi Giulia</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Gialli Monica</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Verdi Luca</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Azzurri Margherita</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Viola Riccardo</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Arancioni Sofia</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Celeste Lorenzo</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Rosa Alex</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Neri Federico</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Marroni Eleonora</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Grigi Roberto</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Lavanda Francesco</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Giannini Matteo</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Forcellini Filippo</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Limoni Marta</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Acqua Filomena</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Fuochi Davide</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Lampone Federica</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Agnelli Lucia</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Rinaldi Martina</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Tonelli Alessandro</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Nardelli Tommaso</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-            </tbody>
-        </table>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal Dettaglio Dipendente -->
+<div class="modal-overlay" id="modalDettaglio" onclick="chiudiModalOverlay(event)">
+    <div class="modal-box" id="modalContent">
     </div>
 </div>
+
+@section scripts {
+    <script>
+        function apriModal(id) {
+            fetch('@Url.Action("DettaglioDipendente", "Users", new { Area = "Example" })?id=' + id)
+                .then(function(response) { return response.text(); })
+                .then(function(html) {
+                    document.getElementById('modalContent').innerHTML = html;
+                    document.getElementById('modalDettaglio').classList.add('show');
+                    // Inizializza i campi dopo aver caricato il contenuto
+                    inizializzaCampiModal();
+                });
+        }
+
+        function chiudiModal() {
+            document.getElementById('modalDettaglio').classList.remove('show');
+        }
+
+        function chiudiModalOverlay(event) {
+            if (event.target.id === 'modalDettaglio') {
+                chiudiModal();
+            }
+        }
+
+        function richiedePatente(ruolo) {
+            return ruolo === 'Gruista' || ruolo === 'Mulettista';
+        }
+
+        function inizializzaCampiModal() {
+            var selectRuolo = document.getElementById('selectRuolo');
+            var checkPatente = document.getElementById('checkPatente');
+            var inputScadenza = document.getElementById('inputScadenza');
+            var patenteGroup = document.getElementById('patenteGroup');
+            var scadenzaGroup = document.getElementById('scadenzaGroup');
+
+            if (!selectRuolo) return;
+
+            function aggiornaCampi() {
+                var ruolo = selectRuolo.value;
+                var abilitato = richiedePatente(ruolo);
+
+                if (abilitato) {
+                    // Abilita i campi
+                    checkPatente.disabled = false;
+                    checkPatente.classList.remove('campo-disabilitato');
+                    inputScadenza.disabled = false;
+                    inputScadenza.classList.remove('campo-disabilitato');
+                    patenteGroup.classList.remove('gruppo-disabilitato');
+                    scadenzaGroup.classList.remove('gruppo-disabilitato');
+                } else {
+                    // Disabilita completamente
+                    checkPatente.disabled = true;
+                    checkPatente.checked = false;
+                    checkPatente.classList.add('campo-disabilitato');
+                    inputScadenza.disabled = true;
+                    inputScadenza.value = '';
+                    inputScadenza.classList.add('campo-disabilitato');
+                    patenteGroup.classList.add('gruppo-disabilitato');
+                    scadenzaGroup.classList.add('gruppo-disabilitato');
+                }
+            }
+
+            // Aggiungi evento change
+            selectRuolo.onchange = aggiornaCampi;
+
+            // Esegui subito per impostare lo stato iniziale
+            aggiornaCampi();
+        }
+
+        function validaForm() {
+            var selectRuolo = document.getElementById('selectRuolo');
+            var checkPatente = document.getElementById('checkPatente');
+            var inputScadenza = document.getElementById('inputScadenza');
+
+            var ruolo = selectRuolo.value;
+
+            if (richiedePatente(ruolo)) {
+                if (!checkPatente.checked) {
+                    alert('Per Gruisti e Mulettisti la patente è obbligatoria');
+                    return false;
+                }
+                if (!inputScadenza.value) {
+                    alert('Per Gruisti e Mulettisti la scadenza è obbligatoria');
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    </script>
+}
