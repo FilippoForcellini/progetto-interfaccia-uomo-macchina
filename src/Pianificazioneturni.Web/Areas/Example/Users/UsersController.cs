@@ -32,46 +32,43 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                 new NaveDetailViewModel
                 {
                     Id = 1,
-                    Nome = "Nave Aurora",
+                    Nome = "Nave 1",
+                    Tipo = TipoNave.Container,
                     Pontile = 10,
+                    DataArrivo = DateTime.Today,
+                    FasciaMattina = true,
+                    FasciaPomeriggio = true,
+                    FasciaSera = false,
                     RichiedeGruisti = true,
                     RichiedeMulettisti = true,
-                    GiorniSosta = new List<DateTime>
-                    {
-                        DateTime.Today,
-                        DateTime.Today.AddDays(1),
-                        DateTime.Today.AddDays(2)
-                    },
                     Colore = ColoriNavi.GetColore(0)
                 },
                 new NaveDetailViewModel
                 {
                     Id = 2,
-                    Nome = "Nave Stella",
-                    Pontile = 25,
-                    RichiedeGruisti = true,
-                    RichiedeMulettisti = false,
-                    GiorniSosta = new List<DateTime>
-                    {
-                        DateTime.Today.AddDays(1),
-                        DateTime.Today.AddDays(2),
-                        DateTime.Today.AddDays(3),
-                        DateTime.Today.AddDays(4)
-                    },
+                    Nome = "Nave 2",
+                    Tipo = TipoNave.Portarinfuse,
+                    Pontile = 30,
+                    DataArrivo = DateTime.Today,
+                    FasciaMattina = false,
+                    FasciaPomeriggio = false,
+                    FasciaSera = true,
+                    RichiedeGruisti = false,
+                    RichiedeMulettisti = true,
                     Colore = ColoriNavi.GetColore(1)
                 },
                 new NaveDetailViewModel
                 {
                     Id = 3,
-                    Nome = "Nave Luna",
-                    Pontile = 5,
+                    Nome = "Nave 3",
+                    Tipo = TipoNave.NaveTraghetto,
+                    Pontile = 20,
+                    DataArrivo = DateTime.Today.AddDays(1),
+                    FasciaMattina = true,
+                    FasciaPomeriggio = true,
+                    FasciaSera = true,
                     RichiedeGruisti = false,
                     RichiedeMulettisti = true,
-                    GiorniSosta = new List<DateTime>
-                    {
-                        DateTime.Today.AddDays(5),
-                        DateTime.Today.AddDays(6)
-                    },
                     Colore = ColoriNavi.GetColore(2)
                 }
             };
@@ -277,17 +274,39 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         }
 
         [HttpGet]
-        public virtual IActionResult GestioneNavi()
+        public virtual IActionResult GestioneNavi(string giorno = null)
         {
+            var oggi = DateTime.Today;
+            var domani = DateTime.Today.AddDays(1);
+            DateTime? giornoSelezionato = null;
+
+            // Parse del giorno selezionato (se presente)
+            if (!string.IsNullOrEmpty(giorno) && DateTime.TryParse(giorno, out var dataParsata))
+            {
+                // Solo se è un giorno futuro (da dopodomani in poi)
+                if (dataParsata.Date > domani.Date)
+                {
+                    giornoSelezionato = dataParsata.Date;
+                }
+            }
+
             var model = new GestioneNaviViewModel
             {
-                Navi = _navi
+                DataOggi = oggi,
+                DataDomani = domani,
+                GiornoSelezionato = giornoSelezionato,
+                TutteLeNavi = _navi,
+                NaviOggi = _navi.Where(n => n.DataArrivo.Date == oggi).ToList(),
+                NaviDomani = _navi.Where(n => n.DataArrivo.Date == domani).ToList(),
+                NaviGiornoSelezionato = giornoSelezionato.HasValue
+                    ? _navi.Where(n => n.DataArrivo.Date == giornoSelezionato.Value).ToList()
+                    : null
             };
             return View("Gestione_Navi", model);
         }
 
         [HttpGet]
-        public virtual IActionResult DettaglioNave(int? id)
+        public virtual IActionResult DettaglioNave(int? id, string dataPreselezionata = null)
         {
             NaveDetailViewModel nave;
 
@@ -302,10 +321,17 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
             else
             {
                 // Nuova nave
+                var dataArrivo = DateTime.Today;
+                if (!string.IsNullOrEmpty(dataPreselezionata) && DateTime.TryParse(dataPreselezionata, out var dataParsata))
+                {
+                    dataArrivo = dataParsata;
+                }
+
                 nave = new NaveDetailViewModel
                 {
                     Id = 0,
-                    GiorniSosta = new List<DateTime>()
+                    DataArrivo = dataArrivo,
+                    Tipo = TipoNave.Container
                 };
             }
 
@@ -313,19 +339,35 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         }
 
         [HttpPost]
-        public virtual IActionResult SalvaNave(int id, string nome, int? pontile, bool richiedeGruisti, bool richiedeMulettisti, string giorniSosta)
+        public virtual IActionResult SalvaNave(int id, string nome, int tipo, DateTime dataArrivo, int? pontile,
+            bool fasciaMattina, bool fasciaPomeriggio, bool fasciaSera,
+            bool richiedeGruisti, bool richiedeMulettisti)
         {
-            // Parse giorni sosta
-            var giorni = new List<DateTime>();
-            if (!string.IsNullOrEmpty(giorniSosta))
+            // Validazione: almeno una fascia oraria deve essere selezionata
+            if (!fasciaMattina && !fasciaPomeriggio && !fasciaSera)
             {
-                var giorniArray = giorniSosta.Split(',');
-                foreach (var g in giorniArray)
+                Alerts.AddError(this, "Devi selezionare almeno una fascia oraria");
+                return RedirectToAction(Actions.GestioneNavi());
+            }
+
+            // Validazione: verifica che le fasce selezionate non siano già occupate da altre navi
+            var naviStessoGiorno = _navi.Where(n => n.DataArrivo.Date == dataArrivo.Date && n.Id != id).ToList();
+            foreach (var altraNave in naviStessoGiorno)
+            {
+                if (fasciaMattina && altraNave.FasciaMattina)
                 {
-                    if (DateTime.TryParse(g.Trim(), out var data))
-                    {
-                        giorni.Add(data.Date);
-                    }
+                    Alerts.AddError(this, $"La fascia 00:00-08:00 è già occupata dalla nave {altraNave.Nome}");
+                    return RedirectToAction(Actions.GestioneNavi());
+                }
+                if (fasciaPomeriggio && altraNave.FasciaPomeriggio)
+                {
+                    Alerts.AddError(this, $"La fascia 08:00-16:00 è già occupata dalla nave {altraNave.Nome}");
+                    return RedirectToAction(Actions.GestioneNavi());
+                }
+                if (fasciaSera && altraNave.FasciaSera)
+                {
+                    Alerts.AddError(this, $"La fascia 16:00-24:00 è già occupata dalla nave {altraNave.Nome}");
+                    return RedirectToAction(Actions.GestioneNavi());
                 }
             }
 
@@ -336,10 +378,14 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                 {
                     Id = _nextNaveId++,
                     Nome = nome,
+                    Tipo = (TipoNave)tipo,
+                    DataArrivo = dataArrivo,
                     Pontile = pontile,
+                    FasciaMattina = fasciaMattina,
+                    FasciaPomeriggio = fasciaPomeriggio,
+                    FasciaSera = fasciaSera,
                     RichiedeGruisti = richiedeGruisti,
                     RichiedeMulettisti = richiedeMulettisti,
-                    GiorniSosta = giorni,
                     Colore = ColoriNavi.GetColore(_navi.Count)
                 };
                 _navi.Add(nuovaNave);
@@ -352,10 +398,14 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                 if (nave != null)
                 {
                     nave.Nome = nome;
+                    nave.Tipo = (TipoNave)tipo;
+                    nave.DataArrivo = dataArrivo;
                     nave.Pontile = pontile;
+                    nave.FasciaMattina = fasciaMattina;
+                    nave.FasciaPomeriggio = fasciaPomeriggio;
+                    nave.FasciaSera = fasciaSera;
                     nave.RichiedeGruisti = richiedeGruisti;
                     nave.RichiedeMulettisti = richiedeMulettisti;
-                    nave.GiorniSosta = giorni;
                     Alerts.AddSuccess(this, "Nave aggiornata con successo");
                 }
             }
