@@ -3,6 +3,7 @@
 
 @{
     ViewData["Title"] = "Pianificazione Turni";
+    var oraCorrente = Model.OraCorrente;
 }
 
 @section pageTitle {
@@ -12,18 +13,71 @@
 }
 
 <style>
-    .dipendente { display: flex; align-items: center; gap: 5px; padding: 4px 8px; margin: 2px 0; background: #e3f2fd; cursor: pointer; border-radius: 3px; }
-    .dipendente:hover { background: #bbdefb; }
+    .dipendente {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 8px;
+        margin: 2px 0;
+        background: #e3f2fd;
+        border-radius: 4px;
+        font-size: 0.85rem;
+    }
+    .dipendente.cliccabile { cursor: pointer; }
+    .dipendente.cliccabile:hover { background: #bbdefb; }
+    .dipendente.non-cliccabile { cursor: default; opacity: 0.8; }
     .dipendente.patente-scaduta { background: #ffeb3b; }
-    .dipendente img { width: 16px; height: 16px; }
-    .nave-stato { font-size: 0.85rem; }
-    .nave-stato img { width: 18px; height: 18px; vertical-align: middle; }
-    .col-fascia { vertical-align: top; }
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+    .dipendente.variazione { border: 2px solid #ff9800; }
+    .nave-stato { font-size: 0.8rem; font-weight: 500; padding: 2px 6px; border-radius: 3px; }
+    .stato-lavorazione { background: #4caf50; color: white; }
+    .stato-partenza { background: #2196f3; color: white; }
+    .stato-arrivo { background: #ff9800; color: white; }
+    .col-fascia { vertical-align: top; min-width: 150px; }
+    .fascia-header { font-size: 0.75rem; }
+    .seleziona-dipendente {
+        background: #f5f5f5;
+        border: 2px dashed #ccc;
+        padding: 8px;
+        text-align: center;
+        cursor: pointer;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        color: #666;
+    }
+    .seleziona-dipendente:hover { background: #e0e0e0; border-color: #999; }
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
     .modal-overlay.show { display: flex; }
-    .modal-box { background: #fff; padding: 20px; border-radius: 8px; min-width: 300px; }
-    .modal-title { font-weight: bold; margin-bottom: 15px; text-align: center; }
-    .modal-footer { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
+    .modal-box {
+        background: #fff;
+        padding: 25px;
+        border-radius: 8px;
+        min-width: 350px;
+        max-width: 450px;
+    }
+    .modal-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; text-align: center; }
+    .modal-footer { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+    .dipendente-option {
+        padding: 8px 12px;
+        margin: 4px 0;
+        background: #f5f5f5;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .dipendente-option:hover { background: #e3f2fd; }
+    .dipendente-option.selected { background: #2196f3; color: white; }
+    .dipendente-option.patente-scaduta { background: #fff3cd; }
+    .dipendente-option.non-disponibile { background: #f8d7da; color: #721c24; cursor: not-allowed; opacity: 0.6; }
 </style>
 
 @section navbar {
@@ -46,61 +100,150 @@
         <div class="col-md-6">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5 class="fw-bold mb-0">NAVI OGGI</h5>
-                <div>
-                    <button class="btn btn-outline-secondary btn-sm">Solo Orari</button>
-                    <button class="btn btn-outline-secondary btn-sm">Solo Variazioni</button>
-                </div>
             </div>
-            <table class="table table-bordered">
-                <thead>
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
                     <tr>
-                        <th colspan="5" class="text-center">@Model.DataOggi.ToString("dd/MM/yyyy")</th>
+                        <th colspan="5" class="text-center bg-primary text-white">@Model.DataOggi.ToString("dd/MM/yyyy")</th>
                     </tr>
                     <tr>
                         <th>Nome Nave</th>
                         <th>Pontile</th>
-                        <th colspan="3" class="text-center">Orari e Dipendenti</th>
-                    </tr>
-                    <tr>
-                        <th></th>
-                        <th></th>
-                        <th class="text-center">00:00 - 08:00</th>
-                        <th class="text-center">08:00 - 16:00</th>
-                        <th class="text-center">16:00 - 24:00</th>
+                        <th class="text-center fascia-header">00:00 - 08:00</th>
+                        <th class="text-center fascia-header">08:00 - 16:00</th>
+                        <th class="text-center fascia-header">16:00 - 24:00</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var nave in Model.NaviOggi)
+                    @if (Model.NaviOggi.Any())
                     {
-                        <tr>
-                            <td>
-                                <div>@nave.Nome</div>
-                                <div class="nave-stato">@nave.StatoDescrizione <img src="~/images/@nave.StatoIcona" /></div>
-                            </td>
-                            <td>@nave.Pontile</td>
-                            @for (int i = 0; i < 3; i++)
-                            {
-                                var fascia = (FasciaOraria)i;
+                        @foreach (var nave in Model.NaviOggi)
+                        {
+                            var stato = nave.GetStato(oraCorrente);
+                            var statoClasse = stato switch {
+                                StatoNave.InLavorazione => "stato-lavorazione",
+                                StatoNave.InPartenza => "stato-partenza",
+                                StatoNave.InArrivo => "stato-arrivo",
+                                _ => ""
+                            };
+                            <tr>
+                                <td>
+                                    <div class="fw-bold">@nave.Nome</div>
+                                    <span class="nave-stato @statoClasse">@nave.GetStatoDescrizione(oraCorrente)</span>
+                                </td>
+                                <td class="text-center">@nave.Pontile</td>
+                                <!-- Fascia Mattina -->
                                 <td class="col-fascia">
-                                    @if (nave.Fascia == fascia)
+                                    @if (nave.FasciaMattina)
                                     {
-                                        @foreach (var dip in nave.Dipendenti)
+                                        var fasciaInArrivo = nave.IsFasciaInArrivo(FasciaOraria.Mattina, oraCorrente);
+                                        @if (fasciaInArrivo && !nave.DipendentiMattina.Any())
                                         {
-                                            <div class="dipendente @(dip.PatenteScaduta ? "patente-scaduta" : "")" onclick="apriModal(this, @dip.Id)">
-                                                @if (dip.PatenteScaduta)
-                                                {
-                                                    <img src="~/images/patente.png" title="Patente scaduta" />
-                                                }
-                                                @if (dip.RichiedeVariazione)
-                                                {
-                                                    <img src="~/images/variazione.png" title="Richiesta variazione" />
-                                                }
-                                                <span>@dip.NomeCompleto</span>
+                                            <div class="seleziona-dipendente" onclick="apriModalSelezione(@nave.Id, 0, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                                + Seleziona dipendenti
                                             </div>
+                                        }
+                                        else
+                                        {
+                                            @foreach (var dip in nave.DipendentiMattina)
+                                            {
+                                                @if (fasciaInArrivo)
+                                                {
+                                                    <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "") @(dip.RichiedeVariazione ? "variazione" : "")"
+                                                         onclick="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 0, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                                        @if (dip.PatenteScaduta) { <span title="Patente scaduta">⚠️</span> }
+                                                        @if (dip.RichiedeVariazione) { <span title="Richiede variazione">🔄</span> }
+                                                        <span>@dip.NomeCompleto</span>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="dipendente non-cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")">
+                                                        @if (dip.PatenteScaduta) { <span title="Patente scaduta">⚠️</span> }
+                                                        <span>@dip.NomeCompleto</span>
+                                                    </div>
+                                                }
+                                            }
                                         }
                                     }
                                 </td>
-                            }
+                                <!-- Fascia Pomeriggio -->
+                                <td class="col-fascia">
+                                    @if (nave.FasciaPomeriggio)
+                                    {
+                                        var fasciaInArrivo = nave.IsFasciaInArrivo(FasciaOraria.Pomeriggio, oraCorrente);
+                                        @if (fasciaInArrivo && !nave.DipendentiPomeriggio.Any())
+                                        {
+                                            <div class="seleziona-dipendente" onclick="apriModalSelezione(@nave.Id, 1, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                                + Seleziona dipendenti
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            @foreach (var dip in nave.DipendentiPomeriggio)
+                                            {
+                                                @if (fasciaInArrivo)
+                                                {
+                                                    <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "") @(dip.RichiedeVariazione ? "variazione" : "")"
+                                                         onclick="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 1, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                                        @if (dip.PatenteScaduta) { <span title="Patente scaduta">⚠️</span> }
+                                                        @if (dip.RichiedeVariazione) { <span title="Richiede variazione">🔄</span> }
+                                                        <span>@dip.NomeCompleto</span>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="dipendente non-cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")">
+                                                        @if (dip.PatenteScaduta) { <span title="Patente scaduta">⚠️</span> }
+                                                        <span>@dip.NomeCompleto</span>
+                                                    </div>
+                                                }
+                                            }
+                                        }
+                                    }
+                                </td>
+                                <!-- Fascia Sera -->
+                                <td class="col-fascia">
+                                    @if (nave.FasciaSera)
+                                    {
+                                        var fasciaInArrivo = nave.IsFasciaInArrivo(FasciaOraria.Sera, oraCorrente);
+                                        @if (fasciaInArrivo && !nave.DipendentiSera.Any())
+                                        {
+                                            <div class="seleziona-dipendente" onclick="apriModalSelezione(@nave.Id, 2, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                                + Seleziona dipendenti
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            @foreach (var dip in nave.DipendentiSera)
+                                            {
+                                                @if (fasciaInArrivo)
+                                                {
+                                                    <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "") @(dip.RichiedeVariazione ? "variazione" : "")"
+                                                         onclick="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 2, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                                        @if (dip.PatenteScaduta) { <span title="Patente scaduta">⚠️</span> }
+                                                        @if (dip.RichiedeVariazione) { <span title="Richiede variazione">🔄</span> }
+                                                        <span>@dip.NomeCompleto</span>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="dipendente non-cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")">
+                                                        @if (dip.PatenteScaduta) { <span title="Patente scaduta">⚠️</span> }
+                                                        <span>@dip.NomeCompleto</span>
+                                                    </div>
+                                                }
+                                            }
+                                        }
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">Nessuna nave per oggi</td>
                         </tr>
                     }
                 </tbody>
@@ -111,61 +254,110 @@
         <div class="col-md-6">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5 class="fw-bold mb-0">NAVI DOMANI</h5>
-                <div>
-                    <button class="btn btn-outline-secondary btn-sm">Solo Orari</button>
-                    <button class="btn btn-outline-secondary btn-sm">Solo Variazioni</button>
-                </div>
             </div>
-            <table class="table table-bordered">
-                <thead>
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
                     <tr>
-                        <th colspan="5" class="text-center">@Model.DataDomani.ToString("dd/MM/yyyy")</th>
+                        <th colspan="5" class="text-center bg-secondary text-white">@Model.DataDomani.ToString("dd/MM/yyyy")</th>
                     </tr>
                     <tr>
                         <th>Nome Nave</th>
                         <th>Pontile</th>
-                        <th colspan="3" class="text-center">Orari e Dipendenti</th>
-                    </tr>
-                    <tr>
-                        <th></th>
-                        <th></th>
-                        <th class="text-center">00:00 - 08:00</th>
-                        <th class="text-center">08:00 - 16:00</th>
-                        <th class="text-center">16:00 - 24:00</th>
+                        <th class="text-center fascia-header">00:00 - 08:00</th>
+                        <th class="text-center fascia-header">08:00 - 16:00</th>
+                        <th class="text-center fascia-header">16:00 - 24:00</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var nave in Model.NaviDomani)
+                    @if (Model.NaviDomani.Any())
                     {
-                        <tr>
-                            <td>
-                                <div>@nave.Nome</div>
-                                <div class="nave-stato">@nave.StatoDescrizione <img src="~/images/@nave.StatoIcona" /></div>
-                            </td>
-                            <td>@nave.Pontile</td>
-                            @for (int i = 0; i < 3; i++)
-                            {
-                                var fascia = (FasciaOraria)i;
+                        @foreach (var nave in Model.NaviDomani)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-bold">@nave.Nome</div>
+                                    <span class="nave-stato stato-arrivo">In arrivo</span>
+                                </td>
+                                <td class="text-center">@nave.Pontile</td>
+                                <!-- Fascia Mattina -->
                                 <td class="col-fascia">
-                                    @if (nave.Fascia == fascia)
+                                    @if (nave.FasciaMattina)
                                     {
-                                        @foreach (var dip in nave.Dipendenti)
+                                        @if (!nave.DipendentiMattina.Any())
                                         {
-                                            <div class="dipendente @(dip.PatenteScaduta ? "patente-scaduta" : "")" onclick="apriModal(this, @dip.Id)">
-                                                @if (dip.PatenteScaduta)
-                                                {
-                                                    <img src="~/images/patente.png" title="Patente scaduta" />
-                                                }
-                                                @if (dip.RichiedeVariazione)
-                                                {
-                                                    <img src="~/images/variazione.png" title="Richiesta variazione" />
-                                                }
-                                                <span>@dip.NomeCompleto</span>
+                                            <div class="seleziona-dipendente" onclick="apriModalSelezione(@nave.Id, 0, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                                + Seleziona dipendenti
                                             </div>
+                                        }
+                                        else
+                                        {
+                                            @foreach (var dip in nave.DipendentiMattina)
+                                            {
+                                                <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "") @(dip.RichiedeVariazione ? "variazione" : "")"
+                                                     onclick="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 0, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                                    @if (dip.PatenteScaduta) { <span title="Patente scaduta">⚠️</span> }
+                                                    @if (dip.RichiedeVariazione) { <span title="Richiede variazione">🔄</span> }
+                                                    <span>@dip.NomeCompleto</span>
+                                                </div>
+                                            }
                                         }
                                     }
                                 </td>
-                            }
+                                <!-- Fascia Pomeriggio -->
+                                <td class="col-fascia">
+                                    @if (nave.FasciaPomeriggio)
+                                    {
+                                        @if (!nave.DipendentiPomeriggio.Any())
+                                        {
+                                            <div class="seleziona-dipendente" onclick="apriModalSelezione(@nave.Id, 1, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                                + Seleziona dipendenti
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            @foreach (var dip in nave.DipendentiPomeriggio)
+                                            {
+                                                <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "") @(dip.RichiedeVariazione ? "variazione" : "")"
+                                                     onclick="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 1, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                                    @if (dip.PatenteScaduta) { <span title="Patente scaduta">⚠️</span> }
+                                                    @if (dip.RichiedeVariazione) { <span title="Richiede variazione">🔄</span> }
+                                                    <span>@dip.NomeCompleto</span>
+                                                </div>
+                                            }
+                                        }
+                                    }
+                                </td>
+                                <!-- Fascia Sera -->
+                                <td class="col-fascia">
+                                    @if (nave.FasciaSera)
+                                    {
+                                        @if (!nave.DipendentiSera.Any())
+                                        {
+                                            <div class="seleziona-dipendente" onclick="apriModalSelezione(@nave.Id, 2, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                                + Seleziona dipendenti
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            @foreach (var dip in nave.DipendentiSera)
+                                            {
+                                                <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "") @(dip.RichiedeVariazione ? "variazione" : "")"
+                                                     onclick="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 2, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                                    @if (dip.PatenteScaduta) { <span title="Patente scaduta">⚠️</span> }
+                                                    @if (dip.RichiedeVariazione) { <span title="Richiede variazione">🔄</span> }
+                                                    <span>@dip.NomeCompleto</span>
+                                                </div>
+                                            }
+                                        }
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">Nessuna nave per domani</td>
                         </tr>
                     }
                 </tbody>
@@ -175,57 +367,221 @@
 </div>
 
 <!-- Modal cambio dipendente -->
-<div class="modal-overlay" id="modalCambio">
+<div class="modal-overlay" id="modalCambio" onclick="chiudiModalOverlay(event, 'modalCambio')">
     <div class="modal-box">
-        <div class="modal-title">Variazioni</div>
-        <label>Dipendente:</label>
-        <select id="selectDipendente" class="form-select mt-1">
-            @foreach (var dip in Model.TuttiDipendenti)
-            {
-                <option value="@dip.Id">@dip.NomeCompleto</option>
-            }
-        </select>
+        <div class="modal-title">Variazione Dipendente</div>
+        <p class="text-center mb-3">Dipendente attuale: <strong id="dipendenteAttuale"></strong></p>
+        <label class="form-label">Seleziona sostituto:</label>
+        <div id="listaDipendentiCambio" style="max-height: 250px; overflow-y: auto;"></div>
         <div class="modal-footer">
-            <button class="btn btn-danger" onclick="eliminaDipendente()">Elimina</button>
-            <button class="btn btn-success" onclick="salvaCambio()">Salva</button>
+            <button class="btn btn-secondary" onclick="chiudiModal('modalCambio')">Annulla</button>
+            <button class="btn btn-success" onclick="salvaCambio()">Conferma</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal selezione dipendenti -->
+<div class="modal-overlay" id="modalSelezione" onclick="chiudiModalOverlay(event, 'modalSelezione')">
+    <div class="modal-box">
+        <div class="modal-title">Seleziona Dipendenti</div>
+        <p class="text-muted text-center mb-3">Seleziona fino a 5 dipendenti</p>
+        <div id="listaDipendentiSelezione" style="max-height: 300px; overflow-y: auto;"></div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="chiudiModal('modalSelezione')">Annulla</button>
+            <button class="btn btn-success" onclick="salvaSelezione()">Conferma</button>
         </div>
     </div>
 </div>
 
 <script>
-    var elemCorrente = null;
+    // Dati dipendenti dal server
+    var gruisti = @Html.Raw(Json.Serialize(Model.Gruisti));
+    var mulettisti = @Html.Raw(Json.Serialize(Model.Mulettisti));
+    var tuttiDipendenti = @Html.Raw(Json.Serialize(Model.TuttiDipendenti));
 
-    function apriModal(el, idDip) {
-        elemCorrente = el;
-        document.getElementById('selectDipendente').value = idDip;
+    // Assegnazioni esistenti per verificare disponibilità
+    var assegnazioni = @Html.Raw(Json.Serialize(Model.Assegnazioni));
+
+    var vecchioDipendenteId = null;
+    var naveIdCorrente = null;
+    var fasciaCorrente = null;
+    var giornoCorrente = null;
+    var dipendentiSelezionati = [];
+
+    function getDipendentiFiltrati(richiedeGruisti, richiedeMulettisti) {
+        var lista = [];
+        if (richiedeGruisti) lista = lista.concat(gruisti);
+        if (richiedeMulettisti) lista = lista.concat(mulettisti);
+        if (!richiedeGruisti && !richiedeMulettisti) lista = tuttiDipendenti;
+        return lista;
+    }
+
+    // Verifica se un dipendente è disponibile per una fascia (regola 8 ore di pausa)
+    function isDipendenteDisponibile(dipId, fascia, giorno) {
+        // Raccogli tutti gli ID dei dipendenti che lavorano nella fascia precedente
+        var dipendentiOccupati = [];
+
+        // Fascia precedente che richiede 8 ore di pausa
+        // Fascia 0 (mattina): controllare fascia 2 (sera) del giorno prima
+        // Fascia 1 (pomeriggio): controllare fascia 0 (mattina) dello stesso giorno
+        // Fascia 2 (sera): controllare fascia 1 (pomeriggio) dello stesso giorno
+
+        if (fascia === 0) {
+            // Mattina: controlla sera del giorno prima
+            if (giorno === 'domani') {
+                // Controlla fascia sera di oggi
+                for (var key in assegnazioni) {
+                    if (key.endsWith('_2_oggi')) {
+                        dipendentiOccupati = dipendentiOccupati.concat(assegnazioni[key]);
+                    }
+                }
+            }
+            // Per oggi mattina, non abbiamo il giorno prima
+        } else if (fascia === 1) {
+            // Pomeriggio: controlla mattina dello stesso giorno
+            for (var key in assegnazioni) {
+                if (key.endsWith('_0_' + giorno)) {
+                    dipendentiOccupati = dipendentiOccupati.concat(assegnazioni[key]);
+                }
+            }
+        } else if (fascia === 2) {
+            // Sera: controlla pomeriggio dello stesso giorno
+            for (var key in assegnazioni) {
+                if (key.endsWith('_1_' + giorno)) {
+                    dipendentiOccupati = dipendentiOccupati.concat(assegnazioni[key]);
+                }
+            }
+        }
+
+        return dipendentiOccupati.indexOf(dipId) === -1;
+    }
+
+    function apriModalCambio(dipId, dipNome, naveId, fascia, giorno, richiedeGruisti, richiedeMulettisti) {
+        vecchioDipendenteId = dipId;
+        naveIdCorrente = naveId;
+        fasciaCorrente = fascia;
+        giornoCorrente = giorno;
+
+        document.getElementById('dipendenteAttuale').textContent = dipNome;
+
+        var dipendenti = getDipendentiFiltrati(richiedeGruisti, richiedeMulettisti);
+        var html = '';
+        dipendenti.forEach(function(d) {
+            var disponibile = isDipendenteDisponibile(d.id, fascia, giorno);
+            var classePatente = d.patenteScaduta ? 'patente-scaduta' : '';
+            var classeDisp = disponibile ? '' : 'non-disponibile';
+            var icona = d.patenteScaduta ? '⚠️ ' : '';
+            var suffisso = disponibile ? '' : ' (non disponibile - pausa 8h)';
+
+            if (disponibile) {
+                html += '<div class="dipendente-option ' + classePatente + '" data-id="' + d.id + '" onclick="selezionaDipendente(this)">' +
+                        icona + d.nomeCompleto + '</div>';
+            } else {
+                html += '<div class="dipendente-option ' + classeDisp + '" data-id="' + d.id + '">' +
+                        icona + d.nomeCompleto + suffisso + '</div>';
+            }
+        });
+        document.getElementById('listaDipendentiCambio').innerHTML = html;
         document.getElementById('modalCambio').classList.add('show');
     }
 
-    function chiudiModal() {
-        document.getElementById('modalCambio').classList.remove('show');
-        elemCorrente = null;
+    function apriModalSelezione(naveId, fascia, giorno, richiedeGruisti, richiedeMulettisti) {
+        naveIdCorrente = naveId;
+        fasciaCorrente = fascia;
+        giornoCorrente = giorno;
+        dipendentiSelezionati = [];
+
+        var dipendenti = getDipendentiFiltrati(richiedeGruisti, richiedeMulettisti);
+        var html = '';
+        dipendenti.forEach(function(d) {
+            var disponibile = isDipendenteDisponibile(d.id, fascia, giorno);
+            var classePatente = d.patenteScaduta ? 'patente-scaduta' : '';
+            var classeDisp = disponibile ? '' : 'non-disponibile';
+            var icona = d.patenteScaduta ? '⚠️ ' : '';
+            var suffisso = disponibile ? '' : ' (non disponibile - pausa 8h)';
+
+            if (disponibile) {
+                html += '<div class="dipendente-option ' + classePatente + '" data-id="' + d.id + '" onclick="toggleDipendente(this)">' +
+                        icona + d.nomeCompleto + '</div>';
+            } else {
+                html += '<div class="dipendente-option ' + classeDisp + '" data-id="' + d.id + '">' +
+                        icona + d.nomeCompleto + suffisso + '</div>';
+            }
+        });
+        document.getElementById('listaDipendentiSelezione').innerHTML = html;
+        document.getElementById('modalSelezione').classList.add('show');
+    }
+
+    function selezionaDipendente(el) {
+        document.querySelectorAll('#listaDipendentiCambio .dipendente-option').forEach(function(opt) {
+            opt.classList.remove('selected');
+        });
+        el.classList.add('selected');
+    }
+
+    function toggleDipendente(el) {
+        var id = parseInt(el.getAttribute('data-id'));
+        if (el.classList.contains('selected')) {
+            el.classList.remove('selected');
+            dipendentiSelezionati = dipendentiSelezionati.filter(function(d) { return d !== id; });
+        } else {
+            if (dipendentiSelezionati.length < 5) {
+                el.classList.add('selected');
+                dipendentiSelezionati.push(id);
+            } else {
+                alert('Puoi selezionare massimo 5 dipendenti');
+            }
+        }
     }
 
     function salvaCambio() {
-        if (elemCorrente) {
-            var select = document.getElementById('selectDipendente');
-            var nuovoNome = select.options[select.selectedIndex].text;
-            elemCorrente.classList.remove('patente-scaduta');
-            var imgs = elemCorrente.querySelectorAll('img');
-            imgs.forEach(function(img) { img.remove(); });
-            elemCorrente.querySelector('span').textContent = nuovoNome;
+        var selected = document.querySelector('#listaDipendentiCambio .dipendente-option.selected');
+        if (!selected) {
+            alert('Seleziona un dipendente');
+            return;
         }
-        chiudiModal();
+
+        var nuovoDipendenteId = parseInt(selected.getAttribute('data-id'));
+
+        fetch('@Url.Action("CambiaDipendente", "Users", new { Area = "Example" })', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'naveId=' + naveIdCorrente + '&fascia=' + fasciaCorrente + '&vecchioDipendenteId=' + vecchioDipendenteId + '&nuovoDipendenteId=' + nuovoDipendenteId
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            if (data.success) {
+                location.reload();
+            }
+        });
     }
 
-    function eliminaDipendente() {
-        if (elemCorrente) {
-            elemCorrente.remove();
+    function salvaSelezione() {
+        if (dipendentiSelezionati.length === 0) {
+            alert('Seleziona almeno un dipendente');
+            return;
         }
-        chiudiModal();
+
+        fetch('@Url.Action("SalvaAssegnazione", "Users", new { Area = "Example" })?naveId=' + naveIdCorrente + '&fascia=' + fasciaCorrente, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dipendentiSelezionati)
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            if (data.success) {
+                location.reload();
+            }
+        });
     }
 
-    document.getElementById('modalCambio').onclick = function(e) {
-        if (e.target === this) chiudiModal();
-    };
+    function chiudiModal(modalId) {
+        document.getElementById(modalId).classList.remove('show');
+    }
+
+    function chiudiModalOverlay(event, modalId) {
+        if (event.target.id === modalId) {
+            chiudiModal(modalId);
+        }
+    }
 </script>

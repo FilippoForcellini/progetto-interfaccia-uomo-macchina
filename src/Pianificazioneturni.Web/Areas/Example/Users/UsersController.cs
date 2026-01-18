@@ -78,31 +78,51 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         {
             return new List<DipendenteDetailViewModel>
             {
-                new DipendenteDetailViewModel { Id = 1, Nome = "Rossi Mario", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2026, 1, 1) },
-                new DipendenteDetailViewModel { Id = 2, Nome = "Blu Marco", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2025, 12, 2) },
-                new DipendenteDetailViewModel { Id = 3, Nome = "Bianchi Filippo", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2025, 6, 15) },
+                new DipendenteDetailViewModel { Id = 1, Nome = "Rossi Mario", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2027, 6, 15) },
+                new DipendenteDetailViewModel { Id = 2, Nome = "Blu Marco", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2027, 8, 20) },
+                new DipendenteDetailViewModel { Id = 3, Nome = "Bianchi Filippo", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2026, 1, 10) }, // Scaduta
                 new DipendenteDetailViewModel { Id = 4, Nome = "Cortesi Giulia", Ruolo = "Addetto terminal", Patente = false, Scadenza = null },
-                new DipendenteDetailViewModel { Id = 5, Nome = "Gialli Monica", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2026, 3, 20) },
+                new DipendenteDetailViewModel { Id = 5, Nome = "Gialli Monica", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2027, 3, 20) },
                 new DipendenteDetailViewModel { Id = 6, Nome = "Verdi Luca", Ruolo = "Ormeggiatore", Patente = false, Scadenza = null },
-                new DipendenteDetailViewModel { Id = 7, Nome = "Azzurri Margherita", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2025, 2, 10) },
+                new DipendenteDetailViewModel { Id = 7, Nome = "Azzurri Margherita", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2027, 9, 10) },
                 new DipendenteDetailViewModel { Id = 8, Nome = "Viola Riccardo", Ruolo = "Addetto alla Sicurezza", Patente = false, Scadenza = null },
-                new DipendenteDetailViewModel { Id = 9, Nome = "Arancioni Sofia", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2025, 11, 30) },
-                new DipendenteDetailViewModel { Id = 10, Nome = "Celeste Lorenzo", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2026, 8, 25) },
+                new DipendenteDetailViewModel { Id = 9, Nome = "Arancioni Sofia", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2027, 11, 30) },
+                new DipendenteDetailViewModel { Id = 10, Nome = "Celeste Lorenzo", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2027, 8, 25) },
                 new DipendenteDetailViewModel { Id = 11, Nome = "Rosa Alex", Ruolo = "Addetto terminal", Patente = false, Scadenza = null },
-                new DipendenteDetailViewModel { Id = 12, Nome = "Neri Federico", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2025, 1, 5) },
+                new DipendenteDetailViewModel { Id = 12, Nome = "Neri Federico", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2025, 12, 5) }, // Scaduta
                 new DipendenteDetailViewModel { Id = 13, Nome = "Marroni Eleonora", Ruolo = "Ormeggiatore", Patente = false, Scadenza = null },
-                new DipendenteDetailViewModel { Id = 14, Nome = "Grigi Roberto", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2025, 9, 18) },
-                new DipendenteDetailViewModel { Id = 15, Nome = "Lavanda Francesco", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2026, 5, 12) },
+                new DipendenteDetailViewModel { Id = 14, Nome = "Grigi Roberto", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2027, 4, 18) },
+                new DipendenteDetailViewModel { Id = 15, Nome = "Lavanda Francesco", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2027, 5, 12) },
                 new DipendenteDetailViewModel { Id = 16, Nome = "Giannini Matteo", Ruolo = "Addetto alla Sicurezza", Patente = false, Scadenza = null },
-                new DipendenteDetailViewModel { Id = 17, Nome = "Forcellini Filippo", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2025, 4, 22) },
-                new DipendenteDetailViewModel { Id = 18, Nome = "Limoni Marta", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2026, 2, 14) },
+                new DipendenteDetailViewModel { Id = 17, Nome = "Forcellini Filippo", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2027, 7, 22) },
+                new DipendenteDetailViewModel { Id = 18, Nome = "Limoni Marta", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2027, 2, 14) },
                 new DipendenteDetailViewModel { Id = 19, Nome = "Acqua Filomena", Ruolo = "Addetto terminal", Patente = false, Scadenza = null },
-                new DipendenteDetailViewModel { Id = 20, Nome = "Fuochi Davide", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2025, 8, 8) },
+                new DipendenteDetailViewModel { Id = 20, Nome = "Fuochi Davide", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2027, 10, 8) },
                 new DipendenteDetailViewModel { Id = 21, Nome = "Lampone Federica", Ruolo = "Ormeggiatore", Patente = false, Scadenza = null },
-                new DipendenteDetailViewModel { Id = 22, Nome = "Agnelli Lucia", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2025, 3, 30) },
+                new DipendenteDetailViewModel { Id = 22, Nome = "Agnelli Lucia", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2027, 3, 30) },
                 new DipendenteDetailViewModel { Id = 23, Nome = "Rinaldi Martina", Ruolo = "Addetto alla Sicurezza", Patente = false, Scadenza = null },
-                new DipendenteDetailViewModel { Id = 24, Nome = "Tonelli Alessandro", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2026, 7, 19) },
-                new DipendenteDetailViewModel { Id = 25, Nome = "Nardelli Tommaso", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2025, 10, 25) }
+                new DipendenteDetailViewModel { Id = 24, Nome = "Tonelli Alessandro", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2027, 7, 19) },
+                new DipendenteDetailViewModel { Id = 25, Nome = "Nardelli Tommaso", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2027, 12, 25) }
+            };
+        }
+
+        // Assegnazioni dipendenti alle navi (chiave: naveId_fascia, valore: lista id dipendenti)
+        private static Dictionary<string, List<int>> _assegnazioniDipendenti = InitAssegnazioni();
+
+        private static Dictionary<string, List<int>> InitAssegnazioni()
+        {
+            // Pre-popola assegnazioni di esempio per le navi esistenti
+            return new Dictionary<string, List<int>>
+            {
+                // Nave 1 - oggi, fascia mattina e pomeriggio (gruisti e mulettisti)
+                { "1_0", new List<int> { 1, 7, 10, 2, 5 } },      // Mattina: gruisti 1,7,10 + mulettisti 2,5
+                { "1_1", new List<int> { 14, 17, 20, 9, 15 } },   // Pomeriggio: gruisti 14,17,20 + mulettisti 9,15
+                // Nave 2 - oggi, fascia sera (solo mulettisti)
+                { "2_2", new List<int> { 2, 5, 9, 15, 18 } },     // Sera: mulettisti
+                // Nave 3 - domani, tutte le fasce (solo mulettisti)
+                { "3_0", new List<int> { 2, 5, 9, 15, 18 } },     // Mattina
+                { "3_1", new List<int> { 22, 25, 12, 2, 5 } },    // Pomeriggio (alcuni diversi)
+                { "3_2", new List<int> { 9, 15, 18, 22, 25 } }    // Sera
             };
         }
 
@@ -129,81 +149,114 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
 
         private void CaricaDatiPianificazione(IndexViewModel model)
         {
-            // Lista dipendenti
-            model.TuttiDipendenti = new List<DipendenteViewModel>
+            var oggi = DateTime.Today;
+            var domani = DateTime.Today.AddDays(1);
+            var random = new Random();
+
+            // Converti dipendenti da Gestione Dipendenti a DipendenteViewModel
+            model.TuttiDipendenti = _dipendenti.Select(d => new DipendenteViewModel
             {
-                new DipendenteViewModel { Id = 1, Nome = "Mario", Cognome = "Rossi" },
-                new DipendenteViewModel { Id = 2, Nome = "Luigi", Cognome = "Verdi" },
-                new DipendenteViewModel { Id = 3, Nome = "Lucia", Cognome = "Gialli" },
-                new DipendenteViewModel { Id = 4, Nome = "Marco", Cognome = "Blu", PatenteScaduta = true },
-                new DipendenteViewModel { Id = 5, Nome = "Sofia", Cognome = "Bianchi", RichiedeVariazione = true },
-                new DipendenteViewModel { Id = 6, Nome = "Paolo", Cognome = "Neri" },
-                new DipendenteViewModel { Id = 7, Nome = "Anna", Cognome = "Rosa" },
-                new DipendenteViewModel { Id = 8, Nome = "Marco", Cognome = "Grigi" },
-                new DipendenteViewModel { Id = 9, Nome = "Sara", Cognome = "Viola" },
-                new DipendenteViewModel { Id = 10, Nome = "Luca", Cognome = "Aranci" },
-                new DipendenteViewModel { Id = 11, Nome = "Claudio", Cognome = "Neri" },
-                new DipendenteViewModel { Id = 12, Nome = "Luca", Cognome = "Azzurri", PatenteScaduta = true },
-                new DipendenteViewModel { Id = 13, Nome = "Lucia", Cognome = "Rosa" },
+                Id = d.Id,
+                Nome = d.Nome.Split(' ').Length > 1 ? d.Nome.Split(' ')[1] : d.Nome,
+                Cognome = d.Nome.Split(' ')[0],
+                Ruolo = d.Ruolo,
+                PatenteScaduta = d.Patente && d.Scadenza.HasValue && d.Scadenza.Value < DateTime.Today,
+                RichiedeVariazione = random.Next(100) < 15 // 15% probabilità variazione
+            }).ToList();
+
+            // Filtra gruisti e mulettisti disponibili
+            model.Gruisti = model.TuttiDipendenti.Where(d => d.Ruolo == "Gruista").ToList();
+            model.Mulettisti = model.TuttiDipendenti.Where(d => d.Ruolo == "Mulettista").ToList();
+
+            // Navi oggi da Gestione Navi
+            var naviOggiDb = _navi.Where(n => n.DataArrivo.Date == oggi).ToList();
+            model.NaviOggi = naviOggiDb.Select(n => CreaNaveViewModel(n, model.TuttiDipendenti, random)).ToList();
+
+            // Navi domani da Gestione Navi
+            var naviDomaniDb = _navi.Where(n => n.DataArrivo.Date == domani).ToList();
+            model.NaviDomani = naviDomaniDb.Select(n => CreaNaveViewModel(n, model.TuttiDipendenti, random)).ToList();
+
+            model.OraCorrente = DateTime.Now.Hour;
+
+            // Passa le assegnazioni per filtrare i dipendenti disponibili
+            // Convertiamo le chiavi per includere il giorno (oggi=0, domani=1)
+            model.Assegnazioni = new Dictionary<string, List<int>>();
+            foreach (var nave in model.NaviOggi)
+            {
+                if (nave.DipendentiMattina.Any())
+                    model.Assegnazioni[$"{nave.Id}_0_oggi"] = nave.DipendentiMattina.Select(d => d.Id).ToList();
+                if (nave.DipendentiPomeriggio.Any())
+                    model.Assegnazioni[$"{nave.Id}_1_oggi"] = nave.DipendentiPomeriggio.Select(d => d.Id).ToList();
+                if (nave.DipendentiSera.Any())
+                    model.Assegnazioni[$"{nave.Id}_2_oggi"] = nave.DipendentiSera.Select(d => d.Id).ToList();
+            }
+            foreach (var nave in model.NaviDomani)
+            {
+                if (nave.DipendentiMattina.Any())
+                    model.Assegnazioni[$"{nave.Id}_0_domani"] = nave.DipendentiMattina.Select(d => d.Id).ToList();
+                if (nave.DipendentiPomeriggio.Any())
+                    model.Assegnazioni[$"{nave.Id}_1_domani"] = nave.DipendentiPomeriggio.Select(d => d.Id).ToList();
+                if (nave.DipendentiSera.Any())
+                    model.Assegnazioni[$"{nave.Id}_2_domani"] = nave.DipendentiSera.Select(d => d.Id).ToList();
+            }
+        }
+
+        private NaveViewModel CreaNaveViewModel(NaveDetailViewModel naveDb, List<DipendenteViewModel> tuttiDipendenti, Random random)
+        {
+            var nave = new NaveViewModel
+            {
+                Id = naveDb.Id,
+                Nome = naveDb.Nome,
+                Pontile = naveDb.Pontile ?? 0,
+                FasciaMattina = naveDb.FasciaMattina,
+                FasciaPomeriggio = naveDb.FasciaPomeriggio,
+                FasciaSera = naveDb.FasciaSera,
+                RichiedeGruisti = naveDb.RichiedeGruisti,
+                RichiedeMulettisti = naveDb.RichiedeMulettisti
             };
 
-            // Navi oggi
-            model.NaviOggi = new List<NaveViewModel>
-            {
-                new NaveViewModel
-                {
-                    Id = 1,
-                    Nome = "Nave 1",
-                    Stato = StatoNave.InLavorazione,
-                    Pontile = 10,
-                    Fascia = FasciaOraria.Mattina,
-                    Dipendenti = new List<DipendenteViewModel>
-                    {
-                        model.TuttiDipendenti[0],
-                        model.TuttiDipendenti[1],
-                        model.TuttiDipendenti[2],
-                        model.TuttiDipendenti[3],
-                        model.TuttiDipendenti[4]
-                    }
-                },
-                new NaveViewModel
-                {
-                    Id = 2,
-                    Nome = "Nave 2",
-                    Stato = StatoNave.InPartenza,
-                    Pontile = 30,
-                    Fascia = FasciaOraria.Pomeriggio,
-                    Dipendenti = new List<DipendenteViewModel>
-                    {
-                        model.TuttiDipendenti[5],
-                        model.TuttiDipendenti[6],
-                        model.TuttiDipendenti[7],
-                        model.TuttiDipendenti[8],
-                        model.TuttiDipendenti[9]
-                    }
-                }
-            };
+            // Carica dipendenti salvati o lascia vuoto
+            if (naveDb.FasciaMattina)
+                nave.DipendentiMattina = GetDipendentiAssegnati(naveDb.Id, 0, tuttiDipendenti);
+            if (naveDb.FasciaPomeriggio)
+                nave.DipendentiPomeriggio = GetDipendentiAssegnati(naveDb.Id, 1, tuttiDipendenti);
+            if (naveDb.FasciaSera)
+                nave.DipendentiSera = GetDipendentiAssegnati(naveDb.Id, 2, tuttiDipendenti);
 
-            // Navi domani
-            model.NaviDomani = new List<NaveViewModel>
+            return nave;
+        }
+
+        private List<DipendenteViewModel> GetDipendentiAssegnati(int naveId, int fascia, List<DipendenteViewModel> tuttiDipendenti)
+        {
+            var chiave = $"{naveId}_{fascia}";
+            if (_assegnazioniDipendenti.TryGetValue(chiave, out var idDipendenti))
             {
-                new NaveViewModel
+                return tuttiDipendenti.Where(d => idDipendenti.Contains(d.Id)).ToList();
+            }
+            return new List<DipendenteViewModel>();
+        }
+
+        [HttpPost]
+        public virtual IActionResult SalvaAssegnazione(int naveId, int fascia, [FromBody] List<int> dipendentiIds)
+        {
+            var chiave = $"{naveId}_{fascia}";
+            _assegnazioniDipendenti[chiave] = dipendentiIds ?? new List<int>();
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
+        public virtual IActionResult CambiaDipendente(int naveId, int fascia, int vecchioDipendenteId, int nuovoDipendenteId)
+        {
+            var chiave = $"{naveId}_{fascia}";
+            if (_assegnazioniDipendenti.TryGetValue(chiave, out var idDipendenti))
+            {
+                var index = idDipendenti.IndexOf(vecchioDipendenteId);
+                if (index >= 0)
                 {
-                    Id = 3,
-                    Nome = "Nave 3",
-                    Stato = StatoNave.InArrivo,
-                    Pontile = 20,
-                    Fascia = FasciaOraria.Sera,
-                    Dipendenti = new List<DipendenteViewModel>
-                    {
-                        model.TuttiDipendenti[0],
-                        model.TuttiDipendenti[10],
-                        model.TuttiDipendenti[11],
-                        model.TuttiDipendenti[12],
-                        new DipendenteViewModel { Id = 2, Nome = "Luigi", Cognome = "Verdi", RichiedeVariazione = true }
-                    }
+                    idDipendenti[index] = nuovoDipendenteId;
                 }
-            };
+            }
+            return Json(new { success = true });
         }
 
         [HttpGet]
@@ -306,9 +359,11 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         }
 
         [HttpGet]
-        public virtual IActionResult DettaglioNave(int? id, string dataPreselezionata = null)
+        public virtual IActionResult DettaglioNave(int? id, string dataPreselezionata = null, bool nascondiCalendario = false)
         {
             NaveDetailViewModel nave;
+            var oggi = DateTime.Today;
+            var domani = DateTime.Today.AddDays(1);
 
             if (id.HasValue)
             {
@@ -316,6 +371,11 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                 if (nave == null)
                 {
                     return NotFound();
+                }
+                // Per navi esistenti di oggi o domani, nascondi il calendario
+                if (nave.DataArrivo.Date == oggi || nave.DataArrivo.Date == domani)
+                {
+                    nascondiCalendario = true;
                 }
             }
             else
@@ -335,6 +395,7 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                 };
             }
 
+            ViewBag.NascondiCalendario = nascondiCalendario;
             return PartialView("_DettaglioNave", nave);
         }
 
@@ -424,6 +485,19 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
             }
 
             return RedirectToAction(Actions.GestioneNavi());
+        }
+
+        [HttpGet]
+        public virtual IActionResult TabellaNaviGiorno(string giorno)
+        {
+            if (string.IsNullOrEmpty(giorno) || !DateTime.TryParse(giorno, out var dataParsata))
+            {
+                return BadRequest();
+            }
+
+            var navi = _navi.Where(n => n.DataArrivo.Date == dataParsata.Date).ToList();
+            ViewBag.DataGiorno = dataParsata;
+            return PartialView("_TabellaNaviGiorno", navi);
         }
 
         [HttpGet]

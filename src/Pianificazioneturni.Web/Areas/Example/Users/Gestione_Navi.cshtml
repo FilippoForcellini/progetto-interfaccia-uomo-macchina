@@ -2,7 +2,6 @@
 @{
     ViewData["Title"] = "Gestione Navi";
     var timeline = Model.GetTimeline();
-    var apriModalAutomaticamente = Model.GiornoSelezionato.HasValue && Context.Request.Query.ContainsKey("nuovo");
 }
 
 @section pageTitle {
@@ -166,16 +165,16 @@
         <span class="timeline-label">Giorni futuri:</span>
         @foreach (var giorno in timeline)
         {
-            var isActive = Model.GiornoSelezionato.HasValue && Model.GiornoSelezionato.Value.Date == giorno.Data.Date;
-            <a href="@Url.Action("GestioneNavi", "Users", new { Area = "Example", giorno = giorno.Data.ToString("yyyy-MM-dd"), nuovo = "true" })"
-               class="timeline-dot @(isActive ? "active" : "")" title="@giorno.DataCompleta - @giorno.NumeroNavi navi">
+            <div class="timeline-dot" id="dot-@giorno.Data.ToString("yyyy-MM-dd")"
+                 onclick="selezionaGiornoFuturo('@giorno.Data.ToString("yyyy-MM-dd")')"
+                 title="@giorno.DataCompleta - @giorno.NumeroNavi navi">
                 <div class="dot-circle @(giorno.HasNavi ? "has-navi" : "")">@giorno.GiornoFormattato</div>
                 <span class="dot-month">@giorno.MeseFormattato</span>
                 @if (giorno.HasNavi)
                 {
                     <span class="dot-count">@giorno.NumeroNavi navi</span>
                 }
-            </a>
+            </div>
         }
     </div>
 
@@ -245,7 +244,7 @@
                 </tbody>
             </table>
             <div class="mt-2">
-                <button class="btn btn-dark btn-sm" onclick="apriModalNuova('@Model.DataOggi.ToString("yyyy-MM-dd")')">Aggiungi</button>
+                <button class="btn btn-dark btn-sm" onclick="apriModalNuova('@Model.DataOggi.ToString("yyyy-MM-dd")', true)">Aggiungi</button>
             </div>
         </div>
 
@@ -313,86 +312,13 @@
                 </tbody>
             </table>
             <div class="mt-2">
-                <button class="btn btn-dark btn-sm" onclick="apriModalNuova('@Model.DataDomani.ToString("yyyy-MM-dd")')">Aggiungi</button>
+                <button class="btn btn-dark btn-sm" onclick="apriModalNuova('@Model.DataDomani.ToString("yyyy-MM-dd")', true)">Aggiungi</button>
             </div>
         </div>
     </div>
 
-    <!-- Tabella giorno selezionato (se presente) -->
-    @if (Model.GiornoSelezionato.HasValue && Model.NaviGiornoSelezionato != null)
-    {
-        <div class="selected-day-section">
-            <div class="row">
-                <div class="col-md-6 mx-auto">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="fw-bold mb-0">NAVI @Model.GiornoSelezionato.Value.ToString("dd/MM/yyyy")</h5>
-                        <a href="@Url.Action("GestioneNavi", "Users", new { Area = "Example" })" class="btn btn-outline-secondary btn-sm">
-                            Chiudi
-                        </a>
-                    </div>
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th colspan="5" class="text-center">@Model.GiornoSelezionato.Value.ToString("dd/MM/yyyy")</th>
-                            </tr>
-                            <tr>
-                                <th>Nome Nave</th>
-                                <th colspan="3" class="text-center">Orario</th>
-                                <th>Ruoli Richiesti</th>
-                            </tr>
-                            <tr>
-                                <th></th>
-                                <th class="col-orario">00:00/<br/>08:00</th>
-                                <th class="col-orario">08:00/<br/>16:00</th>
-                                <th class="col-orario">16:00/<br/>24:00</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model.NaviGiornoSelezionato.Any())
-                            {
-                                @foreach (var nave in Model.NaviGiornoSelezionato)
-                                {
-                                    <tr class="nave-row" onclick="apriModal(@nave.Id)">
-                                        <td>
-                                            <div><strong>@nave.Nome</strong></div>
-                                            <div class="tipo-nave">@nave.TipoDescrizione</div>
-                                        </td>
-                                        <td class="col-orario">
-                                            @if (nave.FasciaMattina)
-                                            {
-                                                <div class="fascia-occupata"></div>
-                                            }
-                                        </td>
-                                        <td class="col-orario">
-                                            @if (nave.FasciaPomeriggio)
-                                            {
-                                                <div class="fascia-occupata"></div>
-                                            }
-                                        </td>
-                                        <td class="col-orario">
-                                            @if (nave.FasciaSera)
-                                            {
-                                                <div class="fascia-occupata"></div>
-                                            }
-                                        </td>
-                                        <td class="ruoli-text">@nave.RuoliRichiesti</td>
-                                    </tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted">Nessuna nave per questo giorno</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                    <!-- Bottone Aggiungi rimosso - si aggiunge cliccando sul pallino della data -->
-                </div>
-            </div>
-        </div>
-    }
+    <!-- Contenitore tabella giorno selezionato (caricato via AJAX) -->
+    <div id="sezioneGiornoSelezionato"></div>
 </div>
 
 <!-- Modal Dettaglio Nave -->
@@ -420,14 +346,50 @@
             )
         ));
 
-        // Apri modal automaticamente se richiesto (click su pallino giorno futuro)
-        @if (apriModalAutomaticamente && Model.GiornoSelezionato.HasValue)
-        {
-            <text>
-            document.addEventListener('DOMContentLoaded', function() {
-                apriModalNuova('@Model.GiornoSelezionato.Value.ToString("yyyy-MM-dd")');
+        // Variabile per tracciare il giorno selezionato
+        var giornoSelezionatoCorrente = null;
+
+        // Funzione per selezionare un giorno futuro dalla timeline
+        function selezionaGiornoFuturo(data) {
+            // Rimuovi classe active da tutti i pallini
+            document.querySelectorAll('.timeline-dot').forEach(function(dot) {
+                dot.classList.remove('active');
             });
-            </text>
+
+            // Aggiungi classe active al pallino selezionato
+            var dotSelezionato = document.getElementById('dot-' + data);
+            if (dotSelezionato) {
+                dotSelezionato.classList.add('active');
+            }
+
+            giornoSelezionatoCorrente = data;
+
+            // Apri il popup per nuova nave (senza nascondere il calendario per i giorni futuri)
+            apriModalNuova(data, false);
+
+            // Carica la tabella delle navi per questo giorno via AJAX
+            caricaTabellaGiorno(data);
+        }
+
+        // Funzione per caricare la tabella via AJAX
+        function caricaTabellaGiorno(data) {
+            var url = '@Url.Action("TabellaNaviGiorno", "Users", new { Area = "Example" })?giorno=' + data;
+            fetch(url)
+                .then(function(response) { return response.text(); })
+                .then(function(html) {
+                    document.getElementById('sezioneGiornoSelezionato').innerHTML = html;
+                });
+        }
+
+        // Funzione per chiudere la sezione giorno selezionato
+        function chiudiSezioneGiorno() {
+            document.getElementById('sezioneGiornoSelezionato').innerHTML = '';
+            giornoSelezionatoCorrente = null;
+
+            // Rimuovi classe active da tutti i pallini
+            document.querySelectorAll('.timeline-dot').forEach(function(dot) {
+                dot.classList.remove('active');
+            });
         }
 
         function apriModal(id) {
@@ -440,10 +402,17 @@
                 });
         }
 
-        function apriModalNuova(dataPreselezionata) {
+        function apriModalNuova(dataPreselezionata, nascondiCalendario) {
             var url = '@Url.Action("DettaglioNave", "Users", new { Area = "Example" })';
+            var params = [];
             if (dataPreselezionata) {
-                url += '?dataPreselezionata=' + dataPreselezionata;
+                params.push('dataPreselezionata=' + dataPreselezionata);
+            }
+            if (nascondiCalendario) {
+                params.push('nascondiCalendario=true');
+            }
+            if (params.length > 0) {
+                url += '?' + params.join('&');
             }
             fetch(url)
                 .then(function(response) { return response.text(); })

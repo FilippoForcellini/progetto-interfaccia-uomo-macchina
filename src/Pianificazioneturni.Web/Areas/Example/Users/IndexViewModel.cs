@@ -29,9 +29,15 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         // Pianificazione Turni
         public DateTime DataOggi { get; set; } = DateTime.Today;
         public DateTime DataDomani { get; set; } = DateTime.Today.AddDays(1);
+        public int OraCorrente { get; set; } = DateTime.Now.Hour;
         public List<NaveViewModel> NaviOggi { get; set; }
         public List<NaveViewModel> NaviDomani { get; set; }
         public List<DipendenteViewModel> TuttiDipendenti { get; set; }
+        public List<DipendenteViewModel> Gruisti { get; set; } = new List<DipendenteViewModel>();
+        public List<DipendenteViewModel> Mulettisti { get; set; } = new List<DipendenteViewModel>();
+
+        // Assegnazioni per filtrare dipendenti disponibili (chiave: "naveId_fascia_giorno", valore: lista id dipendenti)
+        public Dictionary<string, List<int>> Assegnazioni { get; set; } = new Dictionary<string, List<int>>();
 
         internal void SetUsers(UsersIndexDTO usersIndexDTO)
         {
@@ -84,40 +90,74 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
 
     // Classi per Pianificazione Turni
     public enum StatoNave { InLavorazione, InPartenza, InArrivo }
-    public enum FasciaOraria { Mattina, Pomeriggio, Sera }
+    public enum FasciaOraria { Mattina = 0, Pomeriggio = 1, Sera = 2 }
 
     public class NaveViewModel
     {
         public int Id { get; set; }
         public string Nome { get; set; }
-        public StatoNave Stato { get; set; }
         public int Pontile { get; set; }
-        public FasciaOraria Fascia { get; set; }
-        public List<DipendenteViewModel> Dipendenti { get; set; } = new List<DipendenteViewModel>();
+        public bool FasciaMattina { get; set; }
+        public bool FasciaPomeriggio { get; set; }
+        public bool FasciaSera { get; set; }
+        public bool RichiedeGruisti { get; set; }
+        public bool RichiedeMulettisti { get; set; }
 
-        public string StatoDescrizione => Stato switch
-        {
-            StatoNave.InLavorazione => "In lavorazione",
-            StatoNave.InPartenza => "In Partenza",
-            StatoNave.InArrivo => "In arrivo",
-            _ => ""
-        };
+        // Dipendenti assegnati per fascia
+        public List<DipendenteViewModel> DipendentiMattina { get; set; } = new List<DipendenteViewModel>();
+        public List<DipendenteViewModel> DipendentiPomeriggio { get; set; } = new List<DipendenteViewModel>();
+        public List<DipendenteViewModel> DipendentiSera { get; set; } = new List<DipendenteViewModel>();
 
-        public string StatoIcona => Stato switch
+        // Calcola lo stato in base all'orario corrente
+        public StatoNave GetStato(int oraCorrente)
         {
-            StatoNave.InLavorazione => "in_lavorazione.png",
-            StatoNave.InPartenza => "in_partenza.png",
-            StatoNave.InArrivo => "in_arrivo.png",
-            _ => ""
-        };
+            // Determina in quale fascia siamo
+            // Mattina: 0-8, Pomeriggio: 8-16, Sera: 16-24
+            bool inFasciaMattina = oraCorrente >= 0 && oraCorrente < 8;
+            bool inFasciaPomeriggio = oraCorrente >= 8 && oraCorrente < 16;
+            bool inFasciaSera = oraCorrente >= 16 && oraCorrente < 24;
 
-        public string FasciaDescrizione => Fascia switch
+            // Verifica se la nave è attiva nella fascia corrente
+            bool naveAttivaOra = (inFasciaMattina && FasciaMattina) ||
+                                 (inFasciaPomeriggio && FasciaPomeriggio) ||
+                                 (inFasciaSera && FasciaSera);
+
+            if (naveAttivaOra)
+                return StatoNave.InLavorazione;
+
+            // Verifica se la nave arriverà più tardi oggi
+            if (inFasciaMattina && (FasciaPomeriggio || FasciaSera))
+                return StatoNave.InArrivo;
+            if (inFasciaPomeriggio && FasciaSera)
+                return StatoNave.InArrivo;
+
+            // Altrimenti la nave è in partenza (già passata)
+            return StatoNave.InPartenza;
+        }
+
+        public string GetStatoDescrizione(int oraCorrente)
         {
-            FasciaOraria.Mattina => "00:00 - 08:00",
-            FasciaOraria.Pomeriggio => "08:00 - 16:00",
-            FasciaOraria.Sera => "16:00 - 24:00",
-            _ => ""
-        };
+            return GetStato(oraCorrente) switch
+            {
+                StatoNave.InLavorazione => "In lavorazione",
+                StatoNave.InPartenza => "In Partenza",
+                StatoNave.InArrivo => "In arrivo",
+                _ => ""
+            };
+        }
+
+        // Verifica se una fascia specifica è "in arrivo" (futura)
+        public bool IsFasciaInArrivo(FasciaOraria fascia, int oraCorrente)
+        {
+            int inizioFascia = fascia switch
+            {
+                FasciaOraria.Mattina => 0,
+                FasciaOraria.Pomeriggio => 8,
+                FasciaOraria.Sera => 16,
+                _ => 0
+            };
+            return oraCorrente < inizioFascia;
+        }
     }
 
     public class DipendenteViewModel
@@ -125,6 +165,7 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         public int Id { get; set; }
         public string Nome { get; set; }
         public string Cognome { get; set; }
+        public string Ruolo { get; set; }
         public bool PatenteScaduta { get; set; }
         public bool RichiedeVariazione { get; set; }
 
