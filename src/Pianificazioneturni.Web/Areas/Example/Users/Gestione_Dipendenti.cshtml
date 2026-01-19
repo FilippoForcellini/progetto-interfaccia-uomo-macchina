@@ -37,6 +37,7 @@
     </nav>
 }
 
+<div id="appDipendenti">
 <div class="container">
     <!-- DEBUG: Data di oggi = @DateTime.Today.ToString("dd/MM/yyyy") -->
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -87,101 +88,134 @@
             }
         </tbody>
     </table>
-</div>
 
-<!-- Modal Dettaglio Dipendente -->
-<div class="modal-overlay" id="modalDettaglio" onclick="chiudiModalOverlay(event)">
-    <div class="modal-box" id="modalContent">
+    <!-- Modal Dettaglio Dipendente -->
+    <div v-if="modalVisible" class="modal-overlay" v-on:click="chiudiModalOverlay($event)">
+        <div class="modal-box" v-html="modalContent">
+        </div>
     </div>
+</div>
 </div>
 
 @section scripts {
     <script>
-        function apriModal(id) {
-            fetch('@Url.Action("DettaglioDipendente", "Users", new { Area = "Example" })?id=' + id)
-                .then(function(response) { return response.text(); })
-                .then(function(html) {
-                    document.getElementById('modalContent').innerHTML = html;
-                    document.getElementById('modalDettaglio').classList.add('show');
-                    // Inizializza i campi dopo aver caricato il contenuto
-                    inizializzaCampiModal();
+    if (typeof Vue === 'undefined') {
+        console.error('Vue.js non è caricato!');
+    } else {
+        const { createApp } = Vue;
+
+        const appDipendenti = createApp({
+        data() {
+            return {
+                modalVisible: false,
+                modalContent: ''
+            };
+        },
+        methods: {
+            async apriModal(id) {
+                const response = await fetch(`@Url.Action("DettaglioDipendente", "Users", new { Area = "Example" })?id=${id}`);
+                this.modalContent = await response.text();
+                this.modalVisible = true;
+                this.$nextTick(() => {
+                    this.inizializzaCampiModal();
                 });
-        }
+            },
+            chiudiModal() {
+                this.modalVisible = false;
+            },
+            chiudiModalOverlay(event) {
+                if (event.target.classList.contains('modal-overlay')) {
+                    this.chiudiModal();
+                }
+            },
+            richiedePatente(ruolo) {
+                return ruolo === 'Gruista' || ruolo === 'Mulettista';
+            },
+            inizializzaCampiModal() {
+                const selectRuolo = document.getElementById('selectRuolo');
+                const checkPatente = document.getElementById('checkPatente');
+                const inputScadenza = document.getElementById('inputScadenza');
+                const patenteGroup = document.getElementById('patenteGroup');
+                const scadenzaGroup = document.getElementById('scadenzaGroup');
 
-        function chiudiModal() {
-            document.getElementById('modalDettaglio').classList.remove('show');
-        }
+                if (!selectRuolo) return;
 
-        function chiudiModalOverlay(event) {
-            if (event.target.id === 'modalDettaglio') {
-                chiudiModal();
+                const aggiornaCampi = () => {
+                    const ruolo = selectRuolo.value;
+                    const abilitato = this.richiedePatente(ruolo);
+
+                    if (abilitato) {
+                        checkPatente.disabled = false;
+                        checkPatente.classList.remove('campo-disabilitato');
+                        inputScadenza.disabled = false;
+                        inputScadenza.classList.remove('campo-disabilitato');
+                        patenteGroup.classList.remove('gruppo-disabilitato');
+                        scadenzaGroup.classList.remove('gruppo-disabilitato');
+                    } else {
+                        checkPatente.disabled = true;
+                        checkPatente.checked = false;
+                        checkPatente.classList.add('campo-disabilitato');
+                        inputScadenza.disabled = true;
+                        inputScadenza.value = '';
+                        inputScadenza.classList.add('campo-disabilitato');
+                        patenteGroup.classList.add('gruppo-disabilitato');
+                        scadenzaGroup.classList.add('gruppo-disabilitato');
+                    }
+                };
+
+                selectRuolo.onchange = aggiornaCampi;
+                aggiornaCampi();
+            },
+            validaForm() {
+                const selectRuolo = document.getElementById('selectRuolo');
+                const checkPatente = document.getElementById('checkPatente');
+                const inputScadenza = document.getElementById('inputScadenza');
+                const ruolo = selectRuolo.value;
+
+                if (this.richiedePatente(ruolo)) {
+                    if (!checkPatente.checked) {
+                        alert('Per Gruisti e Mulettisti la patente è obbligatoria');
+                        return false;
+                    }
+                    if (!inputScadenza.value) {
+                        alert('Per Gruisti e Mulettisti la scadenza è obbligatoria');
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+        });
+
+        // Monta Vue quando il DOM è pronto
+        let appDipendentiInstance = null;
+
+        // Funzione per montare Vue
+        function mountVue() {
+            const appElement = document.getElementById('appDipendenti');
+            if (appElement && !appDipendentiInstance) {
+                appDipendentiInstance = appDipendenti.mount('#appDipendenti');
+                console.log('Vue Dipendenti montato con successo!');
             }
         }
 
-        function richiedePatente(ruolo) {
-            return ruolo === 'Gruista' || ruolo === 'Mulettista';
+        // Aspetta sempre il DOMContentLoaded per sicurezza
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', mountVue);
+        } else {
+            setTimeout(mountVue, 0);
         }
 
-        function inizializzaCampiModal() {
-            var selectRuolo = document.getElementById('selectRuolo');
-            var checkPatente = document.getElementById('checkPatente');
-            var inputScadenza = document.getElementById('inputScadenza');
-            var patenteGroup = document.getElementById('patenteGroup');
-            var scadenzaGroup = document.getElementById('scadenzaGroup');
-
-            if (!selectRuolo) return;
-
-            function aggiornaCampi() {
-                var ruolo = selectRuolo.value;
-                var abilitato = richiedePatente(ruolo);
-
-                if (abilitato) {
-                    // Abilita i campi
-                    checkPatente.disabled = false;
-                    checkPatente.classList.remove('campo-disabilitato');
-                    inputScadenza.disabled = false;
-                    inputScadenza.classList.remove('campo-disabilitato');
-                    patenteGroup.classList.remove('gruppo-disabilitato');
-                    scadenzaGroup.classList.remove('gruppo-disabilitato');
-                } else {
-                    // Disabilita completamente
-                    checkPatente.disabled = true;
-                    checkPatente.checked = false;
-                    checkPatente.classList.add('campo-disabilitato');
-                    inputScadenza.disabled = true;
-                    inputScadenza.value = '';
-                    inputScadenza.classList.add('campo-disabilitato');
-                    patenteGroup.classList.add('gruppo-disabilitato');
-                    scadenzaGroup.classList.add('gruppo-disabilitato');
-                }
-            }
-
-            // Aggiungi evento change
-            selectRuolo.onchange = aggiornaCampi;
-
-            // Esegui subito per impostare lo stato iniziale
-            aggiornaCampi();
-        }
-
-        function validaForm() {
-            var selectRuolo = document.getElementById('selectRuolo');
-            var checkPatente = document.getElementById('checkPatente');
-            var inputScadenza = document.getElementById('inputScadenza');
-
-            var ruolo = selectRuolo.value;
-
-            if (richiedePatente(ruolo)) {
-                if (!checkPatente.checked) {
-                    alert('Per Gruisti e Mulettisti la patente è obbligatoria');
-                    return false;
-                }
-                if (!inputScadenza.value) {
-                    alert('Per Gruisti e Mulettisti la scadenza è obbligatoria');
-                    return false;
-                }
-            }
-
+        // Esponi funzioni globali per compatibilità con onclick nel HTML
+        window.apriModal = (id) => {
+            if (!appDipendentiInstance) mountVue();
+            if (appDipendentiInstance) appDipendentiInstance.apriModal(id);
+        };
+        window.validaForm = () => {
+            if (!appDipendentiInstance) mountVue();
+            if (appDipendentiInstance) return appDipendentiInstance.validaForm();
             return true;
-        }
+        };
+    }
     </script>
 }

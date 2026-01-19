@@ -159,6 +159,7 @@
     </nav>
 }
 
+<div id="appNavi">
 <div class="container-fluid">
     <!-- Timeline giorni futuri -->
     <div class="timeline-container">
@@ -319,226 +320,225 @@
 
     <!-- Contenitore tabella giorno selezionato (caricato via AJAX) -->
     <div id="sezioneGiornoSelezionato"></div>
-</div>
 
-<!-- Modal Dettaglio Nave -->
-<div class="modal-overlay" id="modalNave" onclick="chiudiModalOverlay(event)">
-    <div class="modal-box" id="modalNaveContent">
+    <!-- Modal Dettaglio Nave -->
+    <div v-if="modalNaveVisible" class="modal-overlay" v-on:click="chiudiModalOverlay($event)">
+        <div class="modal-box" v-html="modalNaveContent">
+        </div>
     </div>
-</div>
 
-<!-- Form per eliminazione -->
-<form id="formEliminaNave" method="post" asp-action="EliminaNave" style="display:none;">
-    <input type="hidden" name="id" id="eliminaNaveId" />
-</form>
+    <!-- Form per eliminazione -->
+    <form id="formEliminaNave" method="post" asp-action="EliminaNave" style="display:none;">
+        <input type="hidden" name="id" id="eliminaNaveId" />
+    </form>
+</div>
+</div>
 
 @section scripts {
     <script>
-        // Dati fasce occupate dal server (JSON)
-        var fasceOccupatePerGiorno = @Html.Raw(Json.Serialize(
-            Model.TutteLeNavi.GroupBy(n => n.DataArrivo.Date).ToDictionary(
-                g => g.Key.ToString("yyyy-MM-dd"),
-                g => new {
-                    mattina = g.Where(n => n.FasciaMattina).Select(n => n.Id).ToList(),
-                    pomeriggio = g.Where(n => n.FasciaPomeriggio).Select(n => n.Id).ToList(),
-                    sera = g.Where(n => n.FasciaSera).Select(n => n.Id).ToList()
+    if (typeof Vue === 'undefined') {
+        console.error('Vue.js non è caricato!');
+    } else {
+        const { createApp } = Vue;
+
+        const appNavi = createApp({
+        data() {
+            return {
+                fasceOccupatePerGiorno: @Html.Raw(Json.Serialize(
+                    Model.TutteLeNavi.GroupBy(n => n.DataArrivo.Date).ToDictionary(
+                        g => g.Key.ToString("yyyy-MM-dd"),
+                        g => new {
+                            mattina = g.Where(n => n.FasciaMattina).Select(n => n.Id).ToList(),
+                            pomeriggio = g.Where(n => n.FasciaPomeriggio).Select(n => n.Id).ToList(),
+                            sera = g.Where(n => n.FasciaSera).Select(n => n.Id).ToList()
+                        }
+                    )
+                )),
+                giornoSelezionatoCorrente: null,
+                modalNaveVisible: false,
+                modalNaveContent: ''
+            };
+        },
+        methods: {
+            async selezionaGiornoFuturo(data) {
+                this.giornoSelezionatoCorrente = data;
+                await this.apriModalNuova(data, false);
+                await this.caricaTabellaGiorno(data);
+            },
+            async caricaTabellaGiorno(data) {
+                const url = `@Url.Action("TabellaNaviGiorno", "Users", new { Area = "Example" })?giorno=${data}`;
+                const response = await fetch(url);
+                const html = await response.text();
+                document.getElementById('sezioneGiornoSelezionato').innerHTML = html;
+            },
+            chiudiSezioneGiorno() {
+                document.getElementById('sezioneGiornoSelezionato').innerHTML = '';
+                this.giornoSelezionatoCorrente = null;
+            },
+            async apriModal(id) {
+                const response = await fetch(`@Url.Action("DettaglioNave", "Users", new { Area = "Example" })?id=${id}`);
+                this.modalNaveContent = await response.text();
+                this.modalNaveVisible = true;
+                this.$nextTick(() => {
+                    this.inizializzaFasceOrarie();
+                });
+            },
+            async apriModalNuova(dataPreselezionata, nascondiCalendario) {
+                let url = '@Url.Action("DettaglioNave", "Users", new { Area = "Example" })';
+                const params = [];
+                if (dataPreselezionata) params.push(`dataPreselezionata=${dataPreselezionata}`);
+                if (nascondiCalendario) params.push('nascondiCalendario=true');
+                if (params.length > 0) url += '?' + params.join('&');
+
+                const response = await fetch(url);
+                this.modalNaveContent = await response.text();
+                this.modalNaveVisible = true;
+                this.$nextTick(() => {
+                    this.inizializzaFasceOrarie();
+                });
+            },
+            chiudiModal() {
+                this.modalNaveVisible = false;
+            },
+            chiudiModalOverlay(event) {
+                if (event.target.classList.contains('modal-overlay')) {
+                    this.chiudiModal();
                 }
-            )
-        ));
+            },
+            eliminaNave(id) {
+                if (confirm('Sei sicuro di voler eliminare questa nave?')) {
+                    document.getElementById('eliminaNaveId').value = id;
+                    document.getElementById('formEliminaNave').submit();
+                }
+            },
+            inizializzaFasceOrarie() {
+                const inputData = document.getElementById('inputDataArrivo');
+                if (!inputData) return;
+                this.aggiornaStatoFasce();
+            },
+            aggiornaStatoFasce() {
+                const inputData = document.getElementById('inputDataArrivo');
+                const naveIdInput = document.getElementById('inputNaveId');
+                const naveId = naveIdInput ? parseInt(naveIdInput.value) : 0;
+                const dataSelezionata = inputData.value;
+                const fasceItems = document.querySelectorAll('.fascia-oraria-item');
 
-        // Variabile per tracciare il giorno selezionato
-        var giornoSelezionatoCorrente = null;
+                fasceItems.forEach(item => {
+                    const fascia = item.getAttribute('data-fascia');
+                    const checkbox = item.querySelector('input[type="checkbox"]');
+                    const statusDiv = item.querySelector('.fascia-status');
+                    const occupata = this.isFasciaOccupata(dataSelezionata, fascia, naveId);
 
-        // Funzione per selezionare un giorno futuro dalla timeline
-        function selezionaGiornoFuturo(data) {
-            // Rimuovi classe active da tutti i pallini
-            document.querySelectorAll('.timeline-dot').forEach(function(dot) {
-                dot.classList.remove('active');
-            });
-
-            // Aggiungi classe active al pallino selezionato
-            var dotSelezionato = document.getElementById('dot-' + data);
-            if (dotSelezionato) {
-                dotSelezionato.classList.add('active');
-            }
-
-            giornoSelezionatoCorrente = data;
-
-            // Apri il popup per nuova nave (senza nascondere il calendario per i giorni futuri)
-            apriModalNuova(data, false);
-
-            // Carica la tabella delle navi per questo giorno via AJAX
-            caricaTabellaGiorno(data);
-        }
-
-        // Funzione per caricare la tabella via AJAX
-        function caricaTabellaGiorno(data) {
-            var url = '@Url.Action("TabellaNaviGiorno", "Users", new { Area = "Example" })?giorno=' + data;
-            fetch(url)
-                .then(function(response) { return response.text(); })
-                .then(function(html) {
-                    document.getElementById('sezioneGiornoSelezionato').innerHTML = html;
-                });
-        }
-
-        // Funzione per chiudere la sezione giorno selezionato
-        function chiudiSezioneGiorno() {
-            document.getElementById('sezioneGiornoSelezionato').innerHTML = '';
-            giornoSelezionatoCorrente = null;
-
-            // Rimuovi classe active da tutti i pallini
-            document.querySelectorAll('.timeline-dot').forEach(function(dot) {
-                dot.classList.remove('active');
-            });
-        }
-
-        function apriModal(id) {
-            fetch('@Url.Action("DettaglioNave", "Users", new { Area = "Example" })?id=' + id)
-                .then(function(response) { return response.text(); })
-                .then(function(html) {
-                    document.getElementById('modalNaveContent').innerHTML = html;
-                    document.getElementById('modalNave').classList.add('show');
-                    inizializzaFasceOrarie();
-                });
-        }
-
-        function apriModalNuova(dataPreselezionata, nascondiCalendario) {
-            var url = '@Url.Action("DettaglioNave", "Users", new { Area = "Example" })';
-            var params = [];
-            if (dataPreselezionata) {
-                params.push('dataPreselezionata=' + dataPreselezionata);
-            }
-            if (nascondiCalendario) {
-                params.push('nascondiCalendario=true');
-            }
-            if (params.length > 0) {
-                url += '?' + params.join('&');
-            }
-            fetch(url)
-                .then(function(response) { return response.text(); })
-                .then(function(html) {
-                    document.getElementById('modalNaveContent').innerHTML = html;
-                    document.getElementById('modalNave').classList.add('show');
-                    inizializzaFasceOrarie();
-                });
-        }
-
-        function chiudiModal() {
-            document.getElementById('modalNave').classList.remove('show');
-        }
-
-        function chiudiModalOverlay(event) {
-            if (event.target.id === 'modalNave') {
-                chiudiModal();
-            }
-        }
-
-        function eliminaNave(id) {
-            if (confirm('Sei sicuro di voler eliminare questa nave?')) {
-                document.getElementById('eliminaNaveId').value = id;
-                document.getElementById('formEliminaNave').submit();
-            }
-        }
-
-        function inizializzaFasceOrarie() {
-            var inputData = document.getElementById('inputDataArrivo');
-            if (!inputData) return;
-
-            // Inizializza lo stato delle fasce
-            aggiornaStatoFasce();
-        }
-
-        function aggiornaStatoFasce() {
-            var inputData = document.getElementById('inputDataArrivo');
-            var naveIdInput = document.getElementById('inputNaveId');
-            var naveId = naveIdInput ? parseInt(naveIdInput.value) : 0;
-            var dataSelezionata = inputData.value;
-
-            var fasceItems = document.querySelectorAll('.fascia-oraria-item');
-
-            fasceItems.forEach(function(item) {
-                var fascia = item.getAttribute('data-fascia');
-                var checkbox = item.querySelector('input[type="checkbox"]');
-                var statusDiv = item.querySelector('.fascia-status');
-
-                // Verifica se la fascia è occupata
-                var occupata = isFasciaOccupata(dataSelezionata, fascia, naveId);
-
-                if (occupata) {
-                    item.classList.add('disabled');
-                    item.classList.remove('selected');
-                    checkbox.disabled = true;
-                    checkbox.checked = false;
-                    statusDiv.textContent = 'Occupata';
-                    statusDiv.style.color = '#dc3545';
-                } else {
-                    item.classList.remove('disabled');
-                    checkbox.disabled = false;
-                    statusDiv.textContent = 'Disponibile';
-                    statusDiv.style.color = '#28a745';
-
-                    // Mantieni lo stato selezionato se era già selezionato
-                    if (checkbox.checked) {
-                        item.classList.add('selected');
+                    if (occupata) {
+                        item.classList.add('disabled');
+                        item.classList.remove('selected');
+                        checkbox.disabled = true;
+                        checkbox.checked = false;
+                        statusDiv.textContent = 'Occupata';
+                        statusDiv.style.color = '#dc3545';
+                    } else {
+                        item.classList.remove('disabled');
+                        checkbox.disabled = false;
+                        statusDiv.textContent = 'Disponibile';
+                        statusDiv.style.color = '#28a745';
+                        if (checkbox.checked) item.classList.add('selected');
                     }
+                });
+                this.verificaTutteFasceOccupate(dataSelezionata, naveId);
+            },
+            isFasciaOccupata(data, fascia, escludiNaveId) {
+                if (!this.fasceOccupatePerGiorno[data]) return false;
+
+                let occupanti = [];
+                if (fascia === 'mattina') occupanti = this.fasceOccupatePerGiorno[data].mattina;
+                else if (fascia === 'pomeriggio') occupanti = this.fasceOccupatePerGiorno[data].pomeriggio;
+                else if (fascia === 'sera') occupanti = this.fasceOccupatePerGiorno[data].sera;
+
+                return occupanti.some(id => id !== escludiNaveId);
+            },
+            verificaTutteFasceOccupate(data, escludiNaveId) {
+                const avvisoDiv = document.getElementById('avvisoFasceOccupate');
+                if (!avvisoDiv) return;
+
+                const mattinaOccupata = this.isFasciaOccupata(data, 'mattina', escludiNaveId);
+                const pomeriggioOccupata = this.isFasciaOccupata(data, 'pomeriggio', escludiNaveId);
+                const seraOccupata = this.isFasciaOccupata(data, 'sera', escludiNaveId);
+
+                avvisoDiv.style.display = (mattinaOccupata && pomeriggioOccupata && seraOccupata) ? 'block' : 'none';
+            },
+            toggleFascia(item) {
+                if (item.classList.contains('disabled')) return;
+                const checkbox = item.querySelector('input[type="checkbox"]');
+                checkbox.checked = !checkbox.checked;
+                item.classList.toggle('selected', checkbox.checked);
+            },
+            validaFormNave() {
+                const checkMattina = document.getElementById('checkFasciaMattina');
+                const checkPomeriggio = document.getElementById('checkFasciaPomeriggio');
+                const checkSera = document.getElementById('checkFasciaSera');
+
+                if (!checkMattina.checked && !checkPomeriggio.checked && !checkSera.checked) {
+                    alert('Devi selezionare almeno una fascia oraria');
+                    return false;
                 }
-            });
-
-            // Verifica se tutte le fasce sono occupate
-            verificaTutteFasceOccupate(dataSelezionata, naveId);
+                return true;
+            }
         }
+        });
 
-        function isFasciaOccupata(data, fascia, escludiNaveId) {
-            if (!fasceOccupatePerGiorno[data]) return false;
+        // Monta Vue quando il DOM è pronto
+        let appNaviInstance = null;
 
-            var occupanti = [];
-            if (fascia === 'mattina') occupanti = fasceOccupatePerGiorno[data].mattina;
-            else if (fascia === 'pomeriggio') occupanti = fasceOccupatePerGiorno[data].pomeriggio;
-            else if (fascia === 'sera') occupanti = fasceOccupatePerGiorno[data].sera;
-
-            // Escludi la nave corrente (se stiamo modificando)
-            return occupanti.some(function(id) { return id !== escludiNaveId; });
-        }
-
-        function verificaTutteFasceOccupate(data, escludiNaveId) {
-            var avvisoDiv = document.getElementById('avvisoFasceOccupate');
-            if (!avvisoDiv) return;
-
-            var mattinaOccupata = isFasciaOccupata(data, 'mattina', escludiNaveId);
-            var pomeriggioOccupata = isFasciaOccupata(data, 'pomeriggio', escludiNaveId);
-            var seraOccupata = isFasciaOccupata(data, 'sera', escludiNaveId);
-
-            if (mattinaOccupata && pomeriggioOccupata && seraOccupata) {
-                avvisoDiv.style.display = 'block';
-            } else {
-                avvisoDiv.style.display = 'none';
+        // Funzione per montare Vue
+        function mountVue() {
+            const appElement = document.getElementById('appNavi');
+            if (appElement && !appNaviInstance) {
+                appNaviInstance = appNavi.mount('#appNavi');
+                console.log('Vue Navi montato con successo!');
             }
         }
 
-        function toggleFascia(item) {
-            if (item.classList.contains('disabled')) return;
-
-            var checkbox = item.querySelector('input[type="checkbox"]');
-            checkbox.checked = !checkbox.checked;
-
-            if (checkbox.checked) {
-                item.classList.add('selected');
-            } else {
-                item.classList.remove('selected');
-            }
+        // Aspetta sempre il DOMContentLoaded per sicurezza
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', mountVue);
+        } else {
+            setTimeout(mountVue, 0);
         }
 
-        function validaFormNave() {
-            var checkMattina = document.getElementById('checkFasciaMattina');
-            var checkPomeriggio = document.getElementById('checkFasciaPomeriggio');
-            var checkSera = document.getElementById('checkFasciaSera');
-
-            if (!checkMattina.checked && !checkPomeriggio.checked && !checkSera.checked) {
-                alert('Devi selezionare almeno una fascia oraria');
-                return false;
-            }
-
+        // Esponi funzioni globali per compatibilità con onclick nel HTML
+        window.selezionaGiornoFuturo = (data) => {
+            if (!appNaviInstance) mountVue();
+            if (appNaviInstance) appNaviInstance.selezionaGiornoFuturo(data);
+        };
+        window.apriModal = (id) => {
+            if (!appNaviInstance) mountVue();
+            if (appNaviInstance) appNaviInstance.apriModal(id);
+        };
+        window.apriModalNuova = (data, nascondi) => {
+            if (!appNaviInstance) mountVue();
+            if (appNaviInstance) appNaviInstance.apriModalNuova(data, nascondi);
+        };
+        window.chiudiSezioneGiorno = () => {
+            if (!appNaviInstance) mountVue();
+            if (appNaviInstance) appNaviInstance.chiudiSezioneGiorno();
+        };
+        window.eliminaNave = (id) => {
+            if (!appNaviInstance) mountVue();
+            if (appNaviInstance) appNaviInstance.eliminaNave(id);
+        };
+        window.toggleFascia = (item) => {
+            if (!appNaviInstance) mountVue();
+            if (appNaviInstance) appNaviInstance.toggleFascia(item);
+        };
+        window.validaFormNave = () => {
+            if (!appNaviInstance) mountVue();
+            if (appNaviInstance) return appNaviInstance.validaFormNave();
             return true;
-        }
+        };
+        window.aggiornaStatoFasce = () => {
+            if (!appNaviInstance) mountVue();
+            if (appNaviInstance) appNaviInstance.aggiornaStatoFasce();
+        };
+    }
     </script>
 }

@@ -94,6 +94,7 @@
     </nav>
 }
 
+<div id="app">
 <div class="container-fluid">
     <div class="row">
         <!-- NAVI OGGI -->
@@ -364,224 +365,228 @@
             </table>
         </div>
     </div>
-</div>
 
-<!-- Modal cambio dipendente -->
-<div class="modal-overlay" id="modalCambio" onclick="chiudiModalOverlay(event, 'modalCambio')">
-    <div class="modal-box">
-        <div class="modal-title">Variazione Dipendente</div>
-        <p class="text-center mb-3">Dipendente attuale: <strong id="dipendenteAttuale"></strong></p>
-        <label class="form-label">Seleziona sostituto:</label>
-        <div id="listaDipendentiCambio" style="max-height: 250px; overflow-y: auto;"></div>
-        <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="chiudiModal('modalCambio')">Annulla</button>
-            <button class="btn btn-success" onclick="salvaCambio()">Conferma</button>
+    <!-- Modal cambio dipendente -->
+    <div id="modalCambio" class="modal-overlay" style="display: none;">
+        <div class="modal-box">
+            <div class="modal-title">Variazione Dipendente</div>
+            <p class="text-center mb-3">Dipendente attuale: <strong id="dipendenteAttualeNome"></strong></p>
+            <label class="form-label">Seleziona sostituto:</label>
+            <div id="listaDipendentiCambio" style="max-height: 250px; overflow-y: auto;"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="chiudiModalCambio()">Annulla</button>
+                <button class="btn btn-success" onclick="salvaCambio()">Conferma</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal selezione dipendenti -->
+    <div id="modalSelezione" class="modal-overlay" style="display: none;">
+        <div class="modal-box">
+            <div class="modal-title">Seleziona Dipendenti</div>
+            <p class="text-muted text-center mb-3">Seleziona fino a 5 dipendenti</p>
+            <div id="listaDipendentiSelezione" style="max-height: 300px; overflow-y: auto;"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="chiudiModalSelezione()">Annulla</button>
+                <button class="btn btn-success" onclick="salvaSelezione()">Conferma</button>
+            </div>
         </div>
     </div>
 </div>
+<!-- Fine container Vue -->
 
-<!-- Modal selezione dipendenti -->
-<div class="modal-overlay" id="modalSelezione" onclick="chiudiModalOverlay(event, 'modalSelezione')">
-    <div class="modal-box">
-        <div class="modal-title">Seleziona Dipendenti</div>
-        <p class="text-muted text-center mb-3">Seleziona fino a 5 dipendenti</p>
-        <div id="listaDipendentiSelezione" style="max-height: 300px; overflow-y: auto;"></div>
-        <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="chiudiModal('modalSelezione')">Annulla</button>
-            <button class="btn btn-success" onclick="salvaSelezione()">Conferma</button>
-        </div>
-    </div>
-</div>
-
+@section scripts {
 <script>
-    // Dati dipendenti dal server
-    var gruisti = @Html.Raw(Json.Serialize(Model.Gruisti));
-    var mulettisti = @Html.Raw(Json.Serialize(Model.Mulettisti));
-    var tuttiDipendenti = @Html.Raw(Json.Serialize(Model.TuttiDipendenti));
+if (typeof Vue === 'undefined') {
+    console.error('Vue.js non è caricato!');
+} else {
+    const { createApp } = Vue;
 
-    // Assegnazioni esistenti per verificare disponibilità
-    var assegnazioni = @Html.Raw(Json.Serialize(Model.Assegnazioni));
+    const app = createApp({
+    data() {
+        return {
+            gruisti: @Html.Raw(Json.Serialize(Model.Gruisti)),
+            mulettisti: @Html.Raw(Json.Serialize(Model.Mulettisti)),
+            tuttiDipendenti: @Html.Raw(Json.Serialize(Model.TuttiDipendenti)),
+            assegnazioni: @Html.Raw(Json.Serialize(Model.Assegnazioni)),
 
-    var vecchioDipendenteId = null;
-    var naveIdCorrente = null;
-    var fasciaCorrente = null;
-    var giornoCorrente = null;
-    var dipendentiSelezionati = [];
+            modalCambioVisible: false,
+            modalSelezioneVisible: false,
 
-    function getDipendentiFiltrati(richiedeGruisti, richiedeMulettisti) {
-        var lista = [];
-        if (richiedeGruisti) lista = lista.concat(gruisti);
-        if (richiedeMulettisti) lista = lista.concat(mulettisti);
-        if (!richiedeGruisti && !richiedeMulettisti) lista = tuttiDipendenti;
-        return lista;
-    }
+            vecchioDipendenteId: null,
+            dipendenteAttualeNome: '',
+            naveIdCorrente: null,
+            fasciaCorrente: null,
+            giornoCorrente: null,
 
-    // Verifica se un dipendente è disponibile per una fascia (regola 8 ore di pausa)
-    function isDipendenteDisponibile(dipId, fascia, giorno) {
-        // Raccogli tutti gli ID dei dipendenti che lavorano nella fascia precedente
-        var dipendentiOccupati = [];
+            richiedeGruistiCorrente: false,
+            richiedeMulettistiCorrente: false,
 
-        // Fascia precedente che richiede 8 ore di pausa
-        // Fascia 0 (mattina): controllare fascia 2 (sera) del giorno prima
-        // Fascia 1 (pomeriggio): controllare fascia 0 (mattina) dello stesso giorno
-        // Fascia 2 (sera): controllare fascia 1 (pomeriggio) dello stesso giorno
+            dipendenteSelezionatoId: null,
+            dipendentiSelezionatiIds: []
+        };
+    },
+    computed: {
+        dipendentiFiltrati() {
+            let lista = [];
+            if (this.richiedeGruistiCorrente) lista = lista.concat(this.gruisti);
+            if (this.richiedeMulettistiCorrente) lista = lista.concat(this.mulettisti);
+            if (!this.richiedeGruistiCorrente && !this.richiedeMulettistiCorrente) lista = this.tuttiDipendenti;
+            return lista;
+        },
+        dipendentiDisponibili() {
+            return this.dipendentiFiltrati.map(d => ({
+                ...d,
+                disponibile: this.isDipendenteDisponibile(d.id, this.fasciaCorrente, this.giornoCorrente)
+            }));
+        }
+    },
+    methods: {
+        isDipendenteDisponibile(dipId, fascia, giorno) {
+            let dipendentiOccupati = [];
 
-        if (fascia === 0) {
-            // Mattina: controlla sera del giorno prima
-            if (giorno === 'domani') {
-                // Controlla fascia sera di oggi
-                for (var key in assegnazioni) {
-                    if (key.endsWith('_2_oggi')) {
-                        dipendentiOccupati = dipendentiOccupati.concat(assegnazioni[key]);
+            if (fascia === 0) {
+                if (giorno === 'domani') {
+                    for (let key in this.assegnazioni) {
+                        if (key.endsWith('_2_oggi')) {
+                            dipendentiOccupati = dipendentiOccupati.concat(this.assegnazioni[key]);
+                        }
+                    }
+                }
+            } else if (fascia === 1) {
+                for (let key in this.assegnazioni) {
+                    if (key.endsWith('_0_' + giorno)) {
+                        dipendentiOccupati = dipendentiOccupati.concat(this.assegnazioni[key]);
+                    }
+                }
+            } else if (fascia === 2) {
+                for (let key in this.assegnazioni) {
+                    if (key.endsWith('_1_' + giorno)) {
+                        dipendentiOccupati = dipendentiOccupati.concat(this.assegnazioni[key]);
                     }
                 }
             }
-            // Per oggi mattina, non abbiamo il giorno prima
-        } else if (fascia === 1) {
-            // Pomeriggio: controlla mattina dello stesso giorno
-            for (var key in assegnazioni) {
-                if (key.endsWith('_0_' + giorno)) {
-                    dipendentiOccupati = dipendentiOccupati.concat(assegnazioni[key]);
+
+            return !dipendentiOccupati.includes(dipId);
+        },
+        apriModalCambio(dipId, dipNome, naveId, fascia, giorno, richiedeGruisti, richiedeMulettisti) {
+            this.vecchioDipendenteId = dipId;
+            this.dipendenteAttualeNome = dipNome;
+            this.naveIdCorrente = naveId;
+            this.fasciaCorrente = fascia;
+            this.giornoCorrente = giorno;
+            this.richiedeGruistiCorrente = richiedeGruisti;
+            this.richiedeMulettistiCorrente = richiedeMulettisti;
+            this.dipendenteSelezionatoId = null;
+            this.modalCambioVisible = true;
+        },
+        apriModalSelezione(naveId, fascia, giorno, richiedeGruisti, richiedeMulettisti) {
+            this.naveIdCorrente = naveId;
+            this.fasciaCorrente = fascia;
+            this.giornoCorrente = giorno;
+            this.richiedeGruistiCorrente = richiedeGruisti;
+            this.richiedeMulettistiCorrente = richiedeMulettisti;
+            this.dipendentiSelezionatiIds = [];
+            this.modalSelezioneVisible = true;
+        },
+        selezionaDipendente(dipId) {
+            this.dipendenteSelezionatoId = dipId;
+        },
+        toggleDipendente(dipId) {
+            const index = this.dipendentiSelezionatiIds.indexOf(dipId);
+            if (index > -1) {
+                this.dipendentiSelezionatiIds.splice(index, 1);
+            } else {
+                if (this.dipendentiSelezionatiIds.length < 5) {
+                    this.dipendentiSelezionatiIds.push(dipId);
+                } else {
+                    alert('Puoi selezionare massimo 5 dipendenti');
                 }
             }
-        } else if (fascia === 2) {
-            // Sera: controlla pomeriggio dello stesso giorno
-            for (var key in assegnazioni) {
-                if (key.endsWith('_1_' + giorno)) {
-                    dipendentiOccupati = dipendentiOccupati.concat(assegnazioni[key]);
-                }
+        },
+        async salvaCambio() {
+            if (!this.dipendenteSelezionatoId) {
+                alert('Seleziona un dipendente');
+                return;
             }
-        }
 
-        return dipendentiOccupati.indexOf(dipId) === -1;
-    }
+            const response = await fetch('@Url.Action("CambiaDipendente", "Users", new { Area = "Example" })', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `naveId=${this.naveIdCorrente}&fascia=${this.fasciaCorrente}&vecchioDipendenteId=${this.vecchioDipendenteId}&nuovoDipendenteId=${this.dipendenteSelezionatoId}`
+            });
 
-    function apriModalCambio(dipId, dipNome, naveId, fascia, giorno, richiedeGruisti, richiedeMulettisti) {
-        vecchioDipendenteId = dipId;
-        naveIdCorrente = naveId;
-        fasciaCorrente = fascia;
-        giornoCorrente = giorno;
-
-        document.getElementById('dipendenteAttuale').textContent = dipNome;
-
-        var dipendenti = getDipendentiFiltrati(richiedeGruisti, richiedeMulettisti);
-        var html = '';
-        dipendenti.forEach(function(d) {
-            var disponibile = isDipendenteDisponibile(d.id, fascia, giorno);
-            var classePatente = d.patenteScaduta ? 'patente-scaduta' : '';
-            var classeDisp = disponibile ? '' : 'non-disponibile';
-            var icona = d.patenteScaduta ? '⚠️ ' : '';
-            var suffisso = disponibile ? '' : ' (non disponibile - pausa 8h)';
-
-            if (disponibile) {
-                html += '<div class="dipendente-option ' + classePatente + '" data-id="' + d.id + '" onclick="selezionaDipendente(this)">' +
-                        icona + d.nomeCompleto + '</div>';
-            } else {
-                html += '<div class="dipendente-option ' + classeDisp + '" data-id="' + d.id + '">' +
-                        icona + d.nomeCompleto + suffisso + '</div>';
-            }
-        });
-        document.getElementById('listaDipendentiCambio').innerHTML = html;
-        document.getElementById('modalCambio').classList.add('show');
-    }
-
-    function apriModalSelezione(naveId, fascia, giorno, richiedeGruisti, richiedeMulettisti) {
-        naveIdCorrente = naveId;
-        fasciaCorrente = fascia;
-        giornoCorrente = giorno;
-        dipendentiSelezionati = [];
-
-        var dipendenti = getDipendentiFiltrati(richiedeGruisti, richiedeMulettisti);
-        var html = '';
-        dipendenti.forEach(function(d) {
-            var disponibile = isDipendenteDisponibile(d.id, fascia, giorno);
-            var classePatente = d.patenteScaduta ? 'patente-scaduta' : '';
-            var classeDisp = disponibile ? '' : 'non-disponibile';
-            var icona = d.patenteScaduta ? '⚠️ ' : '';
-            var suffisso = disponibile ? '' : ' (non disponibile - pausa 8h)';
-
-            if (disponibile) {
-                html += '<div class="dipendente-option ' + classePatente + '" data-id="' + d.id + '" onclick="toggleDipendente(this)">' +
-                        icona + d.nomeCompleto + '</div>';
-            } else {
-                html += '<div class="dipendente-option ' + classeDisp + '" data-id="' + d.id + '">' +
-                        icona + d.nomeCompleto + suffisso + '</div>';
-            }
-        });
-        document.getElementById('listaDipendentiSelezione').innerHTML = html;
-        document.getElementById('modalSelezione').classList.add('show');
-    }
-
-    function selezionaDipendente(el) {
-        document.querySelectorAll('#listaDipendentiCambio .dipendente-option').forEach(function(opt) {
-            opt.classList.remove('selected');
-        });
-        el.classList.add('selected');
-    }
-
-    function toggleDipendente(el) {
-        var id = parseInt(el.getAttribute('data-id'));
-        if (el.classList.contains('selected')) {
-            el.classList.remove('selected');
-            dipendentiSelezionati = dipendentiSelezionati.filter(function(d) { return d !== id; });
-        } else {
-            if (dipendentiSelezionati.length < 5) {
-                el.classList.add('selected');
-                dipendentiSelezionati.push(id);
-            } else {
-                alert('Puoi selezionare massimo 5 dipendenti');
-            }
-        }
-    }
-
-    function salvaCambio() {
-        var selected = document.querySelector('#listaDipendentiCambio .dipendente-option.selected');
-        if (!selected) {
-            alert('Seleziona un dipendente');
-            return;
-        }
-
-        var nuovoDipendenteId = parseInt(selected.getAttribute('data-id'));
-
-        fetch('@Url.Action("CambiaDipendente", "Users", new { Area = "Example" })', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'naveId=' + naveIdCorrente + '&fascia=' + fasciaCorrente + '&vecchioDipendenteId=' + vecchioDipendenteId + '&nuovoDipendenteId=' + nuovoDipendenteId
-        })
-        .then(function(response) { return response.json(); })
-        .then(function(data) {
+            const data = await response.json();
             if (data.success) {
                 location.reload();
             }
-        });
-    }
+        },
+        async salvaSelezione() {
+            if (this.dipendentiSelezionatiIds.length === 0) {
+                alert('Seleziona almeno un dipendente');
+                return;
+            }
 
-    function salvaSelezione() {
-        if (dipendentiSelezionati.length === 0) {
-            alert('Seleziona almeno un dipendente');
-            return;
-        }
+            const response = await fetch(`@Url.Action("SalvaAssegnazione", "Users", new { Area = "Example" })?naveId=${this.naveIdCorrente}&fascia=${this.fasciaCorrente}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(this.dipendentiSelezionatiIds)
+            });
 
-        fetch('@Url.Action("SalvaAssegnazione", "Users", new { Area = "Example" })?naveId=' + naveIdCorrente + '&fascia=' + fasciaCorrente, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dipendentiSelezionati)
-        })
-        .then(function(response) { return response.json(); })
-        .then(function(data) {
+            const data = await response.json();
             if (data.success) {
                 location.reload();
             }
-        });
-    }
-
-    function chiudiModal(modalId) {
-        document.getElementById(modalId).classList.remove('show');
-    }
-
-    function chiudiModalOverlay(event, modalId) {
-        if (event.target.id === modalId) {
-            chiudiModal(modalId);
+        },
+        chiudiModalCambio() {
+            this.modalCambioVisible = false;
+        },
+        chiudiModalSelezione() {
+            this.modalSelezioneVisible = false;
+        },
+        chiudiModalOverlay(event, modalType) {
+            if (event.target.classList.contains('modal-overlay')) {
+                if (modalType === 'cambio') this.chiudiModalCambio();
+                else if (modalType === 'selezione') this.chiudiModalSelezione();
+            }
         }
     }
+    });
+
+    // Monta Vue quando il DOM è pronto
+    let vueAppInstance = null;
+
+    // Funzione per montare Vue
+    function mountVue() {
+        const appElement = document.getElementById('app');
+        if (appElement && !vueAppInstance) {
+            vueAppInstance = app.mount('#app');
+            console.log('Vue montato con successo!');
+        }
+    }
+
+    // Aspetta sempre il DOMContentLoaded per sicurezza
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', mountVue);
+    } else {
+        // DOM già pronto, usa setTimeout per dare tempo al rendering
+        setTimeout(mountVue, 0);
+    }
+
+    // Esponi funzioni globali per compatibilità con onclick nel HTML
+    window.apriModalCambio = function(dipId, dipNome, naveId, fascia, giorno, richiedeGruisti, richiedeMulettisti) {
+        if (!vueAppInstance) mountVue();
+        if (vueAppInstance) {
+            vueAppInstance.apriModalCambio(dipId, dipNome, naveId, fascia, giorno, richiedeGruisti, richiedeMulettisti);
+        }
+    };
+
+    window.apriModalSelezione = function(naveId, fascia, giorno, richiedeGruisti, richiedeMulettisti) {
+        if (!vueAppInstance) mountVue();
+        if (vueAppInstance) {
+            vueAppInstance.apriModalSelezione(naveId, fascia, giorno, richiedeGruisti, richiedeMulettisti);
+        }
+    };
+}
 </script>
+}
