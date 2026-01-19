@@ -46,7 +46,6 @@
     }
     .seleziona-dipendente:hover { background: #e0e0e0; border-color: #999; }
     .modal-overlay {
-        display: none;
         position: fixed;
         top: 0;
         left: 0;
@@ -54,10 +53,10 @@
         height: 100%;
         background: rgba(0,0,0,0.5);
         z-index: 1000;
+        display: flex;
         justify-content: center;
         align-items: center;
     }
-    .modal-overlay.show { display: flex; }
     .modal-box {
         background: #fff;
         padding: 25px;
@@ -367,28 +366,46 @@
     </div>
 
     <!-- Modal cambio dipendente -->
-    <div id="modalCambio" class="modal-overlay" style="display: none;">
+    <div v-if="modalCambioVisible" class="modal-overlay" v-on:click="chiudiModalOverlay($event, 'cambio')">
         <div class="modal-box">
             <div class="modal-title">Variazione Dipendente</div>
-            <p class="text-center mb-3">Dipendente attuale: <strong id="dipendenteAttualeNome"></strong></p>
+            <p class="text-center mb-3">Dipendente attuale: <strong>{{ dipendenteAttualeNome }}</strong></p>
             <label class="form-label">Seleziona sostituto:</label>
-            <div id="listaDipendentiCambio" style="max-height: 250px; overflow-y: auto;"></div>
+            <div style="max-height: 250px; overflow-y: auto;">
+                <div v-for="dip in dipendentiDisponibili" :key="dip.id"
+                     class="dipendente-option"
+                     :class="{ 'selected': dipendenteSelezionatoId === dip.id, 'patente-scaduta': dip.patenteScaduta, 'non-disponibile': !dip.disponibile }"
+                     v-on:click="dip.disponibile && selezionaDipendente(dip.id)">
+                    {{ dip.nomeCompleto }}
+                    <span v-if="dip.patenteScaduta" style="color: #dc3545;"> (Patente scaduta)</span>
+                    <span v-if="!dip.disponibile" style="font-size: 0.8rem;"> - Già assegnato</span>
+                </div>
+            </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="chiudiModalCambio()">Annulla</button>
-                <button class="btn btn-success" onclick="salvaCambio()">Conferma</button>
+                <button class="btn btn-secondary" v-on:click="chiudiModalCambio()">Annulla</button>
+                <button class="btn btn-success" v-on:click="salvaCambio()">Conferma</button>
             </div>
         </div>
     </div>
 
     <!-- Modal selezione dipendenti -->
-    <div id="modalSelezione" class="modal-overlay" style="display: none;">
+    <div v-if="modalSelezioneVisible" class="modal-overlay" v-on:click="chiudiModalOverlay($event, 'selezione')">
         <div class="modal-box">
             <div class="modal-title">Seleziona Dipendenti</div>
             <p class="text-muted text-center mb-3">Seleziona fino a 5 dipendenti</p>
-            <div id="listaDipendentiSelezione" style="max-height: 300px; overflow-y: auto;"></div>
+            <div style="max-height: 300px; overflow-y: auto;">
+                <div v-for="dip in dipendentiDisponibili" :key="dip.id"
+                     class="dipendente-option"
+                     :class="{ 'selected': dipendentiSelezionatiIds.includes(dip.id), 'patente-scaduta': dip.patenteScaduta, 'non-disponibile': !dip.disponibile }"
+                     v-on:click="dip.disponibile && toggleDipendente(dip.id)">
+                    {{ dip.nomeCompleto }}
+                    <span v-if="dip.patenteScaduta" style="color: #dc3545;"> (Patente scaduta)</span>
+                    <span v-if="!dip.disponibile" style="font-size: 0.8rem;"> - Già assegnato</span>
+                </div>
+            </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="chiudiModalSelezione()">Annulla</button>
-                <button class="btn btn-success" onclick="salvaSelezione()">Conferma</button>
+                <button class="btn btn-secondary" v-on:click="chiudiModalSelezione()">Annulla</button>
+                <button class="btn btn-success" v-on:click="salvaSelezione()">Conferma</button>
             </div>
         </div>
     </div>
@@ -403,177 +420,174 @@ if (typeof Vue === 'undefined') {
     const { createApp } = Vue;
 
     const app = createApp({
-    data() {
-        return {
-            gruisti: @Html.Raw(Json.Serialize(Model.Gruisti)),
-            mulettisti: @Html.Raw(Json.Serialize(Model.Mulettisti)),
-            tuttiDipendenti: @Html.Raw(Json.Serialize(Model.TuttiDipendenti)),
-            assegnazioni: @Html.Raw(Json.Serialize(Model.Assegnazioni)),
+        data() {
+            return {
+                gruisti: @Html.Raw(Json.Serialize(Model.Gruisti)),
+                mulettisti: @Html.Raw(Json.Serialize(Model.Mulettisti)),
+                tuttiDipendenti: @Html.Raw(Json.Serialize(Model.TuttiDipendenti)),
+                assegnazioni: @Html.Raw(Json.Serialize(Model.Assegnazioni)),
 
-            modalCambioVisible: false,
-            modalSelezioneVisible: false,
+                modalCambioVisible: false,
+                modalSelezioneVisible: false,
 
-            vecchioDipendenteId: null,
-            dipendenteAttualeNome: '',
-            naveIdCorrente: null,
-            fasciaCorrente: null,
-            giornoCorrente: null,
+                vecchioDipendenteId: null,
+                dipendenteAttualeNome: '',
+                naveIdCorrente: null,
+                fasciaCorrente: null,
+                giornoCorrente: null,
 
-            richiedeGruistiCorrente: false,
-            richiedeMulettistiCorrente: false,
+                richiedeGruistiCorrente: false,
+                richiedeMulettistiCorrente: false,
 
-            dipendenteSelezionatoId: null,
-            dipendentiSelezionatiIds: []
-        };
-    },
-    computed: {
-        dipendentiFiltrati() {
-            let lista = [];
-            if (this.richiedeGruistiCorrente) lista = lista.concat(this.gruisti);
-            if (this.richiedeMulettistiCorrente) lista = lista.concat(this.mulettisti);
-            if (!this.richiedeGruistiCorrente && !this.richiedeMulettistiCorrente) lista = this.tuttiDipendenti;
-            return lista;
+                dipendenteSelezionatoId: null,
+                dipendentiSelezionatiIds: []
+            };
         },
-        dipendentiDisponibili() {
-            return this.dipendentiFiltrati.map(d => ({
-                ...d,
-                disponibile: this.isDipendenteDisponibile(d.id, this.fasciaCorrente, this.giornoCorrente)
-            }));
-        }
-    },
-    methods: {
-        isDipendenteDisponibile(dipId, fascia, giorno) {
-            let dipendentiOccupati = [];
+        computed: {
+            dipendentiFiltrati() {
+                let lista = [];
+                if (this.richiedeGruistiCorrente) lista = lista.concat(this.gruisti);
+                if (this.richiedeMulettistiCorrente) lista = lista.concat(this.mulettisti);
+                if (!this.richiedeGruistiCorrente && !this.richiedeMulettistiCorrente) lista = this.tuttiDipendenti;
+                return lista;
+            },
+            dipendentiDisponibili() {
+                return this.dipendentiFiltrati.map(d => ({
+                    ...d,
+                    disponibile: this.isDipendenteDisponibile(d.id, this.fasciaCorrente, this.giornoCorrente)
+                }));
+            }
+        },
+        methods: {
+            isDipendenteDisponibile(dipId, fascia, giorno) {
+                let dipendentiOccupati = [];
 
-            if (fascia === 0) {
-                if (giorno === 'domani') {
+                if (fascia === 0) {
+                    if (giorno === 'domani') {
+                        for (let key in this.assegnazioni) {
+                            if (key.endsWith('_2_oggi')) {
+                                dipendentiOccupati = dipendentiOccupati.concat(this.assegnazioni[key]);
+                            }
+                        }
+                    }
+                } else if (fascia === 1) {
                     for (let key in this.assegnazioni) {
-                        if (key.endsWith('_2_oggi')) {
+                        if (key.endsWith('_0_' + giorno)) {
+                            dipendentiOccupati = dipendentiOccupati.concat(this.assegnazioni[key]);
+                        }
+                    }
+                } else if (fascia === 2) {
+                    for (let key in this.assegnazioni) {
+                        if (key.endsWith('_1_' + giorno)) {
                             dipendentiOccupati = dipendentiOccupati.concat(this.assegnazioni[key]);
                         }
                     }
                 }
-            } else if (fascia === 1) {
-                for (let key in this.assegnazioni) {
-                    if (key.endsWith('_0_' + giorno)) {
-                        dipendentiOccupati = dipendentiOccupati.concat(this.assegnazioni[key]);
-                    }
-                }
-            } else if (fascia === 2) {
-                for (let key in this.assegnazioni) {
-                    if (key.endsWith('_1_' + giorno)) {
-                        dipendentiOccupati = dipendentiOccupati.concat(this.assegnazioni[key]);
-                    }
-                }
-            }
 
-            return !dipendentiOccupati.includes(dipId);
-        },
-        apriModalCambio(dipId, dipNome, naveId, fascia, giorno, richiedeGruisti, richiedeMulettisti) {
-            this.vecchioDipendenteId = dipId;
-            this.dipendenteAttualeNome = dipNome;
-            this.naveIdCorrente = naveId;
-            this.fasciaCorrente = fascia;
-            this.giornoCorrente = giorno;
-            this.richiedeGruistiCorrente = richiedeGruisti;
-            this.richiedeMulettistiCorrente = richiedeMulettisti;
-            this.dipendenteSelezionatoId = null;
-            this.modalCambioVisible = true;
-        },
-        apriModalSelezione(naveId, fascia, giorno, richiedeGruisti, richiedeMulettisti) {
-            this.naveIdCorrente = naveId;
-            this.fasciaCorrente = fascia;
-            this.giornoCorrente = giorno;
-            this.richiedeGruistiCorrente = richiedeGruisti;
-            this.richiedeMulettistiCorrente = richiedeMulettisti;
-            this.dipendentiSelezionatiIds = [];
-            this.modalSelezioneVisible = true;
-        },
-        selezionaDipendente(dipId) {
-            this.dipendenteSelezionatoId = dipId;
-        },
-        toggleDipendente(dipId) {
-            const index = this.dipendentiSelezionatiIds.indexOf(dipId);
-            if (index > -1) {
-                this.dipendentiSelezionatiIds.splice(index, 1);
-            } else {
-                if (this.dipendentiSelezionatiIds.length < 5) {
-                    this.dipendentiSelezionatiIds.push(dipId);
+                return !dipendentiOccupati.includes(dipId);
+            },
+            apriModalCambio(dipId, dipNome, naveId, fascia, giorno, richiedeGruisti, richiedeMulettisti) {
+                this.vecchioDipendenteId = dipId;
+                this.dipendenteAttualeNome = dipNome;
+                this.naveIdCorrente = naveId;
+                this.fasciaCorrente = fascia;
+                this.giornoCorrente = giorno;
+                this.richiedeGruistiCorrente = richiedeGruisti;
+                this.richiedeMulettistiCorrente = richiedeMulettisti;
+                this.dipendenteSelezionatoId = null;
+                this.modalCambioVisible = true;
+            },
+            apriModalSelezione(naveId, fascia, giorno, richiedeGruisti, richiedeMulettisti) {
+                this.naveIdCorrente = naveId;
+                this.fasciaCorrente = fascia;
+                this.giornoCorrente = giorno;
+                this.richiedeGruistiCorrente = richiedeGruisti;
+                this.richiedeMulettistiCorrente = richiedeMulettisti;
+                this.dipendentiSelezionatiIds = [];
+                this.modalSelezioneVisible = true;
+            },
+            selezionaDipendente(dipId) {
+                this.dipendenteSelezionatoId = dipId;
+            },
+            toggleDipendente(dipId) {
+                const index = this.dipendentiSelezionatiIds.indexOf(dipId);
+                if (index > -1) {
+                    this.dipendentiSelezionatiIds.splice(index, 1);
                 } else {
-                    alert('Puoi selezionare massimo 5 dipendenti');
+                    if (this.dipendentiSelezionatiIds.length < 5) {
+                        this.dipendentiSelezionatiIds.push(dipId);
+                    } else {
+                        alert('Puoi selezionare massimo 5 dipendenti');
+                    }
                 }
-            }
-        },
-        async salvaCambio() {
-            if (!this.dipendenteSelezionatoId) {
-                alert('Seleziona un dipendente');
-                return;
-            }
+            },
+            async salvaCambio() {
+                if (!this.dipendenteSelezionatoId) {
+                    alert('Seleziona un dipendente');
+                    return;
+                }
 
-            const response = await fetch('@Url.Action("CambiaDipendente", "Users", new { Area = "Example" })', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `naveId=${this.naveIdCorrente}&fascia=${this.fasciaCorrente}&vecchioDipendenteId=${this.vecchioDipendenteId}&nuovoDipendenteId=${this.dipendenteSelezionatoId}`
-            });
+                const response = await fetch('@Url.Action("CambiaDipendente", "Users", new { Area = "Example" })', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `naveId=${this.naveIdCorrente}&fascia=${this.fasciaCorrente}&vecchioDipendenteId=${this.vecchioDipendenteId}&nuovoDipendenteId=${this.dipendenteSelezionatoId}`
+                });
 
-            const data = await response.json();
-            if (data.success) {
-                location.reload();
-            }
-        },
-        async salvaSelezione() {
-            if (this.dipendentiSelezionatiIds.length === 0) {
-                alert('Seleziona almeno un dipendente');
-                return;
-            }
+                const data = await response.json();
+                if (data.success) {
+                    location.reload();
+                }
+            },
+            async salvaSelezione() {
+                if (this.dipendentiSelezionatiIds.length === 0) {
+                    alert('Seleziona almeno un dipendente');
+                    return;
+                }
 
-            const response = await fetch(`@Url.Action("SalvaAssegnazione", "Users", new { Area = "Example" })?naveId=${this.naveIdCorrente}&fascia=${this.fasciaCorrente}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(this.dipendentiSelezionatiIds)
-            });
+                const response = await fetch(`@Url.Action("SalvaAssegnazione", "Users", new { Area = "Example" })?naveId=${this.naveIdCorrente}&fascia=${this.fasciaCorrente}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(this.dipendentiSelezionatiIds)
+                });
 
-            const data = await response.json();
-            if (data.success) {
-                location.reload();
-            }
-        },
-        chiudiModalCambio() {
-            this.modalCambioVisible = false;
-        },
-        chiudiModalSelezione() {
-            this.modalSelezioneVisible = false;
-        },
-        chiudiModalOverlay(event, modalType) {
-            if (event.target.classList.contains('modal-overlay')) {
-                if (modalType === 'cambio') this.chiudiModalCambio();
-                else if (modalType === 'selezione') this.chiudiModalSelezione();
+                const data = await response.json();
+                if (data.success) {
+                    location.reload();
+                }
+            },
+            chiudiModalCambio() {
+                this.modalCambioVisible = false;
+            },
+            chiudiModalSelezione() {
+                this.modalSelezioneVisible = false;
+            },
+            chiudiModalOverlay(event, modalType) {
+                if (event.target.classList.contains('modal-overlay')) {
+                    if (modalType === 'cambio') this.chiudiModalCambio();
+                    else if (modalType === 'selezione') this.chiudiModalSelezione();
+                }
             }
         }
-    }
     });
 
     // Monta Vue quando il DOM è pronto
     let vueAppInstance = null;
 
-    // Funzione per montare Vue
     function mountVue() {
         const appElement = document.getElementById('app');
         if (appElement && !vueAppInstance) {
             vueAppInstance = app.mount('#app');
-            console.log('Vue montato con successo!');
+            console.log('Vue Home montato con successo!');
         }
     }
 
-    // Aspetta sempre il DOMContentLoaded per sicurezza
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', mountVue);
     } else {
-        // DOM già pronto, usa setTimeout per dare tempo al rendering
         setTimeout(mountVue, 0);
     }
 
-    // Esponi funzioni globali per compatibilità con onclick nel HTML
+    // Esponi TUTTE le funzioni globali per compatibilità con onclick nel HTML
     window.apriModalCambio = function(dipId, dipNome, naveId, fascia, giorno, richiedeGruisti, richiedeMulettisti) {
         if (!vueAppInstance) mountVue();
         if (vueAppInstance) {
@@ -586,6 +600,22 @@ if (typeof Vue === 'undefined') {
         if (vueAppInstance) {
             vueAppInstance.apriModalSelezione(naveId, fascia, giorno, richiedeGruisti, richiedeMulettisti);
         }
+    };
+
+    window.chiudiModalCambio = function() {
+        if (vueAppInstance) vueAppInstance.chiudiModalCambio();
+    };
+
+    window.chiudiModalSelezione = function() {
+        if (vueAppInstance) vueAppInstance.chiudiModalSelezione();
+    };
+
+    window.salvaCambio = function() {
+        if (vueAppInstance) vueAppInstance.salvaCambio();
+    };
+
+    window.salvaSelezione = function() {
+        if (vueAppInstance) vueAppInstance.salvaSelezione();
     };
 }
 </script>

@@ -92,7 +92,7 @@ namespace Pianificazioneturni.Web.Infrastructure
     }
 
     public class CompositePhysicalFileProvider : IFileProvider
-    {
+    {cl
         PhysicalFileProvider _p;
         string _baseFolder;
         string _relativeFolder;
