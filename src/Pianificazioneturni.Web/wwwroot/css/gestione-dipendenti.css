@@ -1,0 +1,10 @@
+.dipendente-row { cursor: pointer; }
+.dipendente-row:hover { background-color: #e3f2fd; }
+.patente-scaduta { background-color: #ffeb3b !important; }
+.patente-scaduta:hover { background-color: #ffeb3b !important; }
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; justify-content: center; align-items: center; }
+.modal-box { background: #fff; padding: 25px; border-radius: 8px; min-width: 350px; max-width: 400px; }
+.modal-title { font-weight: bold; font-size: 1.2rem; margin-bottom: 20px; text-align: center; }
+.btn-filter.active { background-color: #ffc107; border-color: #ffc107; color: #000; }
+.campo-disabilitato { background-color: #e9ecef !important; pointer-events: none; }
+.gruppo-disabilitato { opacity: 0.5; }

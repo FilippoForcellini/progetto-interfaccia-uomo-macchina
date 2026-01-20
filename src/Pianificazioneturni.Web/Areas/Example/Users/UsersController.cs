@@ -6,7 +6,9 @@ using Pianificazioneturni.Web.SignalR.Hubs.Events;
 using PianificazioneTurni.Services.Shared;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Pianificazioneturni.Web.Areas.Example.Users
@@ -18,12 +20,20 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         private readonly IPublishDomainEvents _publisher;
         private readonly IStringLocalizer<SharedResource> _sharedLocalizer;
 
+        // Percorsi file JSON per la persistenza
+        private static readonly string DataFolder = Path.Combine(Directory.GetCurrentDirectory(), "Data");
+        private static readonly string NaviFilePath = Path.Combine(DataFolder, "navi.json");
+        private static readonly string DipendentiFilePath = Path.Combine(DataFolder, "dipendenti.json");
+        private static readonly string AssegnazioniFilePath = Path.Combine(DataFolder, "assegnazioni.json");
+        private static readonly string VariazioniRisolteFilePath = Path.Combine(DataFolder, "variazioni_risolte.json");
+        private static readonly string NextNaveIdFilePath = Path.Combine(DataFolder, "next_nave_id.json");
+
         // Lista statica dipendenti (simula database)
-        private static List<DipendenteDetailViewModel> _dipendenti = InitDipendenti();
+        private static List<DipendenteDetailViewModel> _dipendenti = LoadDipendenti();
 
         // Lista statica navi (simula database)
-        private static List<NaveDetailViewModel> _navi = InitNavi();
-        private static int _nextNaveId = 4;
+        private static List<NaveDetailViewModel> _navi = LoadNavi();
+        private static int _nextNaveId = LoadNextNaveId();
 
         private static List<NaveDetailViewModel> InitNavi()
         {
@@ -56,21 +66,8 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                     RichiedeGruisti = false,
                     RichiedeMulettisti = true,
                     Colore = ColoriNavi.GetColore(1)
-                },
-                new NaveDetailViewModel
-                {
-                    Id = 3,
-                    Nome = "Nave 3",
-                    Tipo = TipoNave.NaveTraghetto,
-                    Pontile = 20,
-                    DataArrivo = DateTime.Today.AddDays(1),
-                    FasciaMattina = true,
-                    FasciaPomeriggio = true,
-                    FasciaSera = true,
-                    RichiedeGruisti = false,
-                    RichiedeMulettisti = true,
-                    Colore = ColoriNavi.GetColore(2)
                 }
+                // Nave 3 rimossa - aggiungi le tue navi da Gestione Navi
             };
         }
 
@@ -107,22 +104,244 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         }
 
         // Assegnazioni dipendenti alle navi (chiave: naveId_fascia, valore: lista id dipendenti)
-        private static Dictionary<string, List<int>> _assegnazioniDipendenti = InitAssegnazioni();
+        private static Dictionary<string, List<int>> _assegnazioniDipendenti = LoadAssegnazioni();
+
+        // Dipendenti con variazione risolta (non devono più mostrare il flag variazione)
+        private static HashSet<int> _variazioniRisolte = LoadVariazioniRisolte();
+
+        #region Persistenza Dati JSON
+
+        private static void EnsureDataFolderExists()
+        {
+            if (!Directory.Exists(DataFolder))
+            {
+                Directory.CreateDirectory(DataFolder);
+            }
+        }
+
+        private static List<NaveDetailViewModel> LoadNavi()
+        {
+            try
+            {
+                EnsureDataFolderExists();
+                if (System.IO.File.Exists(NaviFilePath))
+                {
+                    var json = System.IO.File.ReadAllText(NaviFilePath);
+                    if (!string.IsNullOrWhiteSpace(json))
+                    {
+                        var options = new System.Text.Json.JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        };
+                        return System.Text.Json.JsonSerializer.Deserialize<List<NaveDetailViewModel>>(json, options) ?? InitNavi();
+                    }
+                }
+            }
+            catch
+            {
+                // Se c'è un errore, elimina il file corrotto e riparti dai dati iniziali
+                try { System.IO.File.Delete(NaviFilePath); } catch { }
+            }
+            return InitNavi();
+        }
+
+        private static void SaveNavi()
+        {
+            try
+            {
+                EnsureDataFolderExists();
+                var options = new System.Text.Json.JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    PropertyNameCaseInsensitive = true
+                };
+                var json = System.Text.Json.JsonSerializer.Serialize(_navi, options);
+                System.IO.File.WriteAllText(NaviFilePath, json);
+            }
+            catch
+            {
+                // Ignora errori di salvataggio
+            }
+        }
+
+        private static List<DipendenteDetailViewModel> LoadDipendenti()
+        {
+            try
+            {
+                EnsureDataFolderExists();
+                if (System.IO.File.Exists(DipendentiFilePath))
+                {
+                    var json = System.IO.File.ReadAllText(DipendentiFilePath);
+                    if (!string.IsNullOrWhiteSpace(json))
+                    {
+                        var options = new System.Text.Json.JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        };
+                        return System.Text.Json.JsonSerializer.Deserialize<List<DipendenteDetailViewModel>>(json, options) ?? InitDipendenti();
+                    }
+                }
+            }
+            catch
+            {
+                try { System.IO.File.Delete(DipendentiFilePath); } catch { }
+            }
+            return InitDipendenti();
+        }
+
+        private static void SaveDipendenti()
+        {
+            try
+            {
+                EnsureDataFolderExists();
+                var options = new System.Text.Json.JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    PropertyNameCaseInsensitive = true
+                };
+                var json = System.Text.Json.JsonSerializer.Serialize(_dipendenti, options);
+                System.IO.File.WriteAllText(DipendentiFilePath, json);
+            }
+            catch
+            {
+                // Ignora errori di salvataggio
+            }
+        }
+
+        private static Dictionary<string, List<int>> LoadAssegnazioni()
+        {
+            try
+            {
+                EnsureDataFolderExists();
+                if (System.IO.File.Exists(AssegnazioniFilePath))
+                {
+                    var json = System.IO.File.ReadAllText(AssegnazioniFilePath);
+                    if (!string.IsNullOrWhiteSpace(json))
+                    {
+                        var options = new System.Text.Json.JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        };
+                        return System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, List<int>>>(json, options) ?? InitAssegnazioni();
+                    }
+                }
+            }
+            catch
+            {
+                try { System.IO.File.Delete(AssegnazioniFilePath); } catch { }
+            }
+            return InitAssegnazioni();
+        }
+
+        private static void SaveAssegnazioni()
+        {
+            try
+            {
+                EnsureDataFolderExists();
+                var options = new System.Text.Json.JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    PropertyNameCaseInsensitive = true
+                };
+                var json = System.Text.Json.JsonSerializer.Serialize(_assegnazioniDipendenti, options);
+                System.IO.File.WriteAllText(AssegnazioniFilePath, json);
+            }
+            catch
+            {
+                // Ignora errori di salvataggio
+            }
+        }
+
+        private static HashSet<int> LoadVariazioniRisolte()
+        {
+            try
+            {
+                EnsureDataFolderExists();
+                if (System.IO.File.Exists(VariazioniRisolteFilePath))
+                {
+                    var json = System.IO.File.ReadAllText(VariazioniRisolteFilePath);
+                    if (!string.IsNullOrWhiteSpace(json))
+                    {
+                        var options = new System.Text.Json.JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        };
+                        var list = System.Text.Json.JsonSerializer.Deserialize<List<int>>(json, options);
+                        return list != null ? new HashSet<int>(list) : new HashSet<int>();
+                    }
+                }
+            }
+            catch
+            {
+                try { System.IO.File.Delete(VariazioniRisolteFilePath); } catch { }
+            }
+            return new HashSet<int>();
+        }
+
+        private static void SaveVariazioniRisolte()
+        {
+            try
+            {
+                EnsureDataFolderExists();
+                var options = new System.Text.Json.JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    PropertyNameCaseInsensitive = true
+                };
+                var json = System.Text.Json.JsonSerializer.Serialize(_variazioniRisolte.ToList(), options);
+                System.IO.File.WriteAllText(VariazioniRisolteFilePath, json);
+            }
+            catch
+            {
+                // Ignora errori di salvataggio
+            }
+        }
+
+        private static int LoadNextNaveId()
+        {
+            try
+            {
+                EnsureDataFolderExists();
+                if (System.IO.File.Exists(NextNaveIdFilePath))
+                {
+                    var json = System.IO.File.ReadAllText(NextNaveIdFilePath);
+                    if (!string.IsNullOrWhiteSpace(json))
+                    {
+                        return System.Text.Json.JsonSerializer.Deserialize<int>(json);
+                    }
+                }
+            }
+            catch
+            {
+                try { System.IO.File.Delete(NextNaveIdFilePath); } catch { }
+            }
+            return 4; // Valore di default
+        }
+
+        private static void SaveNextNaveId()
+        {
+            try
+            {
+                EnsureDataFolderExists();
+                var json = System.Text.Json.JsonSerializer.Serialize(_nextNaveId);
+                System.IO.File.WriteAllText(NextNaveIdFilePath, json);
+            }
+            catch { }
+        }
+
+        #endregion
 
         private static Dictionary<string, List<int>> InitAssegnazioni()
         {
-            // Pre-popola assegnazioni di esempio per le navi esistenti
+            // Solo navi già in lavorazione (oggi)
             return new Dictionary<string, List<int>>
             {
                 // Nave 1 - oggi, fascia mattina e pomeriggio (gruisti e mulettisti)
                 { "1_0", new List<int> { 1, 7, 10, 2, 5 } },      // Mattina: gruisti 1,7,10 + mulettisti 2,5
                 { "1_1", new List<int> { 14, 17, 20, 9, 15 } },   // Pomeriggio: gruisti 14,17,20 + mulettisti 9,15
                 // Nave 2 - oggi, fascia sera (solo mulettisti)
-                { "2_2", new List<int> { 2, 5, 9, 15, 18 } },     // Sera: mulettisti
-                // Nave 3 - domani, tutte le fasce (solo mulettisti)
-                { "3_0", new List<int> { 2, 5, 9, 15, 18 } },     // Mattina
-                { "3_1", new List<int> { 22, 25, 12, 2, 5 } },    // Pomeriggio (alcuni diversi)
-                { "3_2", new List<int> { 9, 15, 18, 22, 25 } }    // Sera
+                { "2_2", new List<int> { 2, 5, 9, 15, 18 } }      // Sera: mulettisti
+                // Nave 3 (domani) - nessuna assegnazione preimpostata
             };
         }
 
@@ -161,7 +380,7 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                 Cognome = d.Nome.Split(' ')[0],
                 Ruolo = d.Ruolo,
                 PatenteScaduta = d.Patente && d.Scadenza.HasValue && d.Scadenza.Value < DateTime.Today,
-                RichiedeVariazione = random.Next(100) < 15 // 15% probabilità variazione
+                RichiedeVariazione = false // Inizializzato a false, verrà impostato dopo per DOMANI
             }).ToList();
 
             // Filtra gruisti e mulettisti disponibili
@@ -199,6 +418,32 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                 if (nave.DipendentiSera.Any())
                     model.Assegnazioni[$"{nave.Id}_2_domani"] = nave.DipendentiSera.Select(d => d.Id).ToList();
             }
+
+            // Genera MASSIMO 1 variazione per volta, SOLO per dipendenti assegnati a DOMANI (2% probabilità)
+            var dipendentiDomani = model.NaviDomani
+                .SelectMany(n => n.DipendentiMattina.Concat(n.DipendentiPomeriggio).Concat(n.DipendentiSera))
+                .Select(d => d.Id)
+                .Distinct()
+                .ToList();
+
+            // Controlla se c'è già una variazione attiva
+            bool haVariazioneAttiva = model.TuttiDipendenti.Any(d => d.RichiedeVariazione);
+
+            // Genera SOLO se non ci sono già variazioni attive e con probabilità MOLTO bassa
+            if (!haVariazioneAttiva && dipendentiDomani.Any() && random.Next(100) < 5) // 5% probabilità
+            {
+                // Prendi un dipendente casuale tra quelli di domani che non hanno già avuto variazione risolta
+                var candidati = dipendentiDomani.Where(id => !_variazioniRisolte.Contains(id)).ToList();
+                if (candidati.Any())
+                {
+                    var dipIdScelto = candidati[random.Next(candidati.Count)];
+                    var dip = model.TuttiDipendenti.FirstOrDefault(d => d.Id == dipIdScelto);
+                    if (dip != null)
+                    {
+                        dip.RichiedeVariazione = true;
+                    }
+                }
+            }
         }
 
         private NaveViewModel CreaNaveViewModel(NaveDetailViewModel naveDb, List<DipendenteViewModel> tuttiDipendenti, Random random)
@@ -231,7 +476,11 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
             var chiave = $"{naveId}_{fascia}";
             if (_assegnazioniDipendenti.TryGetValue(chiave, out var idDipendenti))
             {
-                return tuttiDipendenti.Where(d => idDipendenti.Contains(d.Id)).ToList();
+                // Mantieni l'ordine degli ID in idDipendenti
+                return idDipendenti
+                    .Select(id => tuttiDipendenti.FirstOrDefault(d => d.Id == id))
+                    .Where(d => d != null)
+                    .ToList();
             }
             return new List<DipendenteViewModel>();
         }
@@ -241,6 +490,7 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         {
             var chiave = $"{naveId}_{fascia}";
             _assegnazioniDipendenti[chiave] = dipendentiIds ?? new List<int>();
+            SaveAssegnazioni();
             return Json(new { success = true });
         }
 
@@ -254,6 +504,12 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                 if (index >= 0)
                 {
                     idDipendenti[index] = nuovoDipendenteId;
+
+                    // Marca il vecchio dipendente come "variazione risolta"
+                    _variazioniRisolte.Add(vecchioDipendenteId);
+
+                    SaveAssegnazioni();
+                    SaveVariazioniRisolte();
                 }
             }
             return Json(new { success = true });
@@ -343,12 +599,18 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                 }
             }
 
+            // Assicurati che _navi non sia null
+            if (_navi == null)
+            {
+                _navi = InitNavi();
+            }
+
             var model = new GestioneNaviViewModel
             {
                 DataOggi = oggi,
                 DataDomani = domani,
                 GiornoSelezionato = giornoSelezionato,
-                TutteLeNavi = _navi,
+                TutteLeNavi = _navi ?? new List<NaveDetailViewModel>(),
                 NaviOggi = _navi.Where(n => n.DataArrivo.Date == oggi).ToList(),
                 NaviDomani = _navi.Where(n => n.DataArrivo.Date == domani).ToList(),
                 NaviGiornoSelezionato = giornoSelezionato.HasValue
@@ -450,6 +712,8 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                     Colore = ColoriNavi.GetColore(_navi.Count)
                 };
                 _navi.Add(nuovaNave);
+                SaveNavi();
+                SaveNextNaveId();
                 Alerts.AddSuccess(this, "Nave aggiunta con successo");
             }
             else
@@ -467,6 +731,7 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                     nave.FasciaSera = fasciaSera;
                     nave.RichiedeGruisti = richiedeGruisti;
                     nave.RichiedeMulettisti = richiedeMulettisti;
+                    SaveNavi();
                     Alerts.AddSuccess(this, "Nave aggiornata con successo");
                 }
             }
@@ -481,6 +746,7 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
             if (nave != null)
             {
                 _navi.Remove(nave);
+                SaveNavi();
                 Alerts.AddSuccess(this, "Nave eliminata con successo");
             }
 
@@ -548,6 +814,7 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                 dipendente.Scadenza = null;
             }
 
+            SaveDipendenti();
             Alerts.AddSuccess(this, "Dipendente aggiornato con successo");
             return RedirectToAction(Actions.GestioneDipendenti());
         }

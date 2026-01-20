@@ -12,72 +12,9 @@
     </div>
 }
 
-<style>
-    .dipendente {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        padding: 4px 8px;
-        margin: 2px 0;
-        background: #e3f2fd;
-        border-radius: 4px;
-        font-size: 0.85rem;
-    }
-    .dipendente.cliccabile { cursor: pointer; }
-    .dipendente.cliccabile:hover { background: #bbdefb; }
-    .dipendente.non-cliccabile { cursor: default; opacity: 0.8; }
-    .dipendente.patente-scaduta { background: #ffeb3b; }
-    .dipendente.variazione { border: 2px solid #ff9800; }
-    .nave-stato { font-size: 0.8rem; font-weight: 500; padding: 2px 6px; border-radius: 3px; }
-    .stato-lavorazione { background: #4caf50; color: white; }
-    .stato-partenza { background: #2196f3; color: white; }
-    .stato-arrivo { background: #ff9800; color: white; }
-    .col-fascia { vertical-align: top; min-width: 150px; }
-    .fascia-header { font-size: 0.75rem; }
-    .seleziona-dipendente {
-        background: #f5f5f5;
-        border: 2px dashed #ccc;
-        padding: 8px;
-        text-align: center;
-        cursor: pointer;
-        border-radius: 4px;
-        font-size: 0.85rem;
-        color: #666;
-    }
-    .seleziona-dipendente:hover { background: #e0e0e0; border-color: #999; }
-    .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        z-index: 1000;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    .modal-box {
-        background: #fff;
-        padding: 25px;
-        border-radius: 8px;
-        min-width: 350px;
-        max-width: 450px;
-    }
-    .modal-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; text-align: center; }
-    .modal-footer { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
-    .dipendente-option {
-        padding: 8px 12px;
-        margin: 4px 0;
-        background: #f5f5f5;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-    .dipendente-option:hover { background: #e3f2fd; }
-    .dipendente-option.selected { background: #2196f3; color: white; }
-    .dipendente-option.patente-scaduta { background: #fff3cd; }
-    .dipendente-option.non-disponibile { background: #f8d7da; color: #721c24; cursor: not-allowed; opacity: 0.6; }
-</style>
+@section styles {
+    <link rel="stylesheet" href="~/css/index.css" />
+}
 
 @section navbar {
     <nav class="navbar navbar-expand-lg bg-body-tertiary justify-content-md-center mb-4">
@@ -93,7 +30,7 @@
     </nav>
 }
 
-<div id="app">
+<div id="app" v-cloak>
 <div class="container-fluid">
     <div class="row">
         <!-- NAVI OGGI -->
@@ -151,15 +88,15 @@
                                                 {
                                                     <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "") @(dip.RichiedeVariazione ? "variazione" : "")"
                                                          onclick="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 0, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
-                                                        @if (dip.PatenteScaduta) { <span title="Patente scaduta">⚠️</span> }
-                                                        @if (dip.RichiedeVariazione) { <span title="Richiede variazione">🔄</span> }
+                                                        @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 16px; height: 16px; vertical-align: middle;" /> }
+                                                        @if (dip.RichiedeVariazione) { <img src="~/images/variazione.png" alt="Richiede variazione" title="Richiede variazione" style="width: 16px; height: 16px; vertical-align: middle;" /> }
                                                         <span>@dip.NomeCompleto</span>
                                                     </div>
                                                 }
                                                 else
                                                 {
                                                     <div class="dipendente non-cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")">
-                                                        @if (dip.PatenteScaduta) { <span title="Patente scaduta">⚠️</span> }
+                                                        @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 16px; height: 16px; vertical-align: middle;" /> }
                                                         <span>@dip.NomeCompleto</span>
                                                     </div>
                                                 }
@@ -186,15 +123,15 @@
                                                 {
                                                     <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "") @(dip.RichiedeVariazione ? "variazione" : "")"
                                                          onclick="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 1, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
-                                                        @if (dip.PatenteScaduta) { <span title="Patente scaduta">⚠️</span> }
-                                                        @if (dip.RichiedeVariazione) { <span title="Richiede variazione">🔄</span> }
+                                                        @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 16px; height: 16px; vertical-align: middle;" /> }
+                                                        @if (dip.RichiedeVariazione) { <img src="~/images/variazione.png" alt="Richiede variazione" title="Richiede variazione" style="width: 16px; height: 16px; vertical-align: middle;" /> }
                                                         <span>@dip.NomeCompleto</span>
                                                     </div>
                                                 }
                                                 else
                                                 {
                                                     <div class="dipendente non-cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")">
-                                                        @if (dip.PatenteScaduta) { <span title="Patente scaduta">⚠️</span> }
+                                                        @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 16px; height: 16px; vertical-align: middle;" /> }
                                                         <span>@dip.NomeCompleto</span>
                                                     </div>
                                                 }
@@ -221,15 +158,15 @@
                                                 {
                                                     <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "") @(dip.RichiedeVariazione ? "variazione" : "")"
                                                          onclick="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 2, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
-                                                        @if (dip.PatenteScaduta) { <span title="Patente scaduta">⚠️</span> }
-                                                        @if (dip.RichiedeVariazione) { <span title="Richiede variazione">🔄</span> }
+                                                        @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 16px; height: 16px; vertical-align: middle;" /> }
+                                                        @if (dip.RichiedeVariazione) { <img src="~/images/variazione.png" alt="Richiede variazione" title="Richiede variazione" style="width: 16px; height: 16px; vertical-align: middle;" /> }
                                                         <span>@dip.NomeCompleto</span>
                                                     </div>
                                                 }
                                                 else
                                                 {
                                                     <div class="dipendente non-cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")">
-                                                        @if (dip.PatenteScaduta) { <span title="Patente scaduta">⚠️</span> }
+                                                        @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 16px; height: 16px; vertical-align: middle;" /> }
                                                         <span>@dip.NomeCompleto</span>
                                                     </div>
                                                 }
@@ -295,8 +232,8 @@
                                             {
                                                 <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "") @(dip.RichiedeVariazione ? "variazione" : "")"
                                                      onclick="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 0, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
-                                                    @if (dip.PatenteScaduta) { <span title="Patente scaduta">⚠️</span> }
-                                                    @if (dip.RichiedeVariazione) { <span title="Richiede variazione">🔄</span> }
+                                                    @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 16px; height: 16px; vertical-align: middle;" /> }
+                                                    @if (dip.RichiedeVariazione) { <img src="~/images/variazione.png" alt="Richiede variazione" title="Richiede variazione" style="width: 16px; height: 16px; vertical-align: middle;" /> }
                                                     <span>@dip.NomeCompleto</span>
                                                 </div>
                                             }
@@ -319,8 +256,8 @@
                                             {
                                                 <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "") @(dip.RichiedeVariazione ? "variazione" : "")"
                                                      onclick="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 1, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
-                                                    @if (dip.PatenteScaduta) { <span title="Patente scaduta">⚠️</span> }
-                                                    @if (dip.RichiedeVariazione) { <span title="Richiede variazione">🔄</span> }
+                                                    @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 16px; height: 16px; vertical-align: middle;" /> }
+                                                    @if (dip.RichiedeVariazione) { <img src="~/images/variazione.png" alt="Richiede variazione" title="Richiede variazione" style="width: 16px; height: 16px; vertical-align: middle;" /> }
                                                     <span>@dip.NomeCompleto</span>
                                                 </div>
                                             }
@@ -343,8 +280,8 @@
                                             {
                                                 <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "") @(dip.RichiedeVariazione ? "variazione" : "")"
                                                      onclick="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 2, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
-                                                    @if (dip.PatenteScaduta) { <span title="Patente scaduta">⚠️</span> }
-                                                    @if (dip.RichiedeVariazione) { <span title="Richiede variazione">🔄</span> }
+                                                    @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 16px; height: 16px; vertical-align: middle;" /> }
+                                                    @if (dip.RichiedeVariazione) { <img src="~/images/variazione.png" alt="Richiede variazione" title="Richiede variazione" style="width: 16px; height: 16px; vertical-align: middle;" /> }
                                                     <span>@dip.NomeCompleto</span>
                                                 </div>
                                             }
@@ -373,8 +310,7 @@
             <label class="form-label">Seleziona sostituto:</label>
             <div style="max-height: 250px; overflow-y: auto;">
                 <div v-for="dip in dipendentiDisponibili" :key="dip.id"
-                     class="dipendente-option"
-                     :class="{ 'selected': dipendenteSelezionatoId === dip.id, 'patente-scaduta': dip.patenteScaduta, 'non-disponibile': !dip.disponibile }"
+                     :class="['dipendente-option', { 'selected': dipendenteSelezionatoId === dip.id, 'patente-scaduta': dip.patenteScaduta, 'non-disponibile': !dip.disponibile }]"
                      v-on:click="dip.disponibile && selezionaDipendente(dip.id)">
                     {{ dip.nomeCompleto }}
                     <span v-if="dip.patenteScaduta" style="color: #dc3545;"> (Patente scaduta)</span>
@@ -392,11 +328,10 @@
     <div v-if="modalSelezioneVisible" class="modal-overlay" v-on:click="chiudiModalOverlay($event, 'selezione')">
         <div class="modal-box">
             <div class="modal-title">Seleziona Dipendenti</div>
-            <p class="text-muted text-center mb-3">Seleziona fino a 5 dipendenti</p>
+            <p class="text-muted text-center mb-3">Selezionati: <strong>{{ dipendentiSelezionatiIds.length }}/5</strong></p>
             <div style="max-height: 300px; overflow-y: auto;">
                 <div v-for="dip in dipendentiDisponibili" :key="dip.id"
-                     class="dipendente-option"
-                     :class="{ 'selected': dipendentiSelezionatiIds.includes(dip.id), 'patente-scaduta': dip.patenteScaduta, 'non-disponibile': !dip.disponibile }"
+                     :class="['dipendente-option', { 'selected': dipendentiSelezionatiIds.includes(dip.id), 'patente-scaduta': dip.patenteScaduta, 'non-disponibile': !dip.disponibile }]"
                      v-on:click="dip.disponibile && toggleDipendente(dip.id)">
                     {{ dip.nomeCompleto }}
                     <span v-if="dip.patenteScaduta" style="color: #dc3545;"> (Patente scaduta)</span>
@@ -408,6 +343,7 @@
                 <button class="btn btn-success" v-on:click="salvaSelezione()">Conferma</button>
             </div>
         </div>
+    </div>
     </div>
 </div>
 <!-- Fine container Vue -->
@@ -440,7 +376,8 @@ if (typeof Vue === 'undefined') {
                 richiedeMulettistiCorrente: false,
 
                 dipendenteSelezionatoId: null,
-                dipendentiSelezionatiIds: []
+                dipendentiSelezionatiIds: [],
+                dipendentiGiaAssegnatiCorrente: [] // Dipendenti già nella lista corrente
             };
         },
         computed: {
@@ -455,6 +392,8 @@ if (typeof Vue === 'undefined') {
                 return this.dipendentiFiltrati.map(d => ({
                     ...d,
                     disponibile: this.isDipendenteDisponibile(d.id, this.fasciaCorrente, this.giornoCorrente)
+                        && !this.dipendentiGiaAssegnatiCorrente.includes(d.id) // Escludi già presenti
+                        && d.id !== this.vecchioDipendenteId // Escludi il dipendente con variazione
                 }));
             }
         },
@@ -495,6 +434,11 @@ if (typeof Vue === 'undefined') {
                 this.richiedeGruistiCorrente = richiedeGruisti;
                 this.richiedeMulettistiCorrente = richiedeMulettisti;
                 this.dipendenteSelezionatoId = null;
+
+                // Ottieni dipendenti già assegnati a questa nave/fascia (escluso quello da cambiare)
+                const chiave = `${naveId}_${fascia}_${giorno}`;
+                this.dipendentiGiaAssegnatiCorrente = (this.assegnazioni[chiave] || []).filter(id => id !== dipId);
+
                 this.modalCambioVisible = true;
             },
             apriModalSelezione(naveId, fascia, giorno, richiedeGruisti, richiedeMulettisti) {
@@ -504,6 +448,12 @@ if (typeof Vue === 'undefined') {
                 this.richiedeGruistiCorrente = richiedeGruisti;
                 this.richiedeMulettistiCorrente = richiedeMulettisti;
                 this.dipendentiSelezionatiIds = [];
+                this.vecchioDipendenteId = null;
+
+                // Ottieni dipendenti già assegnati a questa nave/fascia
+                const chiave = `${naveId}_${fascia}_${giorno}`;
+                this.dipendentiGiaAssegnatiCorrente = this.assegnazioni[chiave] || [];
+
                 this.modalSelezioneVisible = true;
             },
             selezionaDipendente(dipId) {
@@ -541,6 +491,11 @@ if (typeof Vue === 'undefined') {
             async salvaSelezione() {
                 if (this.dipendentiSelezionatiIds.length === 0) {
                     alert('Seleziona almeno un dipendente');
+                    return;
+                }
+
+                if (this.dipendentiSelezionatiIds.length < 5) {
+                    alert('Devi selezionare esattamente 5 dipendenti');
                     return;
                 }
 
