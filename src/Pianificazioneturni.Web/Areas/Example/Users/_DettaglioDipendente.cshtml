@@ -13,7 +13,6 @@
     <div class="form-group mb-3">
         <label asp-for="Ruolo" class="form-label"></label>
         <select class="form-select" asp-for="Ruolo" id="selectRuolo">
-            <option value="">-- Seleziona --</option>
             @foreach (var ruolo in (List<string>)ViewBag.Ruoli)
             {
                 <option value="@ruolo">@ruolo</option>

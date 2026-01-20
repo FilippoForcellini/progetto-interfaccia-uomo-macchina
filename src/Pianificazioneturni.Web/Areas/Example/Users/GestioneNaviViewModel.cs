@@ -5,14 +5,14 @@ using System.Linq;
 
 namespace Pianificazioneturni.Web.Areas.Example.Users
 {
-    // Enum per il tipo di nave
+    //Enum per il tipo di nave
     public enum TipoNave
     {
         Container,
         Portarinfuse,
         NaveTraghetto,
         Petroliera,
-        CargoPronta
+        Cargo
     }
 
     public class GestioneNaviViewModel
@@ -34,16 +34,16 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         public List<NaveDetailViewModel> NaviGiornoSelezionato { get; set; }
         public List<NaveDetailViewModel> TutteLeNavi { get; set; }
 
-        // Giorni futuri (da dopodomani in poi) che hanno navi
+        //giorni futuri (da dopodomani in poi)
         public List<GiornoConNaviViewModel> GiorniFuturiConNavi { get; set; }
 
-        // Genera la lista dei prossimi 14 giorni con info sulle navi
+        //genera la lista dei prossimi 14 giorni con i dettagli sulle navi
         public List<GiornoTimelineViewModel> GetTimeline()
         {
             var timeline = new List<GiornoTimelineViewModel>();
             var oggi = DateTime.Today;
 
-            // Mostra i prossimi 14 giorni (esclusi oggi e domani che sono già nelle tabelle)
+            //mostra i giorni futuri (prossimi 14 giorni)
             for (int i = 2; i <= 14; i++)
             {
                 var giorno = oggi.AddDays(i);
@@ -60,7 +60,7 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
             return timeline;
         }
 
-        // Metodo per ottenere le fasce orarie occupate per un dato giorno
+        //data una data, ti dice quali fasce orarie sono occupate da navi.
         public List<int> GetFasceOccupate(DateTime data)
         {
             var fasceOccupate = new List<int>();
@@ -76,7 +76,7 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
             return fasceOccupate.Distinct().ToList();
         }
 
-        // Verifica se una fascia è disponibile per un dato giorno (escludendo una nave specifica)
+        //controlla se in una certa data e fascia oraria c'è posto oppure è già occupata. Inoltre quando si modifica una nave già esistente non deve contare la nave come occupazione, altrimenti direbbe sempre "occupato" (dalla nave stessa)
         public bool IsFasciaDisponibile(DateTime data, int fascia, int? escludiNaveId = null)
         {
             var naviDelGiorno = TutteLeNavi
@@ -118,7 +118,7 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         [Required(ErrorMessage = "Il numero del pontile è obbligatorio")]
         public int? Pontile { get; set; }
 
-        // Fasce orarie (una nave può occupare più fasce)
+        //fasce orarie. una nave può occupare più fasce orarie
         [Display(Name = "00:00 / 08:00")]
         public bool FasciaMattina { get; set; }
 
@@ -134,14 +134,13 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         [Display(Name = "Richiede Mulettisti")]
         public bool RichiedeMulettisti { get; set; }
 
-        // Proprietà per visualizzazione
         public string TipoDescrizione => Tipo switch
         {
             TipoNave.Container => "Container",
             TipoNave.Portarinfuse => "Portarinfuse",
             TipoNave.NaveTraghetto => "Nave Traghetto",
             TipoNave.Petroliera => "Petroliera",
-            TipoNave.CargoPronta => "Cargo Pronta",
+            TipoNave.Cargo => "Cargo",
             _ => ""
         };
 
@@ -158,7 +157,6 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
 
         public bool HasAlmenoUnaFascia => FasciaMattina || FasciaPomeriggio || FasciaSera;
 
-        // Colore assegnato alla nave per il calendario
         public string Colore { get; set; }
     }
 
@@ -166,16 +164,16 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
     {
         private static readonly List<string> _colori = new List<string>
         {
-            "#FF6B6B", // Rosso
-            "#4ECDC4", // Turchese
-            "#45B7D1", // Azzurro
-            "#96CEB4", // Verde
-            "#FFEAA7", // Giallo
-            "#DDA0DD", // Viola chiaro
-            "#98D8C8", // Verde acqua
-            "#F7DC6F", // Oro
-            "#BB8FCE", // Lavanda
-            "#85C1E9"  // Celeste
+            "#FF6B6B", 
+            "#4ECDC4", 
+            "#45B7D1", 
+            "#96CEB4", 
+            "#FFEAA7", 
+            "#DDA0DD", 
+            "#98D8C8", 
+            "#F7DC6F", 
+            "#BB8FCE", 
+            "#85C1E9" 
         };
 
         public static string GetColore(int index)
@@ -194,19 +192,19 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                 (TipoNave.Portarinfuse, "Portarinfuse"),
                 (TipoNave.NaveTraghetto, "Nave Traghetto"),
                 (TipoNave.Petroliera, "Petroliera"),
-                (TipoNave.CargoPronta, "Cargo Pronta")
+                (TipoNave.Cargo, "Cargo")
             };
         }
     }
 
-    // Classe per i giorni con navi nella timeline
+    //classe per i giorni con navi nella timeline
     public class GiornoConNaviViewModel
     {
         public DateTime Data { get; set; }
         public List<NaveDetailViewModel> Navi { get; set; } = new List<NaveDetailViewModel>();
     }
 
-    // Classe per la timeline dei giorni futuri
+    //classe per la timeline dei giorni futuri
     public class GiornoTimelineViewModel
     {
         public DateTime Data { get; set; }

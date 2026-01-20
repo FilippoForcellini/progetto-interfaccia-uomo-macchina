@@ -17,7 +17,7 @@
 }
 
 @section navbar {
-    <nav class="navbar navbar-expand-lg bg-body-tertiary justify-content-md-center mb-4">
+    <nav class="navbar navbar-expand-lg justify-content-md-center mb-4" style="background-color: #E3F2FD;">
         <div class="container-fluid">
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav gap-5 mx-auto">
@@ -33,7 +33,7 @@
 <div id="app" v-cloak>
 <div class="container-fluid">
     <div class="row">
-        <!-- NAVI OGGI -->
+        <!-- Navi oggi -->
         <div class="col-md-6">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5 class="fw-bold mb-0">NAVI OGGI</h5>
@@ -104,7 +104,7 @@
                                         }
                                     }
                                 </td>
-                                <!-- Fascia Pomeriggio -->
+                                <!--fascia pomeriggio -->
                                 <td class="col-fascia">
                                     @if (nave.FasciaPomeriggio)
                                     {
@@ -139,7 +139,7 @@
                                         }
                                     }
                                 </td>
-                                <!-- Fascia Sera -->
+                                <!-- fascia sera -->
                                 <td class="col-fascia">
                                     @if (nave.FasciaSera)
                                     {
@@ -187,7 +187,7 @@
             </table>
         </div>
 
-        <!-- NAVI DOMANI -->
+        <!-- Navi domani-->
         <div class="col-md-6">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5 class="fw-bold mb-0">NAVI DOMANI</h5>
@@ -216,7 +216,7 @@
                                     <span class="nave-stato stato-arrivo">In arrivo</span>
                                 </td>
                                 <td class="text-center">@nave.Pontile</td>
-                                <!-- Fascia Mattina -->
+                                <!-- fascia mattina -->
                                 <td class="col-fascia">
                                     @if (nave.FasciaMattina)
                                     {
@@ -240,7 +240,7 @@
                                         }
                                     }
                                 </td>
-                                <!-- Fascia Pomeriggio -->
+                                <!-- fascia pomeriggio -->
                                 <td class="col-fascia">
                                     @if (nave.FasciaPomeriggio)
                                     {
@@ -264,7 +264,7 @@
                                         }
                                     }
                                 </td>
-                                <!-- Fascia Sera -->
+                                <!-- fascia sera -->
                                 <td class="col-fascia">
                                     @if (nave.FasciaSera)
                                     {
@@ -314,7 +314,7 @@
                      v-on:click="dip.disponibile && selezionaDipendente(dip.id)">
                     {{ dip.nomeCompleto }}
                     <span v-if="dip.patenteScaduta" style="color: #dc3545;"> (Patente scaduta)</span>
-                    <span v-if="!dip.disponibile" style="font-size: 0.8rem;"> - Già assegnato</span>
+                    <span v-if="!dip.disponibile && !dip.patenteScaduta" style="font-size: 0.8rem;"> - Già assegnato</span>
                 </div>
             </div>
             <div class="modal-footer">
@@ -335,7 +335,7 @@
                      v-on:click="dip.disponibile && toggleDipendente(dip.id)">
                     {{ dip.nomeCompleto }}
                     <span v-if="dip.patenteScaduta" style="color: #dc3545;"> (Patente scaduta)</span>
-                    <span v-if="!dip.disponibile" style="font-size: 0.8rem;"> - Già assegnato</span>
+                    <span v-if="!dip.disponibile && !dip.patenteScaduta" style="font-size: 0.8rem;"> - Già assegnato</span>
                 </div>
             </div>
             <div class="modal-footer">
@@ -346,7 +346,6 @@
     </div>
     </div>
 </div>
-<!-- Fine container Vue -->
 
 @section scripts {
 <script>
@@ -377,7 +376,7 @@ if (typeof Vue === 'undefined') {
 
                 dipendenteSelezionatoId: null,
                 dipendentiSelezionatiIds: [],
-                dipendentiGiaAssegnatiCorrente: [] // Dipendenti già nella lista corrente
+                dipendentiGiaAssegnatiCorrente: [] //dipendenti già nella lista corrente
             };
         },
         computed: {
@@ -392,8 +391,9 @@ if (typeof Vue === 'undefined') {
                 return this.dipendentiFiltrati.map(d => ({
                     ...d,
                     disponibile: this.isDipendenteDisponibile(d.id, this.fasciaCorrente, this.giornoCorrente)
-                        && !this.dipendentiGiaAssegnatiCorrente.includes(d.id) // Escludi già presenti
-                        && d.id !== this.vecchioDipendenteId // Escludi il dipendente con variazione
+                        && !this.dipendentiGiaAssegnatiCorrente.includes(d.id) //esclude i dipendenti già presenti
+                        && d.id !== this.vecchioDipendenteId //escludi il dipendente con variazione
+                        && !d.patenteScaduta //escludi dipendenti con patente scaduta
                 }));
             }
         },
@@ -435,7 +435,7 @@ if (typeof Vue === 'undefined') {
                 this.richiedeMulettistiCorrente = richiedeMulettisti;
                 this.dipendenteSelezionatoId = null;
 
-                // Ottieni dipendenti già assegnati a questa nave/fascia (escluso quello da cambiare)
+                //ottieni dipendenti già assegnati a questa nave/fascia (escluso quello da cambiare)
                 const chiave = `${naveId}_${fascia}_${giorno}`;
                 this.dipendentiGiaAssegnatiCorrente = (this.assegnazioni[chiave] || []).filter(id => id !== dipId);
 
@@ -450,7 +450,7 @@ if (typeof Vue === 'undefined') {
                 this.dipendentiSelezionatiIds = [];
                 this.vecchioDipendenteId = null;
 
-                // Ottieni dipendenti già assegnati a questa nave/fascia
+                //ottieni dipendenti già assegnati a questa nave/fascia
                 const chiave = `${naveId}_${fascia}_${giorno}`;
                 this.dipendentiGiaAssegnatiCorrente = this.assegnazioni[chiave] || [];
 
@@ -525,7 +525,7 @@ if (typeof Vue === 'undefined') {
         }
     });
 
-    // Monta Vue quando il DOM è pronto
+    //monta Vue quando il DOM è pronto
     let vueAppInstance = null;
 
     function mountVue() {
@@ -542,7 +542,7 @@ if (typeof Vue === 'undefined') {
         setTimeout(mountVue, 0);
     }
 
-    // Esponi TUTTE le funzioni globali per compatibilità con onclick nel HTML
+    //esponi tutte le funzioni globali per compatibilità con onclick nell' HTML
     window.apriModalCambio = function(dipId, dipNome, naveId, fascia, giorno, richiedeGruisti, richiedeMulettisti) {
         if (!vueAppInstance) mountVue();
         if (vueAppInstance) {

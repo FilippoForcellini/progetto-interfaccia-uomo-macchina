@@ -14,7 +14,7 @@
 }
 
 @section navbar {
-    <nav class="navbar navbar-expand-lg bg-body-tertiary justify-content-md-center mb-4">
+    <nav class="navbar navbar-expand-lg justify-content-md-center mb-4" style="background-color: #E3F2FD;">
         <div class="container-fluid">
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav gap-5 mx-auto">
@@ -29,7 +29,6 @@
 
 <div id="appDipendenti">
 <div class="container">
-    <!-- DEBUG: Data di oggi = @DateTime.Today.ToString("dd/MM/yyyy") -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">Storico Dipendenti</h4>
         @if (Model.FiltroPatentiScadute)
@@ -79,7 +78,7 @@
         </tbody>
     </table>
 
-    <!-- Modal Dettaglio Dipendente -->
+    <!-- modal dettaglio dipendente-->
     <div v-if="modalVisible" class="modal-overlay" v-on:click="chiudiModalOverlay($event)">
         <div class="modal-box" v-html="modalContent">
         </div>
@@ -177,10 +176,10 @@
         }
         });
 
-        // Monta Vue quando il DOM è pronto
+        //monta Vue quando il DOM è pronto
         let appDipendentiInstance = null;
 
-        // Funzione per montare Vue
+        //Funzione per montare Vue
         function mountVue() {
             const appElement = document.getElementById('appDipendenti');
             if (appElement && !appDipendentiInstance) {
@@ -189,14 +188,14 @@
             }
         }
 
-        // Aspetta sempre il DOMContentLoaded per sicurezza
+        //aspetta sempre il DOMContentLoaded per sicurezza
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', mountVue);
         } else {
             setTimeout(mountVue, 0);
         }
 
-        // Esponi funzioni globali per compatibilità con onclick nel HTML
+        //Espone funzioni globali per compatibilità con onclick nell' HTML
         window.apriModal = (id) => {
             if (!appDipendentiInstance) mountVue();
             if (appDipendentiInstance) appDipendentiInstance.apriModal(id);

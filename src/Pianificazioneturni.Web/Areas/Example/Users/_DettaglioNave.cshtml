@@ -10,7 +10,7 @@
 
     @if (nascondiCalendario)
     {
-        <!-- Data nascosta per Oggi/Domani -->
+        //data nascosta per Oggi/Domani
         <input type="hidden" name="dataArrivo" id="inputDataArrivo" value="@Model.DataArrivo.ToString("yyyy-MM-dd")" />
         <div class="form-group mb-3">
             <label class="form-label fw-bold">Data:</label>
@@ -19,7 +19,7 @@
     }
     else
     {
-        <!-- Campo data visibile per giorni futuri -->
+        //Campo data visibile per giorni futuri
         <div class="form-group mb-3">
             <label class="form-label fw-bold">Data Arrivo:</label>
             <input type="date" class="form-control" name="dataArrivo" id="inputDataArrivo"
@@ -55,13 +55,13 @@
         <label class="form-label fw-bold">Fasce Orarie:</label>
         <small class="text-muted d-block mb-2">Seleziona una o più fasce orarie in cui la nave sarà presente</small>
 
-        <!-- Avviso fasce tutte occupate -->
+        <!-- Avviso fasce orarie tutte occupate -->
         <div id="avvisoFasceOccupate" class="alert alert-warning mb-2" style="display: none;">
             Tutte le fasce orarie sono occupate per questo giorno.
         </div>
 
         <div class="fascia-oraria-group">
-            <!-- Fascia Mattina -->
+            <!-- Fascia mattina -->
             <div class="fascia-oraria-item @(Model.FasciaMattina ? "selected" : "")"
                  data-fascia="mattina" onclick="toggleFascia(this)">
                 <input type="checkbox" name="fasciaMattina" id="checkFasciaMattina" value="true"
@@ -70,7 +70,7 @@
                 <div class="fascia-status">Disponibile</div>
             </div>
 
-            <!-- Fascia Pomeriggio -->
+            <!-- Fascia pomeriggio -->
             <div class="fascia-oraria-item @(Model.FasciaPomeriggio ? "selected" : "")"
                  data-fascia="pomeriggio" onclick="toggleFascia(this)">
                 <input type="checkbox" name="fasciaPomeriggio" id="checkFasciaPomeriggio" value="true"
@@ -79,7 +79,7 @@
                 <div class="fascia-status">Disponibile</div>
             </div>
 
-            <!-- Fascia Sera -->
+            <!-- Fascia sera -->
             <div class="fascia-oraria-item @(Model.FasciaSera ? "selected" : "")"
                  data-fascia="sera" onclick="toggleFascia(this)">
                 <input type="checkbox" name="fasciaSera" id="checkFasciaSera" value="true"

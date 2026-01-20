@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Pianificazioneturni.Web.Infrastructure;
 using PianificazioneTurni.Services.Shared;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
 
         public IEnumerable<UserIndexViewModel> Users { get; set; }
 
-        // Pianificazione Turni
+        //pianificazione turni
         public DateTime DataOggi { get; set; } = DateTime.Today;
         public DateTime DataDomani { get; set; } = DateTime.Today.AddDays(1);
         public int OraCorrente { get; set; } = DateTime.Now.Hour;
@@ -36,7 +37,7 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         public List<DipendenteViewModel> Gruisti { get; set; } = new List<DipendenteViewModel>();
         public List<DipendenteViewModel> Mulettisti { get; set; } = new List<DipendenteViewModel>();
 
-        // Assegnazioni per filtrare dipendenti disponibili (chiave: "naveId_fascia_giorno", valore: lista id dipendenti)
+        //assegnazioni per filtrare dipendenti disponibili (chiave: "naveId_fascia_giorno", valore: lista id dipendenti)
         public Dictionary<string, List<int>> Assegnazioni { get; set; } = new Dictionary<string, List<int>>();
 
         internal void SetUsers(UsersIndexDTO usersIndexDTO)
@@ -88,7 +89,7 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         public string LastName { get; set; }
     }
 
-    // Classi per Pianificazione Turni
+    //classi per pianificazione turni
     public enum StatoNave { InLavorazione, InPartenza, InArrivo }
     public enum FasciaOraria { Mattina = 0, Pomeriggio = 1, Sera = 2 }
 
@@ -103,21 +104,20 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         public bool RichiedeGruisti { get; set; }
         public bool RichiedeMulettisti { get; set; }
 
-        // Dipendenti assegnati per fascia
+        //dipendenti assegnati per fascia
         public List<DipendenteViewModel> DipendentiMattina { get; set; } = new List<DipendenteViewModel>();
         public List<DipendenteViewModel> DipendentiPomeriggio { get; set; } = new List<DipendenteViewModel>();
         public List<DipendenteViewModel> DipendentiSera { get; set; } = new List<DipendenteViewModel>();
 
-        // Calcola lo stato in base all'orario corrente
+        //calcola lo stato in base all'orario corrente
         public StatoNave GetStato(int oraCorrente)
         {
-            // Determina in quale fascia siamo
-            // Mattina: 0-8, Pomeriggio: 8-16, Sera: 16-24
+            //Determina in quale fascia siamo
             bool inFasciaMattina = oraCorrente >= 0 && oraCorrente < 8;
             bool inFasciaPomeriggio = oraCorrente >= 8 && oraCorrente < 16;
             bool inFasciaSera = oraCorrente >= 16 && oraCorrente < 24;
 
-            // Verifica se la nave è attiva nella fascia corrente
+            //verifica se la nave è attiva nella fascia corrente
             bool naveAttivaOra = (inFasciaMattina && FasciaMattina) ||
                                  (inFasciaPomeriggio && FasciaPomeriggio) ||
                                  (inFasciaSera && FasciaSera);
@@ -125,13 +125,14 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
             if (naveAttivaOra)
                 return StatoNave.InLavorazione;
 
-            // Verifica se la nave arriverà più tardi oggi
+            //verifica quando arriverà la nave. Se siamo nella fascia mattina e la nave arriva di pomeriggio o sera → stato "InArrivo"
+            //se siamo nella fascia pomeriggio e la nave arriva di sera → stato "InArrivo"
             if (inFasciaMattina && (FasciaPomeriggio || FasciaSera))
                 return StatoNave.InArrivo;
             if (inFasciaPomeriggio && FasciaSera)
                 return StatoNave.InArrivo;
 
-            // Altrimenti la nave è in partenza (già passata)
+            //altrimenti la nave è in partenza
             return StatoNave.InPartenza;
         }
 
@@ -146,7 +147,7 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
             };
         }
 
-        // Verifica se una fascia specifica è "in arrivo" (futura)
+        //verifica se una fascia specifica è "in arrivo"
         public bool IsFasciaInArrivo(FasciaOraria fascia, int oraCorrente)
         {
             int inizioFascia = fascia switch

@@ -15,7 +15,7 @@
 }
 
 @section navbar {
-    <nav class="navbar navbar-expand-lg bg-body-tertiary justify-content-md-center mb-4">
+    <nav class="navbar navbar-expand-lg justify-content-md-center mb-4" style="background-color: #E3F2FD;">
         <div class="container-fluid">
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav gap-5 mx-auto">
@@ -30,7 +30,7 @@
 
 <div id="appNavi">
 <div class="container-fluid">
-    <!-- Timeline giorni futuri -->
+    <!-- timeline giorni futuri -->
     <div class="timeline-container">
         <span class="timeline-label">Giorni futuri:</span>
         @foreach (var giorno in timeline)
@@ -48,9 +48,8 @@
         }
     </div>
 
-    <!-- Tabelle OGGI e DOMANI -->
     <div class="row">
-        <!-- NAVI OGGI -->
+        <!-- Navi oggi -->
         <div class="col-md-6">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5 class="fw-bold mb-0">NAVI OGGI</h5>
@@ -118,7 +117,7 @@
             </div>
         </div>
 
-        <!-- NAVI DOMANI -->
+        <!-- Navi domani -->
         <div class="col-md-6">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5 class="fw-bold mb-0">NAVI DOMANI</h5>
@@ -187,16 +186,16 @@
         </div>
     </div>
 
-    <!-- Contenitore tabella giorno selezionato (caricato via AJAX) -->
+    <!-- contenitore tabella giorno selezionato (caricato via AJAX) -->
     <div id="sezioneGiornoSelezionato"></div>
 
-    <!-- Modal Dettaglio Nave -->
+    <!-- Modal dettaglio nave -->
     <div v-if="modalNaveVisible" class="modal-overlay" v-on:click="chiudiModalOverlay($event)">
         <div class="modal-box" v-html="modalNaveContent">
         </div>
     </div>
 
-    <!-- Form per eliminazione -->
+    <!-- Form per l'eliminazione -->
     <form id="formEliminaNave" method="post" asp-action="EliminaNave" style="display:none;">
         <input type="hidden" name="id" id="eliminaNaveId" />
     </form>
@@ -355,10 +354,10 @@
         }
         });
 
-        // Monta Vue quando il DOM è pronto
+        // monta Vue quando il DOM è pronto
         let appNaviInstance = null;
 
-        // Funzione per montare Vue
+        //funzione per montare Vue
         function mountVue() {
             const appElement = document.getElementById('appNavi');
             if (appElement && !appNaviInstance) {
@@ -367,14 +366,14 @@
             }
         }
 
-        // Aspetta sempre il DOMContentLoaded per sicurezza
+        //aspetta sempre il DOMContentLoaded per sicurezza
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', mountVue);
         } else {
             setTimeout(mountVue, 0);
         }
 
-        // Esponi funzioni globali per compatibilità con onclick nel HTML
+        //espone funzioni globali per compatibilità con onclick nell' HTML
         window.selezionaGiornoFuturo = (data) => {
             if (!appNaviInstance) mountVue();
             if (appNaviInstance) appNaviInstance.selezionaGiornoFuturo(data);

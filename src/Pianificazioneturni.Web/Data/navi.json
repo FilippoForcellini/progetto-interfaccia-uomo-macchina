@@ -14,37 +14,5 @@
     "RuoliRichiesti": "Gruisti\nMulettisti",
     "HasAlmenoUnaFascia": true,
     "Colore": "#FF6B6B"
-  },
-  {
-    "Id": 2,
-    "Nome": "Nave 2",
-    "Tipo": 1,
-    "DataArrivo": "2026-01-20T00:00:00+01:00",
-    "Pontile": 30,
-    "FasciaMattina": false,
-    "FasciaPomeriggio": false,
-    "FasciaSera": true,
-    "RichiedeGruisti": false,
-    "RichiedeMulettisti": true,
-    "TipoDescrizione": "Portarinfuse",
-    "RuoliRichiesti": "Mulettisti",
-    "HasAlmenoUnaFascia": true,
-    "Colore": "#4ECDC4"
-  },
-  {
-    "Id": 4,
-    "Nome": "1",
-    "Tipo": 0,
-    "DataArrivo": "2026-01-21T00:00:00",
-    "Pontile": 1,
-    "FasciaMattina": true,
-    "FasciaPomeriggio": false,
-    "FasciaSera": false,
-    "RichiedeGruisti": true,
-    "RichiedeMulettisti": false,
-    "TipoDescrizione": "Container",
-    "RuoliRichiesti": "Gruisti",
-    "HasAlmenoUnaFascia": true,
-    "Colore": "#45B7D1"
   }
 ]
