@@ -14,5 +14,21 @@
     "RuoliRichiesti": "Gruisti\nMulettisti",
     "HasAlmenoUnaFascia": true,
     "Colore": "#FF6B6B"
+  },
+  {
+    "Id": 11,
+    "Nome": "w",
+    "Tipo": 0,
+    "DataArrivo": "2026-01-24T00:00:00",
+    "Pontile": 2,
+    "FasciaMattina": true,
+    "FasciaPomeriggio": false,
+    "FasciaSera": false,
+    "RichiedeGruisti": true,
+    "RichiedeMulettisti": false,
+    "TipoDescrizione": "Container",
+    "RuoliRichiesti": "Gruisti",
+    "HasAlmenoUnaFascia": true,
+    "Colore": "#4ECDC4"
   }
 ]

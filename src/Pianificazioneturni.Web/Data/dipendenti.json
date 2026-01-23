@@ -4,20 +4,20 @@
     "Nome": "Rossi Mario",
     "Ruolo": "Gruista",
     "Patente": true,
-    "Scadenza": "2027-06-15T00:00:00",
+    "Scadenza": "2026-10-28T00:00:00",
     "RichiedePatente": true,
     "IsPatenteScaduta": false,
-    "ScadenzaFormattata": "15/06/2027"
+    "ScadenzaFormattata": "28/10/2026"
   },
   {
     "Id": 2,
     "Nome": "Blu Marco",
     "Ruolo": "Mulettista",
     "Patente": true,
-    "Scadenza": "2027-08-20T00:00:00",
+    "Scadenza": "2027-07-23T00:00:00",
     "RichiedePatente": true,
     "IsPatenteScaduta": false,
-    "ScadenzaFormattata": "20/08/2027"
+    "ScadenzaFormattata": "23/07/2027"
   },
   {
     "Id": 3,
