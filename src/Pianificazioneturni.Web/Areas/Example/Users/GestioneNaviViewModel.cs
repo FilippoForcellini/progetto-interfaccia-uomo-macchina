@@ -37,17 +37,16 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         //giorni futuri (da dopodomani in poi)
         public List<GiornoConNaviViewModel> GiorniFuturiConNavi { get; set; }
 
-        //genera la lista dei prossimi 14 giorni con i dettagli sulle navi
+        //genera timeline 7 giorni a partire da oggi
         public List<GiornoTimelineViewModel> GetTimeline()
         {
             var timeline = new List<GiornoTimelineViewModel>();
             var oggi = DateTime.Today;
 
-            //mostra i giorni futuri (prossimi 14 giorni)
-            for (int i = 2; i <= 14; i++)
+            for (int i = 0; i < 7; i++)
             {
                 var giorno = oggi.AddDays(i);
-                var naviDelGiorno = TutteLeNavi.Where(n => n.DataArrivo.Date == giorno.Date).ToList();
+                var naviDelGiorno = TutteLeNavi.Where(n => n.DatePresenza.Any(d => d.Date == giorno.Date)).ToList();
 
                 timeline.Add(new GiornoTimelineViewModel
                 {
@@ -60,37 +59,25 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
             return timeline;
         }
 
-        //data una data, ti dice quali fasce orarie sono occupate da navi.
-        public List<int> GetFasceOccupate(DateTime data)
+        //restituisce le navi presenti in un dato giorno
+        public List<NaveDetailViewModel> GetNaviPerGiorno(DateTime data)
         {
-            var fasceOccupate = new List<int>();
-            var naviDelGiorno = TutteLeNavi.Where(n => n.DataArrivo.Date == data.Date).ToList();
-
-            foreach (var nave in naviDelGiorno)
-            {
-                if (nave.FasciaMattina) fasceOccupate.Add(0);
-                if (nave.FasciaPomeriggio) fasceOccupate.Add(1);
-                if (nave.FasciaSera) fasceOccupate.Add(2);
-            }
-
-            return fasceOccupate.Distinct().ToList();
+            return TutteLeNavi.Where(n => n.DatePresenza.Any(d => d.Date == data.Date)).ToList();
         }
 
-        //controlla se in una certa data e fascia oraria c'è posto oppure è già occupata. Inoltre quando si modifica una nave già esistente non deve contare la nave come occupazione, altrimenti direbbe sempre "occupato" (dalla nave stessa)
-        public bool IsFasciaDisponibile(DateTime data, int fascia, int? escludiNaveId = null)
+        //controlla se una fascia è occupata in una certa data
+        public bool IsFasciaOccupata(DateTime data, int fascia, int? escludiNaveId = null)
         {
             var naviDelGiorno = TutteLeNavi
-                .Where(n => n.DataArrivo.Date == data.Date && (!escludiNaveId.HasValue || n.Id != escludiNaveId.Value))
+                .Where(n => n.DatePresenza.Any(d => d.Date == data.Date) && (!escludiNaveId.HasValue || n.Id != escludiNaveId.Value))
                 .ToList();
 
             foreach (var nave in naviDelGiorno)
             {
-                if (fascia == 0 && nave.FasciaMattina) return false;
-                if (fascia == 1 && nave.FasciaPomeriggio) return false;
-                if (fascia == 2 && nave.FasciaSera) return false;
+                if (nave.HasFasciaInData(data, fascia)) return true;
             }
 
-            return true;
+            return false;
         }
     }
 
@@ -98,7 +85,8 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
     {
         public NaveDetailViewModel()
         {
-            DataArrivo = DateTime.Today;
+            DatePresenza = new List<DateTime>();
+            FascePerData = new Dictionary<string, List<int>>();
         }
 
         public int Id { get; set; }
@@ -110,15 +98,18 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         [Display(Name = "Tipo Nave")]
         public TipoNave Tipo { get; set; }
 
-        [Display(Name = "Data Arrivo")]
-        [Required(ErrorMessage = "La data di arrivo è obbligatoria")]
-        public DateTime DataArrivo { get; set; }
+        [Display(Name = "Date Presenza")]
+        [Required(ErrorMessage = "Devi selezionare almeno un giorno")]
+        public List<DateTime> DatePresenza { get; set; }
+
+        //fasce orarie per ogni data (chiave: yyyy-MM-dd, valore: lista fasce 0=mattina, 1=pomeriggio, 2=sera)
+        public Dictionary<string, List<int>> FascePerData { get; set; }
 
         [Display(Name = "Pontile")]
         [Required(ErrorMessage = "Il numero del pontile è obbligatorio")]
         public int? Pontile { get; set; }
 
-        //fasce orarie. una nave può occupare più fasce orarie
+        //proprietà di retrocompatibilità (deprecate ma mantenute per non rompere codice esistente)
         [Display(Name = "00:00 / 08:00")]
         public bool FasciaMattina { get; set; }
 
@@ -127,6 +118,13 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
 
         [Display(Name = "16:00 / 24:00")]
         public bool FasciaSera { get; set; }
+
+        //helper methods per verificare se una fascia è presente in una specifica data
+        public bool HasFasciaInData(DateTime data, int fascia)
+        {
+            var dataKey = data.ToString("yyyy-MM-dd");
+            return FascePerData.ContainsKey(dataKey) && FascePerData[dataKey].Contains(fascia);
+        }
 
         [Display(Name = "Richiede Gruisti")]
         public bool RichiedeGruisti { get; set; }

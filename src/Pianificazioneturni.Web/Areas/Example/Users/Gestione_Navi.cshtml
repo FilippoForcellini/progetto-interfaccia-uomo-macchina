@@ -30,164 +30,88 @@
 
 <div id="appNavi">
 <div class="container-fluid">
-    <!-- timeline giorni futuri -->
-    <div class="timeline-container">
-        <span class="timeline-label">Giorni futuri:</span>
-        @foreach (var giorno in timeline)
-        {
-            <div class="timeline-dot" id="dot-@giorno.Data.ToString("yyyy-MM-dd")"
-                 onclick="selezionaGiornoFuturo('@giorno.Data.ToString("yyyy-MM-dd")')"
-                 title="@giorno.DataCompleta - @giorno.NumeroNavi navi">
-                <div class="dot-circle @(giorno.HasNavi ? "has-navi" : "")">@giorno.GiornoFormattato</div>
-                <span class="dot-month">@giorno.MeseFormattato</span>
-                @if (giorno.HasNavi)
+
+    <div class="table-responsive">
+        <table class="table table-bordered timeline-table">
+            <thead>
+                <!-- Prima riga: intestazioni colonne info + giorni -->
+                <tr>
+                    <th rowspan="2" class="colonna-info">Nome Nave</th>
+                    <th rowspan="2" class="colonna-info">Pontile</th>
+                    <th rowspan="2" class="colonna-info">Ruoli</th>
+                    @foreach (var giorno in timeline)
+                    {
+                        <th colspan="3" class="text-center giorno-header">
+                            @giorno.Data.ToString("dd/MM")<br/>@giorno.Data.ToString("ddd")
+                        </th>
+                    }
+                </tr>
+                <!-- Seconda riga: fasce orarie -->
+                <tr>
+                    @foreach (var giorno in timeline)
+                    {
+                        <th class="fascia-header">00:00<br/>08:00</th>
+                        <th class="fascia-header">08:00<br/>16:00</th>
+                        <th class="fascia-header">16:00<br/>24:00</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.TutteLeNavi.Any())
                 {
-                    <span class="dot-count">@giorno.NumeroNavi navi</span>
+                    @foreach (var nave in Model.TutteLeNavi)
+                    {
+                        <tr class="nave-row" onclick="apriModal(@nave.Id)">
+                            <!-- Colonna Nome -->
+                            <td class="info-cell"><strong>@nave.Nome</strong></td>
+                            <!-- Colonna Pontile -->
+                            <td class="info-cell text-center">@nave.Pontile</td>
+                            <!-- Colonna Ruoli -->
+                            <td class="info-cell">@nave.RuoliRichiesti.Replace("\n", ", ")</td>
+
+                            <!-- Celle fasce orarie per ogni giorno -->
+                            @foreach (var giorno in timeline)
+                            {
+                                var hasMattina = nave.HasFasciaInData(giorno.Data, 0);
+                                var hasPomeriggio = nave.HasFasciaInData(giorno.Data, 1);
+                                var hasSera = nave.HasFasciaInData(giorno.Data, 2);
+
+                                <td class="fascia-cell @(hasMattina ? "fascia-occupata" : "")">
+                                    @if (hasMattina)
+                                    {
+                                        <div class="fascia-marker"></div>
+                                    }
+                                </td>
+                                <td class="fascia-cell @(hasPomeriggio ? "fascia-occupata" : "")">
+                                    @if (hasPomeriggio)
+                                    {
+                                        <div class="fascia-marker"></div>
+                                    }
+                                </td>
+                                <td class="fascia-cell @(hasSera ? "fascia-occupata" : "")">
+                                    @if (hasSera)
+                                    {
+                                        <div class="fascia-marker"></div>
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
                 }
-            </div>
-        }
+                else
+                {
+                    <tr>
+                        <td colspan="24" class="text-center text-muted">Nessuna nave presente</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 
-    <div class="row">
-        <!-- Navi oggi -->
-        <div class="col-md-6">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <h5 class="fw-bold mb-0">NAVI OGGI</h5>
-            </div>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th colspan="5" class="text-center">@Model.DataOggi.ToString("dd/MM/yyyy")</th>
-                    </tr>
-                    <tr>
-                        <th>Nome Nave</th>
-                        <th colspan="3" class="text-center">Orario</th>
-                        <th>Ruoli Richiesti</th>
-                    </tr>
-                    <tr>
-                        <th></th>
-                        <th class="col-orario">00:00/<br/>08:00</th>
-                        <th class="col-orario">08:00/<br/>16:00</th>
-                        <th class="col-orario">16:00/<br/>24:00</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.NaviOggi.Any())
-                    {
-                        @foreach (var nave in Model.NaviOggi)
-                        {
-                            <tr class="nave-row" onclick="apriModal(@nave.Id)">
-                                <td>
-                                    <div><strong>@nave.Nome</strong></div>
-                                    <div class="tipo-nave">@nave.TipoDescrizione</div>
-                                </td>
-                                <td class="col-orario">
-                                    @if (nave.FasciaMattina)
-                                    {
-                                        <div class="fascia-occupata"></div>
-                                    }
-                                </td>
-                                <td class="col-orario">
-                                    @if (nave.FasciaPomeriggio)
-                                    {
-                                        <div class="fascia-occupata"></div>
-                                    }
-                                </td>
-                                <td class="col-orario">
-                                    @if (nave.FasciaSera)
-                                    {
-                                        <div class="fascia-occupata"></div>
-                                    }
-                                </td>
-                                <td class="ruoli-text">@nave.RuoliRichiesti</td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="5" class="text-center text-muted">Nessuna nave per oggi</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-            <div class="mt-2">
-                <button class="btn btn-dark btn-sm" onclick="apriModalNuova('@Model.DataOggi.ToString("yyyy-MM-dd")', true)">Aggiungi</button>
-            </div>
-        </div>
-
-        <!-- Navi domani -->
-        <div class="col-md-6">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <h5 class="fw-bold mb-0">NAVI DOMANI</h5>
-            </div>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th colspan="5" class="text-center">@Model.DataDomani.ToString("dd/MM/yyyy")</th>
-                    </tr>
-                    <tr>
-                        <th>Nome Nave</th>
-                        <th colspan="3" class="text-center">Orario</th>
-                        <th>Ruoli Richiesti</th>
-                    </tr>
-                    <tr>
-                        <th></th>
-                        <th class="col-orario">00:00/<br/>08:00</th>
-                        <th class="col-orario">08:00/<br/>16:00</th>
-                        <th class="col-orario">16:00/<br/>24:00</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.NaviDomani.Any())
-                    {
-                        @foreach (var nave in Model.NaviDomani)
-                        {
-                            <tr class="nave-row" onclick="apriModal(@nave.Id)">
-                                <td>
-                                    <div><strong>@nave.Nome</strong></div>
-                                    <div class="tipo-nave">@nave.TipoDescrizione</div>
-                                </td>
-                                <td class="col-orario">
-                                    @if (nave.FasciaMattina)
-                                    {
-                                        <div class="fascia-occupata"></div>
-                                    }
-                                </td>
-                                <td class="col-orario">
-                                    @if (nave.FasciaPomeriggio)
-                                    {
-                                        <div class="fascia-occupata"></div>
-                                    }
-                                </td>
-                                <td class="col-orario">
-                                    @if (nave.FasciaSera)
-                                    {
-                                        <div class="fascia-occupata"></div>
-                                    }
-                                </td>
-                                <td class="ruoli-text">@nave.RuoliRichiesti</td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="5" class="text-center text-muted">Nessuna nave per domani</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-            <div class="mt-2">
-                <button class="btn btn-dark btn-sm" onclick="apriModalNuova('@Model.DataDomani.ToString("yyyy-MM-dd")', true)">Aggiungi</button>
-            </div>
-        </div>
+    <!-- Bottone Aggiungi sotto la tabella -->
+    <div class="mt-3 mb-3">
+        <button class="btn btn-dark btn-sm" onclick="apriModalNuova()">Aggiungi Nave</button>
     </div>
-
-    <!-- contenitore tabella giorno selezionato (caricato via AJAX) -->
-    <div id="sezioneGiornoSelezionato"></div>
 
     <!-- Modal dettaglio nave -->
     <div v-if="modalNaveVisible" class="modal-overlay" v-on:click="chiudiModalOverlay($event)">
@@ -212,58 +136,20 @@
         const appNavi = createApp({
         data() {
             return {
-                fasceOccupatePerGiorno: @Html.Raw(Json.Serialize(
-                    Model.TutteLeNavi.GroupBy(n => n.DataArrivo.Date).ToDictionary(
-                        g => g.Key.ToString("yyyy-MM-dd"),
-                        g => new {
-                            mattina = g.Where(n => n.FasciaMattina).Select(n => n.Id).ToList(),
-                            pomeriggio = g.Where(n => n.FasciaPomeriggio).Select(n => n.Id).ToList(),
-                            sera = g.Where(n => n.FasciaSera).Select(n => n.Id).ToList()
-                        }
-                    )
-                )),
-                giornoSelezionatoCorrente: null,
                 modalNaveVisible: false,
                 modalNaveContent: ''
             };
         },
         methods: {
-            async selezionaGiornoFuturo(data) {
-                this.giornoSelezionatoCorrente = data;
-                await this.apriModalNuova(data, false);
-                await this.caricaTabellaGiorno(data);
-            },
-            async caricaTabellaGiorno(data) {
-                const url = `@Url.Action("TabellaNaviGiorno", "Users", new { Area = "Example" })?giorno=${data}`;
-                const response = await fetch(url);
-                const html = await response.text();
-                document.getElementById('sezioneGiornoSelezionato').innerHTML = html;
-            },
-            chiudiSezioneGiorno() {
-                document.getElementById('sezioneGiornoSelezionato').innerHTML = '';
-                this.giornoSelezionatoCorrente = null;
-            },
             async apriModal(id) {
                 const response = await fetch(`@Url.Action("DettaglioNave", "Users", new { Area = "Example" })?id=${id}`);
                 this.modalNaveContent = await response.text();
                 this.modalNaveVisible = true;
-                this.$nextTick(() => {
-                    this.inizializzaFasceOrarie();
-                });
             },
-            async apriModalNuova(dataPreselezionata, nascondiCalendario) {
-                let url = '@Url.Action("DettaglioNave", "Users", new { Area = "Example" })';
-                const params = [];
-                if (dataPreselezionata) params.push(`dataPreselezionata=${dataPreselezionata}`);
-                if (nascondiCalendario) params.push('nascondiCalendario=true');
-                if (params.length > 0) url += '?' + params.join('&');
-
-                const response = await fetch(url);
+            async apriModalNuova() {
+                const response = await fetch('@Url.Action("DettaglioNave", "Users", new { Area = "Example" })');
                 this.modalNaveContent = await response.text();
                 this.modalNaveVisible = true;
-                this.$nextTick(() => {
-                    this.inizializzaFasceOrarie();
-                });
             },
             chiudiModal() {
                 this.modalNaveVisible = false;
@@ -279,85 +165,111 @@
                     document.getElementById('formEliminaNave').submit();
                 }
             },
-            inizializzaFasceOrarie() {
-                const inputData = document.getElementById('inputDataArrivo');
-                if (!inputData) return;
-                this.aggiornaStatoFasce();
-            },
-            aggiornaStatoFasce() {
-                const inputData = document.getElementById('inputDataArrivo');
-                const naveIdInput = document.getElementById('inputNaveId');
-                const naveId = naveIdInput ? parseInt(naveIdInput.value) : 0;
-                const dataSelezionata = inputData.value;
-                const fasceItems = document.querySelectorAll('.fascia-oraria-item');
-
-                fasceItems.forEach(item => {
-                    const fascia = item.getAttribute('data-fascia');
-                    const checkbox = item.querySelector('input[type="checkbox"]');
-                    const statusDiv = item.querySelector('.fascia-status');
-                    const occupata = this.isFasciaOccupata(dataSelezionata, fascia, naveId);
-
-                    if (occupata) {
-                        item.classList.add('disabled');
-                        item.classList.remove('selected');
-                        checkbox.disabled = true;
-                        checkbox.checked = false;
-                        statusDiv.textContent = 'Occupata';
-                        statusDiv.style.color = '#dc3545';
-                    } else {
-                        item.classList.remove('disabled');
-                        checkbox.disabled = false;
-                        statusDiv.textContent = 'Disponibile';
-                        statusDiv.style.color = '#28a745';
-                        if (checkbox.checked) item.classList.add('selected');
-                    }
-                });
-                this.verificaTutteFasceOccupate(dataSelezionata, naveId);
-            },
-            isFasciaOccupata(data, fascia, escludiNaveId) {
-                if (!this.fasceOccupatePerGiorno[data]) return false;
-
-                let occupanti = [];
-                if (fascia === 'mattina') occupanti = this.fasceOccupatePerGiorno[data].mattina;
-                else if (fascia === 'pomeriggio') occupanti = this.fasceOccupatePerGiorno[data].pomeriggio;
-                else if (fascia === 'sera') occupanti = this.fasceOccupatePerGiorno[data].sera;
-
-                return occupanti.some(id => id !== escludiNaveId);
-            },
-            verificaTutteFasceOccupate(data, escludiNaveId) {
-                const avvisoDiv = document.getElementById('avvisoFasceOccupate');
-                if (!avvisoDiv) return;
-
-                const mattinaOccupata = this.isFasciaOccupata(data, 'mattina', escludiNaveId);
-                const pomeriggioOccupata = this.isFasciaOccupata(data, 'pomeriggio', escludiNaveId);
-                const seraOccupata = this.isFasciaOccupata(data, 'sera', escludiNaveId);
-
-                avvisoDiv.style.display = (mattinaOccupata && pomeriggioOccupata && seraOccupata) ? 'block' : 'none';
-            },
-            toggleFascia(item) {
-                if (item.classList.contains('disabled')) return;
+            toggleFasciaPerGiorno(event) {
+                const item = event.currentTarget;
                 const checkbox = item.querySelector('input[type="checkbox"]');
                 checkbox.checked = !checkbox.checked;
                 item.classList.toggle('selected', checkbox.checked);
             },
-            validaFormNave() {
-                const checkMattina = document.getElementById('checkFasciaMattina');
-                const checkPomeriggio = document.getElementById('checkFasciaPomeriggio');
-                const checkSera = document.getElementById('checkFasciaSera');
+            selectDate(event) {
+                const item = event.currentTarget;
+                const dataDate = item.getAttribute('data-date');
+                const isAlreadySelected = item.classList.contains('selected');
 
-                if (!checkMattina.checked && !checkPomeriggio.checked && !checkSera.checked) {
-                    alert('Devi selezionare almeno una fascia oraria');
+                if (!isAlreadySelected) {
+                    item.classList.add('selected');
+                    this.aggiornaDateSelezionate();
+                }
+
+                const allSections = document.querySelectorAll('.fascia-giorno-section');
+                allSections.forEach(section => section.style.display = 'none');
+
+                const fasciaSection = document.querySelector(`.fascia-giorno-section[data-date="${dataDate}"]`);
+                if (fasciaSection) {
+                    fasciaSection.style.display = 'block';
+                }
+            },
+            removeDate(event) {
+                event.stopPropagation();
+                const item = event.currentTarget.parentElement;
+                const dataDate = item.getAttribute('data-date');
+
+                item.classList.remove('selected');
+
+                const fasciaSection = document.querySelector(`.fascia-giorno-section[data-date="${dataDate}"]`);
+                if (fasciaSection) {
+                    const checkboxes = fasciaSection.querySelectorAll('input[type="checkbox"]');
+                    checkboxes.forEach(cb => {
+                        cb.checked = false;
+                        cb.parentElement.classList.remove('selected');
+                    });
+                }
+
+                const allSections = document.querySelectorAll('.fascia-giorno-section');
+                allSections.forEach(section => section.style.display = 'none');
+
+                const dateItems = document.querySelectorAll('.date-item.selected');
+                if (dateItems.length > 0) {
+                    const lastSelectedDate = dateItems[dateItems.length - 1].getAttribute('data-date');
+                    const lastSection = document.querySelector(`.fascia-giorno-section[data-date="${lastSelectedDate}"]`);
+                    if (lastSection) {
+                        lastSection.style.display = 'block';
+                    }
+                }
+
+                this.aggiornaDateSelezionate();
+            },
+            aggiornaDateSelezionate() {
+                const dateItems = document.querySelectorAll('.date-item.selected');
+                const dateSelezionate = Array.from(dateItems).map(item => item.getAttribute('data-date'));
+                const inputDatePresenza = document.getElementById('inputDatePresenza');
+                if (inputDatePresenza) {
+                    inputDatePresenza.value = JSON.stringify(dateSelezionate);
+                }
+            },
+            validaFormNave() {
+                this.aggiornaDateSelezionate();
+                const datePresenzaJson = document.getElementById('inputDatePresenza').value;
+                const datePresenza = JSON.parse(datePresenzaJson || '[]');
+
+                if (datePresenza.length === 0) {
+                    document.getElementById('avisoDate').style.display = 'block';
                     return false;
                 }
+                document.getElementById('avisoDate').style.display = 'none';
+
+                const fascePerData = {};
+                let haAlmenoUnaFascia = true;
+
+                datePresenza.forEach(dataStr => {
+                    const checkboxes = document.querySelectorAll(`input[name^="fascia_${dataStr}_"]:checked`);
+                    const fasceSelezionate = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+                    if (fasceSelezionate.length === 0) {
+                        haAlmenoUnaFascia = false;
+                    } else {
+                        fascePerData[dataStr] = fasceSelezionate;
+                    }
+                });
+
+                if (!haAlmenoUnaFascia) {
+                    document.getElementById('avisoFasce').style.display = 'block';
+                    return false;
+                }
+                document.getElementById('avisoFasce').style.display = 'none';
+
+                const inputFascePerData = document.getElementById('inputFascePerData');
+                if (inputFascePerData) {
+                    inputFascePerData.value = JSON.stringify(fascePerData);
+                }
+
                 return true;
             }
         }
         });
 
-        // monta Vue quando il DOM è pronto
         let appNaviInstance = null;
 
-        //funzione per montare Vue
         function mountVue() {
             const appElement = document.getElementById('appNavi');
             if (appElement && !appNaviInstance) {
@@ -366,49 +278,40 @@
             }
         }
 
-        //aspetta sempre il DOMContentLoaded per sicurezza
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', mountVue);
         } else {
             setTimeout(mountVue, 0);
         }
 
-        //espone funzioni globali per compatibilità con onclick nell' HTML
-        window.selezionaGiornoFuturo = (data) => {
-            if (!appNaviInstance) mountVue();
-            if (appNaviInstance) appNaviInstance.selezionaGiornoFuturo(data);
-        };
+        //funzioni globali
         window.apriModal = (id) => {
             if (!appNaviInstance) mountVue();
             if (appNaviInstance) appNaviInstance.apriModal(id);
         };
-        window.apriModalNuova = (data, nascondi) => {
+        window.apriModalNuova = () => {
             if (!appNaviInstance) mountVue();
-            if (appNaviInstance) appNaviInstance.apriModalNuova(data, nascondi);
+            if (appNaviInstance) appNaviInstance.apriModalNuova();
         };
         window.chiudiModal = () => {
             if (appNaviInstance) appNaviInstance.chiudiModal();
-        };
-        window.chiudiSezioneGiorno = () => {
-            if (!appNaviInstance) mountVue();
-            if (appNaviInstance) appNaviInstance.chiudiSezioneGiorno();
         };
         window.eliminaNave = (id) => {
             if (!appNaviInstance) mountVue();
             if (appNaviInstance) appNaviInstance.eliminaNave(id);
         };
-        window.toggleFascia = (item) => {
-            if (!appNaviInstance) mountVue();
-            if (appNaviInstance) appNaviInstance.toggleFascia(item);
+        window.toggleFasciaPerGiorno = (event) => {
+            if (appNaviInstance) appNaviInstance.toggleFasciaPerGiorno(event);
+        };
+        window.selectDate = (event) => {
+            if (appNaviInstance) appNaviInstance.selectDate(event);
+        };
+        window.removeDate = (event) => {
+            if (appNaviInstance) appNaviInstance.removeDate(event);
         };
         window.validaFormNave = () => {
-            if (!appNaviInstance) mountVue();
             if (appNaviInstance) return appNaviInstance.validaFormNave();
-            return true;
-        };
-        window.aggiornaStatoFasce = () => {
-            if (!appNaviInstance) mountVue();
-            if (appNaviInstance) appNaviInstance.aggiornaStatoFasce();
+            return false;
         };
     }
     </script>

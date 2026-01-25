@@ -1,34 +1,30 @@
 [
   {
-    "Id": 1,
-    "Nome": "Nave 1",
+    "Id": 16,
+    "Nome": "nave 1",
     "Tipo": 0,
-    "DataArrivo": "2026-01-20T00:00:00+01:00",
-    "Pontile": 10,
-    "FasciaMattina": true,
-    "FasciaPomeriggio": true,
+    "DatePresenza": [
+      "2026-01-25T00:00:00",
+      "2026-01-26T00:00:00"
+    ],
+    "FascePerData": {
+      "2026-01-25": [
+        0,
+        1
+      ],
+      "2026-01-26": [
+        0
+      ]
+    },
+    "Pontile": 2,
+    "FasciaMattina": false,
+    "FasciaPomeriggio": false,
     "FasciaSera": false,
     "RichiedeGruisti": true,
     "RichiedeMulettisti": true,
     "TipoDescrizione": "Container",
     "RuoliRichiesti": "Gruisti\nMulettisti",
-    "HasAlmenoUnaFascia": true,
+    "HasAlmenoUnaFascia": false,
     "Colore": "#FF6B6B"
-  },
-  {
-    "Id": 11,
-    "Nome": "w",
-    "Tipo": 0,
-    "DataArrivo": "2026-01-24T00:00:00",
-    "Pontile": 2,
-    "FasciaMattina": true,
-    "FasciaPomeriggio": false,
-    "FasciaSera": false,
-    "RichiedeGruisti": true,
-    "RichiedeMulettisti": false,
-    "TipoDescrizione": "Container",
-    "RuoliRichiesti": "Gruisti",
-    "HasAlmenoUnaFascia": true,
-    "Colore": "#4ECDC4"
   }
 ]
