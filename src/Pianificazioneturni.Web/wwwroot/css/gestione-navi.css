@@ -28,31 +28,56 @@
     position: relative;
 }
 
-/* Tabella Timeline */
+/* Tabella Timeline - STESSO STILE DI GESTIONE DIPENDENTI */
 .timeline-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.9rem;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #dee2e6;
 }
 
 .timeline-table thead th {
-    background-color: #e9ecef;
+    background-color: #e9ecef !important;
     font-weight: bold;
     padding: 8px;
-    border: 1px solid #dee2e6;
     text-align: center;
     vertical-align: middle;
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+    border-bottom: 2px solid #dee2e6 !important;
+}
+
+.timeline-table td,
+.timeline-table th {
+    border: 1px solid #dee2e6 !important;
+    border-top: 2px solid #f0f0f0 !important;
+}
+
+.timeline-table tbody tr:first-child td {
+    border-top: none !important;
 }
 
 .colonna-info {
     min-width: 120px;
     background-color: #f8f9fa !important;
     font-weight: bold;
+    text-align: center !important;
 }
 
 .giorno-header {
     font-size: 0.85rem;
     padding: 6px;
+}
+
+.info-cell {
+    padding: 10px;
+    background-color: #f8f9fa;
+    text-align: center !important;
+    vertical-align: middle !important;
 }
 
 .fascia-header {
@@ -61,19 +86,12 @@
     padding: 4px;
 }
 
-.info-cell {
-    padding: 10px;
-    background-color: #f8f9fa;
-    border-right: 1px solid #dee2e6;
-}
-
 .fascia-cell {
     width: 60px;
     height: 50px;
     padding: 2px;
     text-align: center;
     vertical-align: middle;
-    border: 1px solid #dee2e6;
 }
 
 .fascia-marker {

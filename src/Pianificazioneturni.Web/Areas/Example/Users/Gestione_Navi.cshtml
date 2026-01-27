@@ -36,23 +36,35 @@
             <thead>
                 <!-- Prima riga: intestazioni colonne info + giorni -->
                 <tr>
-                    <th rowspan="2" class="colonna-info">Nome Nave</th>
-                    <th rowspan="2" class="colonna-info">Pontile</th>
-                    <th rowspan="2" class="colonna-info">Ruoli</th>
+                    <th rowspan="2" class="colonna-info" style="text-align: center !important; border-right: 1px solid #dee2e6 !important;">Nome Nave</th>
+                    <th rowspan="2" class="colonna-info" style="text-align: center !important; border-right: 1px solid #dee2e6 !important;">Pontile</th>
+                    <th rowspan="2" class="colonna-info" style="text-align: center !important; border-right: 3px solid #495057 !important;">Ruoli richiesti</th>
+                    @{
+                        var giornoIndex = 0;
+                        var totalGiorni = timeline.Count();
+                    }
                     @foreach (var giorno in timeline)
                     {
-                        <th colspan="3" class="text-center giorno-header">
+                        giornoIndex++;
+                        var isUltimoGiorno = giornoIndex == totalGiorni;
+                        <th colspan="3" class="text-center giorno-header" style="@(isUltimoGiorno ? "" : "border-right: 3px solid #495057 !important;")">
                             @giorno.Data.ToString("dd/MM")<br/>@giorno.Data.ToString("ddd")
                         </th>
                     }
                 </tr>
                 <!-- Seconda riga: fasce orarie -->
                 <tr>
+                    @{
+                        var fasciaIndex = 0;
+                        var totalFasce = timeline.Count() * 3;
+                    }
                     @foreach (var giorno in timeline)
                     {
                         <th class="fascia-header">00:00<br/>08:00</th>
                         <th class="fascia-header">08:00<br/>16:00</th>
-                        <th class="fascia-header">16:00<br/>24:00</th>
+                        fasciaIndex += 3;
+                        var isUltimaFascia = fasciaIndex == totalFasce;
+                        <th class="fascia-header" style="@(isUltimaFascia ? "" : "border-right: 3px solid #495057 !important;")">16:00<br/>24:00</th>
                     }
                 </tr>
             </thead>
@@ -63,13 +75,17 @@
                     {
                         <tr class="nave-row" onclick="apriModal(@nave.Id)">
                             <!-- Colonna Nome -->
-                            <td class="info-cell"><strong>@nave.Nome</strong></td>
+                            <td class="info-cell" style="text-align: center !important; border-right: 1px solid #dee2e6 !important;"><strong>@nave.Nome</strong></td>
                             <!-- Colonna Pontile -->
-                            <td class="info-cell text-center">@nave.Pontile</td>
+                            <td class="info-cell" style="text-align: center !important; border-right: 1px solid #dee2e6 !important;">@nave.Pontile</td>
                             <!-- Colonna Ruoli -->
-                            <td class="info-cell">@nave.RuoliRichiesti.Replace("\n", ", ")</td>
+                            <td class="info-cell" style="text-align: center !important; border-right: 3px solid #495057 !important;">@nave.RuoliRichiesti.Replace("\n", ", ")</td>
 
                             <!-- Celle fasce orarie per ogni giorno -->
+                            @{
+                                var cellaIndex = 0;
+                                var totalCelle = timeline.Count() * 3;
+                            }
                             @foreach (var giorno in timeline)
                             {
                                 var hasMattina = nave.HasFasciaInData(giorno.Data, 0);
@@ -88,7 +104,9 @@
                                         <div class="fascia-marker"></div>
                                     }
                                 </td>
-                                <td class="fascia-cell @(hasSera ? "fascia-occupata" : "")">
+                                cellaIndex += 3;
+                                var isUltimaCella = cellaIndex == totalCelle;
+                                <td class="fascia-cell @(hasSera ? "fascia-occupata" : "")" style="@(isUltimaCella ? "" : "border-right: 3px solid #495057 !important;")">
                                     @if (hasSera)
                                     {
                                         <div class="fascia-marker"></div>
