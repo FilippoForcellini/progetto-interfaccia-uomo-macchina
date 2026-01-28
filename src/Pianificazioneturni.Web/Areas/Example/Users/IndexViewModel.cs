@@ -168,7 +168,6 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         public string Cognome { get; set; }
         public string Ruolo { get; set; }
         public bool PatenteScaduta { get; set; }
-        public bool RichiedeVariazione { get; set; }
 
         public string NomeCompleto => $"{Cognome} {Nome}";
     }

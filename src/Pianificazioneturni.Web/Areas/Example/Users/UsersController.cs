@@ -25,7 +25,6 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         private static readonly string NaviFilePath = Path.Combine(DataFolder, "navi.json");
         private static readonly string DipendentiFilePath = Path.Combine(DataFolder, "dipendenti.json");
         private static readonly string AssegnazioniFilePath = Path.Combine(DataFolder, "assegnazioni.json");
-        private static readonly string VariazioniRisolteFilePath = Path.Combine(DataFolder, "variazioni_risolte.json");
         private static readonly string NextNaveIdFilePath = Path.Combine(DataFolder, "next_nave_id.json");
 
         //lista statica dipendenti (simula database)
@@ -37,37 +36,7 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
 
         private static List<NaveDetailViewModel> InitNavi()
         {
-            return new List<NaveDetailViewModel>
-            {
-                new NaveDetailViewModel
-                {
-                    Id = 1,
-                    Nome = "Nave 1",
-                    Tipo = TipoNave.Container,
-                    Pontile = 10,
-                    DatePresenza = new List<DateTime> { DateTime.Today },
-                    FasciaMattina = true,
-                    FasciaPomeriggio = true,
-                    FasciaSera = false,
-                    RichiedeGruisti = true,
-                    RichiedeMulettisti = true,
-                    Colore = ColoriNavi.GetColore(0)
-                },
-                new NaveDetailViewModel
-                {
-                    Id = 2,
-                    Nome = "Nave 2",
-                    Tipo = TipoNave.Portarinfuse,
-                    Pontile = 30,
-                    DatePresenza = new List<DateTime> { DateTime.Today },
-                    FasciaMattina = false,
-                    FasciaPomeriggio = false,
-                    FasciaSera = true,
-                    RichiedeGruisti = false,
-                    RichiedeMulettisti = true,
-                    Colore = ColoriNavi.GetColore(1)
-                }
-            };
+            return new List<NaveDetailViewModel>();
         }
 
         private static List<DipendenteDetailViewModel> InitDipendenti()
@@ -104,9 +73,6 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
 
         //Assegnazioni dipendenti alle navi
         private static Dictionary<string, List<int>> _assegnazioniDipendenti = LoadAssegnazioni();
-
-        //dipendenti con variazione risolta (non devono più mostrare il "flag" variazione)
-        private static HashSet<int> _variazioniRisolte = LoadVariazioniRisolte();
 
         #region Persistenza Dati JSON
 
@@ -250,50 +216,6 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
             }
         }
 
-        private static HashSet<int> LoadVariazioniRisolte()
-        {
-            try
-            {
-                EnsureDataFolderExists();
-                if (System.IO.File.Exists(VariazioniRisolteFilePath))
-                {
-                    var json = System.IO.File.ReadAllText(VariazioniRisolteFilePath);
-                    if (!string.IsNullOrWhiteSpace(json))
-                    {
-                        var options = new System.Text.Json.JsonSerializerOptions
-                        {
-                            PropertyNameCaseInsensitive = true
-                        };
-                        var list = System.Text.Json.JsonSerializer.Deserialize<List<int>>(json, options);
-                        return list != null ? new HashSet<int>(list) : new HashSet<int>();
-                    }
-                }
-            }
-            catch
-            {
-                try { System.IO.File.Delete(VariazioniRisolteFilePath); } catch { }
-            }
-            return new HashSet<int>();
-        }
-
-        private static void SaveVariazioniRisolte()
-        {
-            try
-            {
-                EnsureDataFolderExists();
-                var options = new System.Text.Json.JsonSerializerOptions
-                {
-                    WriteIndented = true,
-                    PropertyNameCaseInsensitive = true
-                };
-                var json = System.Text.Json.JsonSerializer.Serialize(_variazioniRisolte.ToList(), options);
-                System.IO.File.WriteAllText(VariazioniRisolteFilePath, json);
-            }
-            catch
-            {
-               
-            }
-        }
 
         private static int LoadNextNaveId()
         {
@@ -331,16 +253,7 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
 
         private static Dictionary<string, List<int>> InitAssegnazioni()
         {
-            //solo navi già in lavorazione (oggi)
-            return new Dictionary<string, List<int>>
-            {
-                // Nave 1 - oggi, fascia mattina e pomeriggio (gruisti e mulettisti)
-                { "1_0", new List<int> { 1, 7, 10, 2, 5 } },     
-                { "1_1", new List<int> { 14, 17, 20, 9, 15 } },
-                // Nave 2 - oggi, fascia sera (solo mulettisti)
-                { "2_2", new List<int> { 2, 5, 9, 15, 18 } }
-              
-            };
+            return new Dictionary<string, List<int>>();
         }
 
         public UsersController(SharedService sharedService, IPublishDomainEvents publisher, IStringLocalizer<SharedResource> sharedLocalizer)
@@ -377,8 +290,7 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                 Nome = d.Nome.Split(' ').Length > 1 ? d.Nome.Split(' ')[1] : d.Nome,
                 Cognome = d.Nome.Split(' ')[0],
                 Ruolo = d.Ruolo,
-                PatenteScaduta = d.Patente && d.Scadenza.HasValue && d.Scadenza.Value < DateTime.Today,
-                RichiedeVariazione = false
+                PatenteScaduta = d.Patente && d.Scadenza.HasValue && d.Scadenza.Value < DateTime.Today
             }).ToList();
 
             //filtra gruisti e mulettisti disponibili
@@ -387,11 +299,11 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
 
             //Navi oggi da Gestione Navi
             var naviOggiDb = _navi.Where(n => n.DatePresenza.Any(d => d.Date == oggi)).ToList();
-            model.NaviOggi = naviOggiDb.Select(n => CreaNaveViewModel(n, model.TuttiDipendenti, random)).ToList();
+            model.NaviOggi = naviOggiDb.Select(n => CreaNaveViewModel(n, model.TuttiDipendenti, random, oggi)).ToList();
 
             //Navi domani da Gestione Navi
             var naviDomaniDb = _navi.Where(n => n.DatePresenza.Any(d => d.Date == domani)).ToList();
-            model.NaviDomani = naviDomaniDb.Select(n => CreaNaveViewModel(n, model.TuttiDipendenti, random)).ToList();
+            model.NaviDomani = naviDomaniDb.Select(n => CreaNaveViewModel(n, model.TuttiDipendenti, random, domani)).ToList();
 
             model.OraCorrente = DateTime.Now.Hour;
 
@@ -417,54 +329,26 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                     model.Assegnazioni[$"{nave.Id}_2_domani"] = nave.DipendentiSera.Select(d => d.Id).ToList();
             }
 
-            //Genera massimo 1 variazione per volta, solo per dipendenti assegnati a "Domani" (2% di probabilità)
-            var dipendentiDomani = model.NaviDomani
-                .SelectMany(n => n.DipendentiMattina.Concat(n.DipendentiPomeriggio).Concat(n.DipendentiSera))
-                .Select(d => d.Id)
-                .Distinct()
-                .ToList();
-
-            //Controlla se c'è già una variazione attiva
-            bool haVariazioneAttiva = model.TuttiDipendenti.Any(d => d.RichiedeVariazione);
-
-            //Genera solo se non ci sono già variazioni attive e con probabilità bassa
-            if (!haVariazioneAttiva && dipendentiDomani.Any() && random.Next(100) < 5) //5% probabilità
-            {
-                //prende un dipendente casuale tra quelli di domani che non hanno già avuto variazione risolta
-                var candidati = dipendentiDomani.Where(id => !_variazioniRisolte.Contains(id)).ToList();
-                if (candidati.Any())
-                {
-                    var dipIdScelto = candidati[random.Next(candidati.Count)];
-                    var dip = model.TuttiDipendenti.FirstOrDefault(d => d.Id == dipIdScelto);
-                    if (dip != null)
-                    {
-                        dip.RichiedeVariazione = true;
-                    }
-                }
-            }
         }
 
-        private NaveViewModel CreaNaveViewModel(NaveDetailViewModel naveDb, List<DipendenteViewModel> tuttiDipendenti, Random random)
+        private NaveViewModel CreaNaveViewModel(NaveDetailViewModel naveDb, List<DipendenteViewModel> tuttiDipendenti, Random random, DateTime data)
         {
             var nave = new NaveViewModel
             {
                 Id = naveDb.Id,
                 Nome = naveDb.Nome,
                 Pontile = naveDb.Pontile ?? 0,
-                FasciaMattina = naveDb.FasciaMattina,
-                FasciaPomeriggio = naveDb.FasciaPomeriggio,
-                FasciaSera = naveDb.FasciaSera,
+                FasciaMattina = naveDb.HasFasciaInData(data, 0),
+                FasciaPomeriggio = naveDb.HasFasciaInData(data, 1),
+                FasciaSera = naveDb.HasFasciaInData(data, 2),
                 RichiedeGruisti = naveDb.RichiedeGruisti,
                 RichiedeMulettisti = naveDb.RichiedeMulettisti
             };
 
-            //Carica dipendenti salvati o lascia vuoto
-            if (naveDb.FasciaMattina)
-                nave.DipendentiMattina = GetDipendentiAssegnati(naveDb.Id, 0, tuttiDipendenti);
-            if (naveDb.FasciaPomeriggio)
-                nave.DipendentiPomeriggio = GetDipendentiAssegnati(naveDb.Id, 1, tuttiDipendenti);
-            if (naveDb.FasciaSera)
-                nave.DipendentiSera = GetDipendentiAssegnati(naveDb.Id, 2, tuttiDipendenti);
+            //Carica dipendenti salvati
+            nave.DipendentiMattina = GetDipendentiAssegnati(naveDb.Id, 0, tuttiDipendenti);
+            nave.DipendentiPomeriggio = GetDipendentiAssegnati(naveDb.Id, 1, tuttiDipendenti);
+            nave.DipendentiSera = GetDipendentiAssegnati(naveDb.Id, 2, tuttiDipendenti);
 
             return nave;
         }
@@ -502,12 +386,7 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                 if (index >= 0)
                 {
                     idDipendenti[index] = nuovoDipendenteId;
-
-                    //marca il vecchio dipendente come "variazione risolta"
-                    _variazioniRisolte.Add(vecchioDipendenteId);
-
                     SaveAssegnazioni();
-                    SaveVariazioniRisolte();
                 }
             }
             return Json(new { success = true });
@@ -628,35 +507,6 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                 }
             }
 
-            //verifica che le fasce selezionate non siano già occupate per ogni data
-            foreach (var data in datePresenza)
-            {
-                var dataKey = data.ToString("yyyy-MM-dd");
-                var fasceDelGiorno = fascePerData.ContainsKey(dataKey) ? fascePerData[dataKey] : new List<int>();
-
-                foreach (var fascia in fasceDelGiorno)
-                {
-                    var naviStessoGiornoStessaFascia = _navi.Where(n =>
-                        n.Id != id &&
-                        n.DatePresenza.Any(d => d.Date == data.Date) &&
-                        n.HasFasciaInData(data, fascia)
-                    ).ToList();
-
-                    if (naviStessoGiornoStessaFascia.Any())
-                    {
-                        var fasciaDesc = fascia switch
-                        {
-                            0 => "00:00-08:00",
-                            1 => "08:00-16:00",
-                            2 => "16:00-24:00",
-                            _ => ""
-                        };
-                        var altraNave = naviStessoGiornoStessaFascia.First();
-                        Alerts.AddError(this, $"La fascia {fasciaDesc} del {data:dd/MM/yyyy} è già occupata dalla nave {altraNave.Nome}");
-                        return RedirectToAction(Actions.GestioneNavi());
-                    }
-                }
-            }
 
             if (id == 0)
             {

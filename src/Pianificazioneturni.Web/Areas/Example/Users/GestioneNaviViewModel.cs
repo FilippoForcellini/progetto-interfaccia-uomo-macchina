@@ -109,15 +109,6 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         [Required(ErrorMessage = "Il numero del pontile è obbligatorio")]
         public int? Pontile { get; set; }
 
-        //proprietà di retrocompatibilità (deprecate ma mantenute per non rompere codice esistente)
-        [Display(Name = "00:00 / 08:00")]
-        public bool FasciaMattina { get; set; }
-
-        [Display(Name = "08:00 / 16:00")]
-        public bool FasciaPomeriggio { get; set; }
-
-        [Display(Name = "16:00 / 24:00")]
-        public bool FasciaSera { get; set; }
 
         //helper methods per verificare se una fascia è presente in una specifica data
         public bool HasFasciaInData(DateTime data, int fascia)
@@ -153,7 +144,7 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
             }
         }
 
-        public bool HasAlmenoUnaFascia => FasciaMattina || FasciaPomeriggio || FasciaSera;
+        public bool HasAlmenoUnaFascia => FascePerData.Any(kvp => kvp.Value.Any());
 
         public string Colore { get; set; }
     }

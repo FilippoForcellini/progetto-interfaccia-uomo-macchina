@@ -2,6 +2,28 @@
     display: none;
 }
 
+/* Stile tabella Home */
+.table.table-bordered {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #dee2e6;
+}
+
+.table thead th {
+    background-color: #e9ecef !important;
+    font-weight: bold;
+    border-bottom: 2px solid #dee2e6 !important;
+}
+
+.table thead th:first-child {
+    color: #000 !important;
+}
+
+.table tbody tr:first-child td {
+    border-top: none !important;
+}
+
 .dipendente {
     display: flex;
     align-items: center;
@@ -21,11 +43,11 @@
 .dipendente.non-cliccabile {
     cursor: default; opacity: 0.8; 
 }
-.dipendente.patente-scaduta { 
-    background: #ffeb3b; 
+.dipendente.patente-scaduta {
+    background: #FFF06C;
 }
-.dipendente.variazione { 
-    border: 2px solid #ff9800; 
+.dipendente.patente-scaduta:hover {
+    background: #FFEB3B;
 }
 .nave-stato { 
     font-size: 0.8rem; font-weight: 500; padding: 2px 6px; border-radius: 3px; 
@@ -89,9 +111,6 @@
 }
 .dipendente-option.selected {
     background: #2196f3; color: white; 
-}
-.dipendente-option.patente-scaduta { 
-   background: #fff3cd; 
 }
 .dipendente-option.non-disponibile {
     background: #f8d7da; color: #721c24; cursor: not-allowed; opacity: 0.6;
