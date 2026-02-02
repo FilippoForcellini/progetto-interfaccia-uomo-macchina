@@ -30,11 +30,22 @@
 
 <div id="appNavi">
 <div class="container-fluid">
+    <h4 class="mb-3">Gestione Navi</h4>
+    <div class="d-flex justify-content-end align-items-center mb-3 gap-2" style="min-height: 32px;">
+        <button class="btn btn-secondary btn-sm btn-filter" :class="{ 'active': filtroRuolo === 'gruisti' }" @@click.stop="filtroRuolo = filtroRuolo === 'gruisti' ? '' : 'gruisti'">
+            Gruisti
+        </button>
+        <button class="btn btn-secondary btn-sm btn-filter" :class="{ 'active': filtroRuolo === 'mulettisti' }" @@click.stop="filtroRuolo = filtroRuolo === 'mulettisti' ? '' : 'mulettisti'">
+            Mulettisti
+        </button>
+        <button class="btn btn-secondary btn-sm btn-filter" :class="{ 'active': filtroRuolo === 'entrambi' }" @@click.stop="filtroRuolo = filtroRuolo === 'entrambi' ? '' : 'entrambi'">
+            Entrambi
+        </button>
+    </div>
 
     <div class="table-responsive">
         <table class="table table-bordered timeline-table">
-            <thead>
-                <!-- Prima riga: intestazioni colonne info + giorni -->
+            <thead>     
                 <tr>
                     <th rowspan="2" class="colonna-info" style="text-align: center !important; border-right: 1px solid #dee2e6 !important;">Nome Nave</th>
                     <th rowspan="2" class="colonna-info" style="text-align: center !important; border-right: 1px solid #dee2e6 !important;">Pontile</th>
@@ -52,7 +63,6 @@
                         </th>
                     }
                 </tr>
-                <!-- Seconda riga: fasce orarie. -->
                 <tr>
                     @{
                         var fasciaIndex = 0;
@@ -73,15 +83,12 @@
                 {
                     @foreach (var nave in Model.TutteLeNavi)
                     {
-                        <tr class="nave-row" onclick="apriModal(@nave.Id)">
-                            <!-- Colonna Nome -->
+                        <tr class="nave-row" @@click="apriModal(@nave.Id)" v-show="mostraNave('@nave.RichiedeGruisti.ToString().ToLower()', '@nave.RichiedeMulettisti.ToString().ToLower()')">
                             <td class="info-cell" style="text-align: center !important; border-right: 1px solid #dee2e6 !important;"><strong>@nave.Nome</strong></td>
-                            <!-- Colonna Pontile -->
                             <td class="info-cell" style="text-align: center !important; border-right: 1px solid #dee2e6 !important;">@nave.Pontile</td>
-                            <!-- Colonna Ruoli -->
                             <td class="info-cell" style="text-align: center !important; border-right: 3px solid #495057 !important;">@nave.RuoliRichiesti.Replace("\n", ", ")</td>
 
-                            <!-- Celle fasce orarie per ogni giorno -->
+                            <!-- celle fasce orarie per ogni giorno -->
                             @{
                                 var cellaIndex = 0;
                                 var totalCelle = timeline.Count() * 3;
@@ -126,7 +133,6 @@
         </table>
     </div>
 
-    <!-- Bottone Aggiungi sotto la tabella -->
     <div class="mt-3 mb-3">
         <button class="btn btn-dark btn-sm" onclick="apriModalNuova()">Aggiungi Nave</button>
     </div>
@@ -137,7 +143,6 @@
         </div>
     </div>
 
-    <!-- Form per l'eliminazione -->
     <form id="formEliminaNave" method="post" asp-action="EliminaNave" style="display:none;">
         <input type="hidden" name="id" id="eliminaNaveId" />
     </form>
@@ -155,10 +160,23 @@
         data() {
             return {
                 modalNaveVisible: false,
-                modalNaveContent: ''
+                modalNaveContent: '',
+                filtroRuolo: ''
             };
         },
         methods: {
+            mostraNave(richiedeGruisti, richiedeMulettisti) {
+                if (!this.filtroRuolo) return true;
+
+                const gruisti = richiedeGruisti === 'true';
+                const mulettisti = richiedeMulettisti === 'true';
+
+                if (this.filtroRuolo === 'gruisti') return gruisti && !mulettisti;
+                if (this.filtroRuolo === 'mulettisti') return mulettisti && !gruisti;
+                if (this.filtroRuolo === 'entrambi') return gruisti && mulettisti;
+
+                return true;
+            },
             async apriModal(id) {
                 const response = await fetch(`@Url.Action("DettaglioNave", "Users", new { Area = "Example" })?id=${id}`);
                 this.modalNaveContent = await response.text();

@@ -63,34 +63,53 @@
         <div id="fascePerGiornoContainer">
             @{
                 var oggiModal = DateTime.Today;
+                var oraCorrente = DateTime.Now.Hour;
                 for (int i = 0; i < 7; i++)
                 {
                     var dataModal = oggiModal.AddDays(i);
                     var dataStrModal = dataModal.ToString("yyyy-MM-dd");
                     var dataDisplay = dataModal.ToString("dd/MM");
                     var isDateSelected = Model.DatePresenza.Any(d => d.Date == dataModal.Date);
+                    var isOggi = dataModal.Date == oggiModal.Date;
 
                     var hasMattina = Model.HasFasciaInData(dataModal, 0);
                     var hasPomeriggio = Model.HasFasciaInData(dataModal, 1);
                     var hasSera = Model.HasFasciaInData(dataModal, 2);
 
+                    //controlla se le fasce sono passate (solo per navi oggi) - si disabilitano quando iniziano
+                    var mattinaPassata = isOggi && oraCorrente >= 0; //si disabilita alle 00:00 (quando inizia)
+                    var pomeriggioPassato = isOggi && oraCorrente >= 8; //Si disabilita alle 08:00 (quando inizia)
+                    var seraPassata = isOggi && oraCorrente >= 16; //si disabilita alle 16:00(quando inizia)
+
                     <div class="fascia-giorno-section" data-date="@dataStrModal" style="display: none;">
                         <div class="fw-bold mb-2 mt-3">@dataDisplay - Seleziona fasce:</div>
                         <div class="fascia-oraria-group">
-                            <div class="fascia-oraria-item @(hasMattina ? "selected" : "")"
-                                 onclick="toggleFasciaPerGiorno(event)">
-                                <input type="checkbox" name="fascia_@(dataStrModal)_0" value="0" @(hasMattina ? "checked" : "") />
+                            <div class="fascia-oraria-item @(hasMattina ? "selected" : "") @(mattinaPassata ? "disabled" : "")"
+                                 onclick="@(mattinaPassata ? "" : "toggleFasciaPerGiorno(event)")">
+                                <input type="checkbox" name="fascia_@(dataStrModal)_0" value="0" @(hasMattina ? "checked" : "") @(mattinaPassata ? "disabled" : "") />
                                 <div class="fascia-label">00:00 / 08:00</div>
+                                @if (mattinaPassata)
+                                {
+                                    <div class="fascia-status text-muted">Passata</div>
+                                }
                             </div>
-                            <div class="fascia-oraria-item @(hasPomeriggio ? "selected" : "")"
-                                 onclick="toggleFasciaPerGiorno(event)">
-                                <input type="checkbox" name="fascia_@(dataStrModal)_1" value="1" @(hasPomeriggio ? "checked" : "") />
+                            <div class="fascia-oraria-item @(hasPomeriggio ? "selected" : "") @(pomeriggioPassato ? "disabled" : "")"
+                                 onclick="@(pomeriggioPassato ? "" : "toggleFasciaPerGiorno(event)")">
+                                <input type="checkbox" name="fascia_@(dataStrModal)_1" value="1" @(hasPomeriggio ? "checked" : "") @(pomeriggioPassato ? "disabled" : "") />
                                 <div class="fascia-label">08:00 / 16:00</div>
+                                @if (pomeriggioPassato)
+                                {
+                                    <div class="fascia-status text-muted">Passata</div>
+                                }
                             </div>
-                            <div class="fascia-oraria-item @(hasSera ? "selected" : "")"
-                                 onclick="toggleFasciaPerGiorno(event)">
-                                <input type="checkbox" name="fascia_@(dataStrModal)_2" value="2" @(hasSera ? "checked" : "") />
+                            <div class="fascia-oraria-item @(hasSera ? "selected" : "") @(seraPassata ? "disabled" : "")"
+                                 onclick="@(seraPassata ? "" : "toggleFasciaPerGiorno(event)")">
+                                <input type="checkbox" name="fascia_@(dataStrModal)_2" value="2" @(hasSera ? "checked" : "") @(seraPassata ? "disabled" : "") />
                                 <div class="fascia-label">16:00 / 24:00</div>
+                                @if (seraPassata)
+                                {
+                                    <div class="fascia-status text-muted">Passata</div>
+                                }
                             </div>
                         </div>
                     </div>

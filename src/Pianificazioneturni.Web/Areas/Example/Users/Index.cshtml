@@ -32,6 +32,10 @@
 
 <div id="app" v-cloak>
 <div class="container-fluid">
+    <div class="d-flex justify-content-end align-items-center mb-3">
+        <input type="text" class="form-control" style="max-width: 300px;" placeholder="Cerca dipendente..." v-model="filtroNome" />
+        <button v-if="filtroNome" class="btn btn-secondary btn-sm ms-2" @@click="filtroNome = ''">Mostra tutti</button>
+    </div>
     <div class="row">
         <!-- Navi oggi -->
         <div class="col-md-6">
@@ -66,7 +70,22 @@
                             <tr>
                                 <td>
                                     <div class="fw-bold">@nave.Nome</div>
-                                    <span class="nave-stato @statoClasse">@nave.GetStatoDescrizione(oraCorrente)</span>
+                                    <span class="nave-stato @statoClasse">
+                                        @nave.GetStatoDescrizione(oraCorrente)
+                                        @{
+                                            var statoIcon = nave.GetStato(oraCorrente) switch
+                                            {
+                                                StatoNave.InLavorazione => "in_lavorazione.png",
+                                                StatoNave.InPartenza => "in_partenza.png",
+                                                StatoNave.InArrivo => "in_arrivo.png",
+                                                _ => ""
+                                            };
+                                        }
+                                        @if (!string.IsNullOrEmpty(statoIcon))
+                                        {
+                                            <img src="~/images/@statoIcon" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 5px;" />
+                                        }
+                                    </span>
                                 </td>
                                 <td class="text-center">@nave.Pontile</td>
                                 <!-- Fascia Mattina -->
@@ -79,6 +98,7 @@
                                             @if (fasciaInArrivo)
                                             {
                                                 <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
+                                                     v-show="mostraDipendente('@dip.NomeCompleto')"
                                                      @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 0, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                     <span>@dip.NomeCompleto</span>
                                                     @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
@@ -86,7 +106,8 @@
                                             }
                                             else
                                             {
-                                                <div class="dipendente non-cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")">
+                                                <div class="dipendente non-cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
+                                                     v-show="mostraDipendente('@dip.NomeCompleto')">
                                                     <span>@dip.NomeCompleto</span>
                                                     @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
                                                 </div>
@@ -110,6 +131,7 @@
                                             @if (fasciaInArrivo)
                                             {
                                                 <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
+                                                     v-show="mostraDipendente('@dip.NomeCompleto')"
                                                      @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 1, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                     <span>@dip.NomeCompleto</span>
                                                     @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
@@ -117,7 +139,8 @@
                                             }
                                             else
                                             {
-                                                <div class="dipendente non-cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")">
+                                                <div class="dipendente non-cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
+                                                     v-show="mostraDipendente('@dip.NomeCompleto')">
                                                     <span>@dip.NomeCompleto</span>
                                                     @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
                                                 </div>
@@ -141,6 +164,7 @@
                                             @if (fasciaInArrivo)
                                             {
                                                 <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
+                                                     v-show="mostraDipendente('@dip.NomeCompleto')"
                                                      @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 2, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                     <span>@dip.NomeCompleto</span>
                                                     @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
@@ -148,7 +172,8 @@
                                             }
                                             else
                                             {
-                                                <div class="dipendente non-cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")">
+                                                <div class="dipendente non-cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
+                                                     v-show="mostraDipendente('@dip.NomeCompleto')">
                                                     <span>@dip.NomeCompleto</span>
                                                     @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
                                                 </div>
@@ -201,7 +226,10 @@
                             <tr>
                                 <td>
                                     <div class="fw-bold">@nave.Nome</div>
-                                    <span class="nave-stato stato-arrivo">In arrivo</span>
+                                    <span class="nave-stato stato-arrivo">
+                                        In arrivo
+                                        <img src="~/images/in_arrivo.png" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 5px;" />
+                                    </span>
                                 </td>
                                 <td class="text-center">@nave.Pontile</td>
                                 <!-- fascia mattina -->
@@ -211,6 +239,7 @@
                                         @foreach (var dip in nave.DipendentiMattina)
                                         {
                                             <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
+                                                 v-show="mostraDipendente('@dip.NomeCompleto')"
                                                  @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 0, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                 <span>@dip.NomeCompleto</span>
                                                 @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
@@ -231,6 +260,7 @@
                                         @foreach (var dip in nave.DipendentiPomeriggio)
                                         {
                                             <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
+                                                 v-show="mostraDipendente('@dip.NomeCompleto')"
                                                  @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 1, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                 <span>@dip.NomeCompleto</span>
                                                 @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
@@ -251,6 +281,7 @@
                                         @foreach (var dip in nave.DipendentiSera)
                                         {
                                             <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
+                                                 v-show="mostraDipendente('@dip.NomeCompleto')"
                                                  @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 2, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                 <span>@dip.NomeCompleto</span>
                                                 @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
@@ -352,7 +383,8 @@ if (typeof Vue === 'undefined') {
 
                 dipendenteSelezionatoId: null,
                 dipendentiSelezionatiIds: [],
-                dipendentiGiaAssegnatiCorrente: [] //dipendenti già nella lista corrente
+                dipendentiGiaAssegnatiCorrente: [], //dipendenti già nella lista corrente
+                filtroNome: ''
             };
         },
         computed: {
@@ -373,6 +405,10 @@ if (typeof Vue === 'undefined') {
             }
         },
         methods: {
+            mostraDipendente(dipNomeCompleto) {
+                if (!this.filtroNome) return true;
+                return dipNomeCompleto.toLowerCase().includes(this.filtroNome.toLowerCase());
+            },
             isDipendenteDisponibile(dipId, fascia, giorno) {
                 let dipendentiOccupati = [];
 
@@ -422,12 +458,11 @@ if (typeof Vue === 'undefined') {
                 this.giornoCorrente = giorno;
                 this.richiedeGruistiCorrente = richiedeGruisti;
                 this.richiedeMulettistiCorrente = richiedeMulettisti;
-                this.dipendentiSelezionatiIds = [];
                 this.vecchioDipendenteId = null;
 
-                //ottieni dipendenti già assegnati a questa nave/fascia
                 const chiave = `${naveId}_${fascia}_${giorno}`;
                 this.dipendentiGiaAssegnatiCorrente = this.assegnazioni[chiave] || [];
+                this.dipendentiSelezionatiIds = [...this.dipendentiGiaAssegnatiCorrente];
 
                 this.modalSelezioneVisible = true;
             },
@@ -469,12 +504,10 @@ if (typeof Vue === 'undefined') {
                     return;
                 }
 
-                const dipendentiFinali = [...this.dipendentiGiaAssegnatiCorrente, ...this.dipendentiSelezionatiIds];
-
                 const response = await fetch(`@Url.Action("SalvaAssegnazione", "Users", new { Area = "Example" })?naveId=${this.naveIdCorrente}&fascia=${this.fasciaCorrente}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dipendentiFinali)
+                    body: JSON.stringify(this.dipendentiSelezionatiIds)
                 });
 
                 const data = await response.json();

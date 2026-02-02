@@ -5,6 +5,13 @@
     font-weight: bold;
 }
 
+/* Filtri */
+.btn-filter.active {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #000;
+}
+
 /* Navbar styling */
 .nav-link {
     padding: 10px 20px;
@@ -175,6 +182,10 @@
     color: #fff;
 }
 
+.fascia-oraria-item.selected:hover {
+    background: rgba(0, 123, 255, 0.85);
+}
+
 .fascia-oraria-item.disabled {
     background: #e9ecef;
     color: #999;
@@ -255,6 +266,10 @@
     border-radius: 50%;
     cursor: pointer;
     z-index: 3;
+}
+
+.date-item.selected:hover {
+    background: rgba(0, 123, 255, 0.85);
 }
 
 .date-item.selected:hover .date-remove {
