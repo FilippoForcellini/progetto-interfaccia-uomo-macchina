@@ -20,16 +20,10 @@
         </select>
     </div>
 
-    <div class="form-group mb-3" id="patenteGroup">
-        <label class="form-label">Patente:</label>
-        <div class="patente-container d-flex align-items-center gap-2">
-            <input type="checkbox" asp-for="Patente" id="checkPatente" class="form-check-input" style="width: 20px; height: 20px;" />
-            <span>Richiesta</span>
-        </div>
-    </div>
+    <input type="hidden" asp-for="Patente" id="checkPatente" value="true" />
 
     <div class="form-group mb-3" id="scadenzaGroup">
-        <label asp-for="Scadenza" class="form-label"></label>
+        <label class="form-label">Scadenza Patente</label>
         <input type="date" class="form-control" asp-for="Scadenza" id="inputScadenza"
                value="@(Model.Scadenza.HasValue ? Model.Scadenza.Value.ToString("yyyy-MM-dd") : "")" />
     </div>

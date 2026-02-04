@@ -102,6 +102,7 @@
                                                      @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 0, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                     <span>@dip.NomeCompleto</span>
                                                     @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
+                                                    <img src="~/images/cestino.png" class="cestino-icon" title="Elimina dipendente" onclick="event.stopPropagation(); eliminaDipendente(@nave.Id, 0, 'oggi', @dip.Id)" />
                                                 </div>
                                             }
                                             else
@@ -117,6 +118,12 @@
                                         {
                                             <div class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 0, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                 + Seleziona dipendenti
+                                            </div>
+                                        }
+                                        @if (fasciaInArrivo && nave.DipendentiMattina.Count >= 2)
+                                        {
+                                            <div class="elimina-turno-btn" onclick="eliminaTurno(@nave.Id, 0, 'oggi')">
+                                                Elimina Turno
                                             </div>
                                         }
                                     }
@@ -135,6 +142,7 @@
                                                      @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 1, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                     <span>@dip.NomeCompleto</span>
                                                     @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
+                                                    <img src="~/images/cestino.png" class="cestino-icon" title="Elimina dipendente" onclick="event.stopPropagation(); eliminaDipendente(@nave.Id, 1, 'oggi', @dip.Id)" />
                                                 </div>
                                             }
                                             else
@@ -150,6 +158,12 @@
                                         {
                                             <div class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 1, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                 + Seleziona dipendenti
+                                            </div>
+                                        }
+                                        @if (fasciaInArrivo && nave.DipendentiPomeriggio.Count >= 2)
+                                        {
+                                            <div class="elimina-turno-btn" onclick="eliminaTurno(@nave.Id, 1, 'oggi')">
+                                                Elimina Turno
                                             </div>
                                         }
                                     }
@@ -168,6 +182,7 @@
                                                      @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 2, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                     <span>@dip.NomeCompleto</span>
                                                     @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
+                                                    <img src="~/images/cestino.png" class="cestino-icon" title="Elimina dipendente" onclick="event.stopPropagation(); eliminaDipendente(@nave.Id, 2, 'oggi', @dip.Id)" />
                                                 </div>
                                             }
                                             else
@@ -183,6 +198,12 @@
                                         {
                                             <div class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 2, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                 + Seleziona dipendenti
+                                            </div>
+                                        }
+                                        @if (fasciaInArrivo && nave.DipendentiSera.Count >= 2)
+                                        {
+                                            <div class="elimina-turno-btn" onclick="eliminaTurno(@nave.Id, 2, 'oggi')">
+                                                Elimina Turno
                                             </div>
                                         }
                                     }
@@ -243,12 +264,19 @@
                                                  @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 0, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                 <span>@dip.NomeCompleto</span>
                                                 @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
+                                                <img src="~/images/cestino.png" class="cestino-icon" title="Elimina dipendente" onclick="event.stopPropagation(); eliminaDipendente(@nave.Id, 0, 'domani', @dip.Id)" />
                                             </div>
                                         }
                                         @if (nave.DipendentiMattina.Count < 5)
                                         {
                                             <div class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 0, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                 + Seleziona dipendenti
+                                            </div>
+                                        }
+                                        @if (nave.DipendentiMattina.Count >= 2)
+                                        {
+                                            <div class="elimina-turno-btn" onclick="eliminaTurno(@nave.Id, 0, 'domani')">
+                                                Elimina Turno
                                             </div>
                                         }
                                     }
@@ -264,12 +292,19 @@
                                                  @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 1, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                 <span>@dip.NomeCompleto</span>
                                                 @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
+                                                <img src="~/images/cestino.png" class="cestino-icon" title="Elimina dipendente" onclick="event.stopPropagation(); eliminaDipendente(@nave.Id, 1, 'domani', @dip.Id)" />
                                             </div>
                                         }
                                         @if (nave.DipendentiPomeriggio.Count < 5)
                                         {
                                             <div class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 1, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                 + Seleziona dipendenti
+                                            </div>
+                                        }
+                                        @if (nave.DipendentiPomeriggio.Count >= 2)
+                                        {
+                                            <div class="elimina-turno-btn" onclick="eliminaTurno(@nave.Id, 1, 'domani')">
+                                                Elimina Turno
                                             </div>
                                         }
                                     }
@@ -285,12 +320,19 @@
                                                  @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 2, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                 <span>@dip.NomeCompleto</span>
                                                 @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
+                                                <img src="~/images/cestino.png" class="cestino-icon" title="Elimina dipendente" onclick="event.stopPropagation(); eliminaDipendente(@nave.Id, 2, 'domani', @dip.Id)" />
                                             </div>
                                         }
                                         @if (nave.DipendentiSera.Count < 5)
                                         {
                                             <div class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 2, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                 + Seleziona dipendenti
+                                            </div>
+                                        }
+                                        @if (nave.DipendentiSera.Count >= 2)
+                                        {
+                                            <div class="elimina-turno-btn" onclick="eliminaTurno(@nave.Id, 2, 'domani')">
+                                                Elimina Turno
                                             </div>
                                         }
                                     }
@@ -319,9 +361,12 @@
                 <div v-for="dip in dipendentiDisponibili" :key="dip.id"
                      :class="['dipendente-option', { 'selected': dipendenteSelezionatoId === dip.id, 'non-disponibile': !dip.disponibile }]"
                      v-on:click="dip.disponibile && selezionaDipendente(dip.id)">
-                    {{ dip.nomeCompleto }}
-                    <img v-if="dip.patenteScaduta" src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" />
-                    <span v-if="!dip.disponibile" style="font-size: 0.8rem;"> - Già assegnato</span>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <span>{{ dip.nomeCompleto }}</span>
+                        <img v-if="dip.patenteScaduta" src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle;" />
+                        <span v-if="!dip.disponibile" style="font-size: 0.8rem;"> - Già assegnato</span>
+                    </div>
+                    <span class="dipendente-ruolo">{{ dip.ruolo }}</span>
                 </div>
             </div>
             <div class="modal-footer">
@@ -340,9 +385,12 @@
                 <div v-for="dip in dipendentiDisponibili" :key="dip.id"
                      :class="['dipendente-option', { 'selected': dipendentiSelezionatiIds.includes(dip.id), 'non-disponibile': !dip.disponibile }]"
                      v-on:click="dip.disponibile && toggleDipendente(dip.id)">
-                    {{ dip.nomeCompleto }}
-                    <img v-if="dip.patenteScaduta" src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" />
-                    <span v-if="!dip.disponibile" style="font-size: 0.8rem;"> - Già assegnato</span>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <span>{{ dip.nomeCompleto }}</span>
+                        <img v-if="dip.patenteScaduta" src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle;" />
+                        <span v-if="!dip.disponibile" style="font-size: 0.8rem;"> - Già assegnato</span>
+                    </div>
+                    <span class="dipendente-ruolo">{{ dip.ruolo }}</span>
                 </div>
             </div>
             <div class="modal-footer">
@@ -515,6 +563,42 @@ if (typeof Vue === 'undefined') {
                     location.reload();
                 }
             },
+            async eliminaDipendente(naveId, fascia, giorno, dipendenteId) {
+                if (!confirm('Sei sicuro di voler eliminare questo dipendente dalla nave?')) {
+                    return;
+                }
+
+                const response = await fetch('@Url.Action("EliminaDipendente", "Users", new { Area = "Example" })', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `naveId=${naveId}&fascia=${fascia}&dipendenteId=${dipendenteId}`
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Errore durante l\'eliminazione del dipendente');
+                }
+            },
+            async eliminaTurno(naveId, fascia, giorno) {
+                if (!confirm('Sei sicuro di voler eliminare tutti i dipendenti di questo turno?')) {
+                    return;
+                }
+
+                const response = await fetch('@Url.Action("EliminaTurno", "Users", new { Area = "Example" })', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `naveId=${naveId}&fascia=${fascia}`
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Errore durante l\'eliminazione del turno');
+                }
+            },
             chiudiModalCambio() {
                 this.modalCambioVisible = false;
             },
@@ -576,6 +660,20 @@ if (typeof Vue === 'undefined') {
 
     window.salvaSelezione = function() {
         if (vueAppInstance) vueAppInstance.salvaSelezione();
+    };
+
+    window.eliminaDipendente = function(naveId, fascia, giorno, dipendenteId) {
+        if (!vueAppInstance) mountVue();
+        if (vueAppInstance) {
+            vueAppInstance.eliminaDipendente(naveId, fascia, giorno, dipendenteId);
+        }
+    };
+
+    window.eliminaTurno = function(naveId, fascia, giorno) {
+        if (!vueAppInstance) mountVue();
+        if (vueAppInstance) {
+            vueAppInstance.eliminaTurno(naveId, fascia, giorno);
+        }
     };
 }
 </script>

@@ -2,12 +2,12 @@
   {
     "Id": 1,
     "Nome": "Rossi Mario",
-    "Ruolo": "Gruista",
+    "Ruolo": "Mulettista",
     "Patente": true,
-    "Scadenza": "2026-10-28T00:00:00",
+    "Scadenza": "2026-10-09T00:00:00",
     "RichiedePatente": true,
     "IsPatenteScaduta": false,
-    "ScadenzaFormattata": "28/10/2026"
+    "ScadenzaFormattata": "09/10/2026"
   },
   {
     "Id": 2,

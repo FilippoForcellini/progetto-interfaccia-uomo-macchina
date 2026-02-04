@@ -392,6 +392,32 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
             return Json(new { success = true });
         }
 
+        [HttpPost]
+        public virtual IActionResult EliminaDipendente(int naveId, int fascia, int dipendenteId)
+        {
+            var chiave = $"{naveId}_{fascia}";
+            if (_assegnazioniDipendenti.TryGetValue(chiave, out var idDipendenti))
+            {
+                idDipendenti.Remove(dipendenteId);
+                SaveAssegnazioni();
+                return Json(new { success = true });
+            }
+            return Json(new { success = false });
+        }
+
+        [HttpPost]
+        public virtual IActionResult EliminaTurno(int naveId, int fascia)
+        {
+            var chiave = $"{naveId}_{fascia}";
+            if (_assegnazioniDipendenti.ContainsKey(chiave))
+            {
+                _assegnazioniDipendenti[chiave] = new List<int>();
+                SaveAssegnazioni();
+                return Json(new { success = true });
+            }
+            return Json(new { success = false });
+        }
+
 
         [HttpGet]
         public virtual IActionResult GestioneNavi(string giorno = null)

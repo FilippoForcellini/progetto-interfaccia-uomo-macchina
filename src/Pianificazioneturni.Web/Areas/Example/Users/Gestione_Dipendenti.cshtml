@@ -128,33 +128,26 @@
             },
             inizializzaCampiModal() {
                 const selectRuolo = document.getElementById('selectRuolo');
-                const checkPatente = document.getElementById('checkPatente');
                 const inputScadenza = document.getElementById('inputScadenza');
-                const patenteGroup = document.getElementById('patenteGroup');
                 const scadenzaGroup = document.getElementById('scadenzaGroup');
 
                 if (!selectRuolo) return;
 
                 const aggiornaCampi = () => {
                     const ruolo = selectRuolo.value;
-                    const abilitato = this.richiedePatente(ruolo);
+                    const richiedePatente = this.richiedePatente(ruolo);
 
-                    if (abilitato) {
-                        checkPatente.disabled = false;
-                        checkPatente.classList.remove('campo-disabilitato');
+                    if (richiedePatente) {
+                        // Campo modificabile per Gruista e Mulettista
                         inputScadenza.disabled = false;
-                        inputScadenza.classList.remove('campo-disabilitato');
-                        patenteGroup.classList.remove('gruppo-disabilitato');
-                        scadenzaGroup.classList.remove('gruppo-disabilitato');
+                        inputScadenza.style.backgroundColor = 'white';
+                        inputScadenza.style.cursor = 'text';
                     } else {
-                        checkPatente.disabled = true;
-                        checkPatente.checked = false;
-                        checkPatente.classList.add('campo-disabilitato');
+                        // Campo non modificabile per altri ruoli
                         inputScadenza.disabled = true;
+                        inputScadenza.style.backgroundColor = '#f8f9fa';
+                        inputScadenza.style.cursor = 'not-allowed';
                         inputScadenza.value = '';
-                        inputScadenza.classList.add('campo-disabilitato');
-                        patenteGroup.classList.add('gruppo-disabilitato');
-                        scadenzaGroup.classList.add('gruppo-disabilitato');
                     }
                 };
 
@@ -163,17 +156,12 @@
             },
             validaForm() {
                 const selectRuolo = document.getElementById('selectRuolo');
-                const checkPatente = document.getElementById('checkPatente');
                 const inputScadenza = document.getElementById('inputScadenza');
                 const ruolo = selectRuolo.value;
 
                 if (this.richiedePatente(ruolo)) {
-                    if (!checkPatente.checked) {
-                        alert('Per Gruisti e Mulettisti la patente è obbligatoria');
-                        return false;
-                    }
                     if (!inputScadenza.value) {
-                        alert('Per Gruisti e Mulettisti la scadenza è obbligatoria');
+                        alert('Per Gruisti e Mulettisti la scadenza patente è obbligatoria');
                         return false;
                     }
                 }
