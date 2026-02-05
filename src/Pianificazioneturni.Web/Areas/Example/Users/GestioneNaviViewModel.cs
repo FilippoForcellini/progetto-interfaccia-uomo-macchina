@@ -99,22 +99,70 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         public TipoNave Tipo { get; set; }
 
         [Display(Name = "Date Presenza")]
-        [Required(ErrorMessage = "Devi selezionare almeno un giorno")]
         public List<DateTime> DatePresenza { get; set; }
 
         //fasce orarie per ogni data (chiave: yyyy-MM-dd, valore: lista fasce 0=mattina, 1=pomeriggio, 2=sera)
         public Dictionary<string, List<int>> FascePerData { get; set; }
 
+        //campi arrivo/partenza (stile Booking.com)
+        public DateTime? DataArrivo { get; set; }
+        public int OrarioArrivo { get; set; } // 0, 8, 16
+        public DateTime? DataPartenza { get; set; }
+        public int OrarioPartenza { get; set; } // 8, 16, 24
+
         [Display(Name = "Pontile")]
         [Required(ErrorMessage = "Il numero del pontile è obbligatorio")]
         public int? Pontile { get; set; }
-
 
         //helper methods per verificare se una fascia è presente in una specifica data
         public bool HasFasciaInData(DateTime data, int fascia)
         {
             var dataKey = data.ToString("yyyy-MM-dd");
             return FascePerData.ContainsKey(dataKey) && FascePerData[dataKey].Contains(fascia);
+        }
+
+        /// <summary>
+        /// Calcola DatePresenza e FascePerData a partire da DataArrivo/OrarioArrivo e DataPartenza/OrarioPartenza.
+        /// Fascia 0=Mattina(00-08), 1=Pomeriggio(08-16), 2=Sera(16-24)
+        /// OrarioArrivo: 0→fascia 0, 8→fascia 1, 16→fascia 2
+        /// OrarioPartenza: 8→fascia 0, 16→fascia 1, 24→fascia 2
+        /// </summary>
+        public void CalcolaDateEFasce()
+        {
+            DatePresenza = new List<DateTime>();
+            FascePerData = new Dictionary<string, List<int>>();
+
+            if (!DataArrivo.HasValue || !DataPartenza.HasValue) return;
+
+            // Converte orario arrivo in indice fascia di partenza (da quale fascia inizia)
+            int fasciaInizio = OrarioArrivo switch { 0 => 0, 8 => 1, 16 => 2, _ => 0 };
+            // Converte orario partenza in indice fascia finale (fino a quale fascia inclusa)
+            int fasciaFine = OrarioPartenza switch { 8 => 0, 16 => 1, 24 => 2, _ => 2 };
+
+            var dataCorrente = DataArrivo.Value.Date;
+            var dataFine = DataPartenza.Value.Date;
+
+            while (dataCorrente <= dataFine)
+            {
+                var dataKey = dataCorrente.ToString("yyyy-MM-dd");
+                var fasce = new List<int>();
+
+                int inizio = (dataCorrente == DataArrivo.Value.Date) ? fasciaInizio : 0;
+                int fine = (dataCorrente == DataPartenza.Value.Date) ? fasciaFine : 2;
+
+                for (int f = inizio; f <= fine; f++)
+                {
+                    fasce.Add(f);
+                }
+
+                if (fasce.Any())
+                {
+                    DatePresenza.Add(dataCorrente);
+                    FascePerData[dataKey] = fasce;
+                }
+
+                dataCorrente = dataCorrente.AddDays(1);
+            }
         }
 
         [Display(Name = "Richiede Gruisti")]

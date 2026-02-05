@@ -181,11 +181,13 @@
                 const response = await fetch(`@Url.Action("DettaglioNave", "Users", new { Area = "Example" })?id=${id}`);
                 this.modalNaveContent = await response.text();
                 this.modalNaveVisible = true;
+                this.$nextTick(() => this.inizializzaValidazioneDate());
             },
             async apriModalNuova() {
                 const response = await fetch('@Url.Action("DettaglioNave", "Users", new { Area = "Example" })');
                 this.modalNaveContent = await response.text();
                 this.modalNaveVisible = true;
+                this.$nextTick(() => this.inizializzaValidazioneDate());
             },
             chiudiModal() {
                 this.modalNaveVisible = false;
@@ -201,104 +203,47 @@
                     document.getElementById('formEliminaNave').submit();
                 }
             },
-            toggleFasciaPerGiorno(event) {
-                const item = event.currentTarget;
-                const checkbox = item.querySelector('input[type="checkbox"]');
-                checkbox.checked = !checkbox.checked;
-                item.classList.toggle('selected', checkbox.checked);
-            },
-            selectDate(event) {
-                const item = event.currentTarget;
-                const dataDate = item.getAttribute('data-date');
-                const isAlreadySelected = item.classList.contains('selected');
-
-                if (!isAlreadySelected) {
-                    item.classList.add('selected');
-                    this.aggiornaDateSelezionate();
-                }
-
-                const allSections = document.querySelectorAll('.fascia-giorno-section');
-                allSections.forEach(section => section.style.display = 'none');
-
-                const fasciaSection = document.querySelector(`.fascia-giorno-section[data-date="${dataDate}"]`);
-                if (fasciaSection) {
-                    fasciaSection.style.display = 'block';
-                }
-            },
-            removeDate(event) {
-                event.stopPropagation();
-                const item = event.currentTarget.parentElement;
-                const dataDate = item.getAttribute('data-date');
-
-                item.classList.remove('selected');
-
-                const fasciaSection = document.querySelector(`.fascia-giorno-section[data-date="${dataDate}"]`);
-                if (fasciaSection) {
-                    const checkboxes = fasciaSection.querySelectorAll('input[type="checkbox"]');
-                    checkboxes.forEach(cb => {
-                        cb.checked = false;
-                        cb.parentElement.classList.remove('selected');
+            inizializzaValidazioneDate() {
+                const inputDataArrivo = document.getElementById('inputDataArrivo');
+                const inputDataPartenza = document.getElementById('inputDataPartenza');
+                if (inputDataArrivo && inputDataPartenza) {
+                    inputDataArrivo.addEventListener('change', () => {
+                        // aggiorna min di data partenza in base a data arrivo
+                        if (inputDataArrivo.value) {
+                            inputDataPartenza.min = inputDataArrivo.value;
+                            if (inputDataPartenza.value && inputDataPartenza.value < inputDataArrivo.value) {
+                                inputDataPartenza.value = inputDataArrivo.value;
+                            }
+                        }
                     });
-                }
-
-                const allSections = document.querySelectorAll('.fascia-giorno-section');
-                allSections.forEach(section => section.style.display = 'none');
-
-                const dateItems = document.querySelectorAll('.date-item.selected');
-                if (dateItems.length > 0) {
-                    const lastSelectedDate = dateItems[dateItems.length - 1].getAttribute('data-date');
-                    const lastSection = document.querySelector(`.fascia-giorno-section[data-date="${lastSelectedDate}"]`);
-                    if (lastSection) {
-                        lastSection.style.display = 'block';
-                    }
-                }
-
-                this.aggiornaDateSelezionate();
-            },
-            aggiornaDateSelezionate() {
-                const dateItems = document.querySelectorAll('.date-item.selected');
-                const dateSelezionate = Array.from(dateItems).map(item => item.getAttribute('data-date'));
-                const inputDatePresenza = document.getElementById('inputDatePresenza');
-                if (inputDatePresenza) {
-                    inputDatePresenza.value = JSON.stringify(dateSelezionate);
                 }
             },
             validaFormNave() {
-                this.aggiornaDateSelezionate();
-                const datePresenzaJson = document.getElementById('inputDatePresenza').value;
-                const datePresenza = JSON.parse(datePresenzaJson || '[]');
+                const dataArrivo = document.getElementById('inputDataArrivo').value;
+                const dataPartenza = document.getElementById('inputDataPartenza').value;
+                const orarioArrivo = parseInt(document.getElementById('selectOrarioArrivo').value);
+                const orarioPartenza = parseInt(document.getElementById('selectOrarioPartenza').value);
+                const aviso = document.getElementById('avisoDate');
 
-                if (datePresenza.length === 0) {
-                    document.getElementById('avisoDate').style.display = 'block';
+                if (!dataArrivo || !dataPartenza) {
+                    aviso.textContent = 'Devi selezionare data di arrivo e partenza';
+                    aviso.style.display = 'block';
                     return false;
                 }
-                document.getElementById('avisoDate').style.display = 'none';
 
-                const fascePerData = {};
-                let haAlmenoUnaFascia = true;
-
-                datePresenza.forEach(dataStr => {
-                    const checkboxes = document.querySelectorAll(`input[name^="fascia_${dataStr}_"]:checked`);
-                    const fasceSelezionate = Array.from(checkboxes).map(cb => parseInt(cb.value));
-
-                    if (fasceSelezionate.length === 0) {
-                        haAlmenoUnaFascia = false;
-                    } else {
-                        fascePerData[dataStr] = fasceSelezionate;
-                    }
-                });
-
-                if (!haAlmenoUnaFascia) {
-                    document.getElementById('avisoFasce').style.display = 'block';
+                if (dataPartenza < dataArrivo) {
+                    aviso.textContent = 'La data di partenza non può essere prima dell\'arrivo';
+                    aviso.style.display = 'block';
                     return false;
                 }
-                document.getElementById('avisoFasce').style.display = 'none';
 
-                const inputFascePerData = document.getElementById('inputFascePerData');
-                if (inputFascePerData) {
-                    inputFascePerData.value = JSON.stringify(fascePerData);
+                if (dataPartenza === dataArrivo && orarioPartenza <= orarioArrivo) {
+                    aviso.textContent = 'L\'orario di partenza deve essere successivo a quello di arrivo';
+                    aviso.style.display = 'block';
+                    return false;
                 }
 
+                aviso.style.display = 'none';
                 return true;
             }
         }
@@ -335,15 +280,6 @@
         window.eliminaNave = (id) => {
             if (!appNaviInstance) mountVue();
             if (appNaviInstance) appNaviInstance.eliminaNave(id);
-        };
-        window.toggleFasciaPerGiorno = (event) => {
-            if (appNaviInstance) appNaviInstance.toggleFasciaPerGiorno(event);
-        };
-        window.selectDate = (event) => {
-            if (appNaviInstance) appNaviInstance.selectDate(event);
-        };
-        window.removeDate = (event) => {
-            if (appNaviInstance) appNaviInstance.removeDate(event);
         };
         window.validaFormNave = () => {
             if (appNaviInstance) return appNaviInstance.validaFormNave();

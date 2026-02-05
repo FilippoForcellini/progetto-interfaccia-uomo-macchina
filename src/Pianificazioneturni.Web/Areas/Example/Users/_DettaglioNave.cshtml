@@ -4,7 +4,6 @@
 
 <form id="formNave" method="post" asp-action="SalvaNave" onsubmit="return validaFormNave()">
     <input type="hidden" name="id" id="inputNaveId" value="@Model.Id" />
-    <input type="hidden" name="datePresenzaJson" id="inputDatePresenza" value="" />
 
     <div class="form-group mb-3">
         <label class="form-label fw-bold">Nome:</label>
@@ -28,98 +27,46 @@
         </div>
     </div>
 
-    <div class="form-group mb-3">
-        <label class="form-label fw-bold">Calendario:</label>
-        <small class="text-muted d-block mb-2">Seleziona da 1 a 7 giorni (dalla data odierna)</small>
-        <div id="calendarioContainer" class="date-selector">
-            @{
-                var oggi = DateTime.Today;
-                for (int i = 0; i < 7; i++)
-                {
-                    var data = oggi.AddDays(i);
-                    var dataStr = data.ToString("yyyy-MM-dd");
-                    var isSelected = Model.DatePresenza.Any(d => d.Date == data.Date);
-                    <div class="date-item @(isSelected ? "selected" : "")"
-                         data-date="@dataStr"
-                         onclick="selectDate(event)">
-                        <div class="date-content">
-                            <div class="fw-bold">@data.ToString("dd")</div>
-                            <div class="small">@data.ToString("MMM")</div>
-                        </div>
-                        <div class="date-remove" onclick="removeDate(event)">
-                            <span>✕</span>
-                        </div>
-                    </div>
-                }
-            }
+    @{
+        var dataArrivoStr = Model.DataArrivo.HasValue ? Model.DataArrivo.Value.ToString("yyyy-MM-dd") : "";
+        var dataPartenzaStr = Model.DataPartenza.HasValue ? Model.DataPartenza.Value.ToString("yyyy-MM-dd") : "";
+    }
+
+    <div class="arrivo-partenza-container">
+        <div class="row">
+            <div class="col-6">
+                <label class="form-label fw-bold">Data Arrivo:</label>
+                <input type="date" class="form-control" name="dataArrivo" id="inputDataArrivo"
+                       value="@dataArrivoStr" required />
+            </div>
+            <div class="col-6">
+                <label class="form-label fw-bold">Orario Arrivo:</label>
+                <select class="form-select" name="orarioArrivo" id="selectOrarioArrivo" required>
+                    <!option value="0" @(Model.OrarioArrivo == 0 ? "selected" : "")>00:00</!option>
+                    <!option value="8" @(Model.OrarioArrivo == 8 ? "selected" : "")>08:00</!option>
+                    <!option value="16" @(Model.OrarioArrivo == 16 ? "selected" : "")>16:00</!option>
+                </select>
+            </div>
         </div>
-        <div id="avisoDate" class="text-danger small mt-2" style="display: none;">Devi selezionare almeno un giorno</div>
+
+        <div class="row mt-3">
+            <div class="col-6">
+                <label class="form-label fw-bold">Data Partenza:</label>
+                <input type="date" class="form-control" name="dataPartenza" id="inputDataPartenza"
+                       value="@dataPartenzaStr" required />
+            </div>
+            <div class="col-6">
+                <label class="form-label fw-bold">Orario Partenza:</label>
+                <select class="form-select" name="orarioPartenza" id="selectOrarioPartenza" required>
+                    <!option value="8" @(Model.OrarioPartenza == 8 ? "selected" : "")>08:00</!option>
+                    <!option value="16" @(Model.OrarioPartenza == 16 ? "selected" : "")>16:00</!option>
+                    <!option value="24" @(Model.OrarioPartenza == 24 ? "selected" : "")>24:00</!option>
+                </select>
+            </div>
+        </div>
     </div>
 
-    <div class="form-group mb-3">
-        <label class="form-label fw-bold">Fasce Orarie per Giorno:</label>
-        <small class="text-muted d-block mb-2">Seleziona le fasce orarie per ogni giorno selezionato</small>
-
-        <div id="fascePerGiornoContainer">
-            @{
-                var oggiModal = DateTime.Today;
-                var oraCorrente = DateTime.Now.Hour;
-                for (int i = 0; i < 7; i++)
-                {
-                    var dataModal = oggiModal.AddDays(i);
-                    var dataStrModal = dataModal.ToString("yyyy-MM-dd");
-                    var dataDisplay = dataModal.ToString("dd/MM");
-                    var isDateSelected = Model.DatePresenza.Any(d => d.Date == dataModal.Date);
-                    var isOggi = dataModal.Date == oggiModal.Date;
-
-                    var hasMattina = Model.HasFasciaInData(dataModal, 0);
-                    var hasPomeriggio = Model.HasFasciaInData(dataModal, 1);
-                    var hasSera = Model.HasFasciaInData(dataModal, 2);
-
-                    //controlla se le fasce sono passate (solo per navi oggi) - si disabilitano quando iniziano
-                    var mattinaPassata = isOggi && oraCorrente >= 0; //si disabilita alle 00:00 (quando inizia)
-                    var pomeriggioPassato = isOggi && oraCorrente >= 8; //Si disabilita alle 08:00 (quando inizia)
-                    var seraPassata = isOggi && oraCorrente >= 16; //si disabilita alle 16:00(quando inizia)
-
-                    <div class="fascia-giorno-section" data-date="@dataStrModal" style="display: none;">
-                        <div class="fw-bold mb-2 mt-3">@dataDisplay - Seleziona fasce:</div>
-                        <div class="fascia-oraria-group">
-                            <div class="fascia-oraria-item @(hasMattina ? "selected" : "") @(mattinaPassata ? "disabled" : "")"
-                                 onclick="@(mattinaPassata ? "" : "toggleFasciaPerGiorno(event)")">
-                                <input type="checkbox" name="fascia_@(dataStrModal)_0" value="0" @(hasMattina ? "checked" : "") @(mattinaPassata ? "disabled" : "") />
-                                <div class="fascia-label">00:00 / 08:00</div>
-                                @if (mattinaPassata)
-                                {
-                                    <div class="fascia-status text-muted">Passata</div>
-                                }
-                            </div>
-                            <div class="fascia-oraria-item @(hasPomeriggio ? "selected" : "") @(pomeriggioPassato ? "disabled" : "")"
-                                 onclick="@(pomeriggioPassato ? "" : "toggleFasciaPerGiorno(event)")">
-                                <input type="checkbox" name="fascia_@(dataStrModal)_1" value="1" @(hasPomeriggio ? "checked" : "") @(pomeriggioPassato ? "disabled" : "") />
-                                <div class="fascia-label">08:00 / 16:00</div>
-                                @if (pomeriggioPassato)
-                                {
-                                    <div class="fascia-status text-muted">Passata</div>
-                                }
-                            </div>
-                            <div class="fascia-oraria-item @(hasSera ? "selected" : "") @(seraPassata ? "disabled" : "")"
-                                 onclick="@(seraPassata ? "" : "toggleFasciaPerGiorno(event)")">
-                                <input type="checkbox" name="fascia_@(dataStrModal)_2" value="2" @(hasSera ? "checked" : "") @(seraPassata ? "disabled" : "") />
-                                <div class="fascia-label">16:00 / 24:00</div>
-                                @if (seraPassata)
-                                {
-                                    <div class="fascia-status text-muted">Passata</div>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                }
-            }
-        </div>
-        <div id="avisoFasce" class="text-danger small mt-2" style="display: none;">Devi selezionare almeno una fascia per ogni giorno</div>
-    </div>
-
-    <input type="hidden" name="fascePerDataJson" id="inputFascePerData" value="" />
+    <div id="avisoDate" class="text-danger small mt-2" style="display: none;"></div>
 
     <div class="modal-footer d-flex justify-content-center gap-2 mt-4">
         <button type="button" class="btn btn-secondary" onclick="chiudiModal()">Annulla</button>
@@ -130,4 +77,3 @@
         <button type="submit" class="btn btn-success">Salva</button>
     </div>
 </form>
-

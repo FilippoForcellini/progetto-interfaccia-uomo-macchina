@@ -97,13 +97,13 @@
                                         {
                                             @if (fasciaInArrivo)
                                             {
-                                                <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
+                                                <button type="button" class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
                                                      v-show="mostraDipendente('@dip.NomeCompleto')"
                                                      @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 0, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                     <span>@dip.NomeCompleto</span>
                                                     @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
                                                     <img src="~/images/cestino.png" class="cestino-icon" title="Elimina dipendente" onclick="event.stopPropagation(); eliminaDipendente(@nave.Id, 0, 'oggi', @dip.Id)" />
-                                                </div>
+                                                </button>
                                             }
                                             else
                                             {
@@ -116,15 +116,15 @@
                                         }
                                         @if (fasciaInArrivo && nave.DipendentiMattina.Count < 5)
                                         {
-                                            <div class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 0, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                            <button type="button" class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 0, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                 + Seleziona dipendenti
-                                            </div>
+                                            </button>
                                         }
                                         @if (fasciaInArrivo && nave.DipendentiMattina.Count >= 2)
                                         {
-                                            <div class="elimina-turno-btn" onclick="eliminaTurno(@nave.Id, 0, 'oggi')">
+                                            <button type="button" class="elimina-turno-btn" onclick="eliminaTurno(@nave.Id, 0, 'oggi')">
                                                 Elimina Turno
-                                            </div>
+                                            </button>
                                         }
                                     }
                                 </td>
@@ -137,13 +137,13 @@
                                         {
                                             @if (fasciaInArrivo)
                                             {
-                                                <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
+                                                <button type="button" class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
                                                      v-show="mostraDipendente('@dip.NomeCompleto')"
                                                      @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 1, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                     <span>@dip.NomeCompleto</span>
                                                     @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
                                                     <img src="~/images/cestino.png" class="cestino-icon" title="Elimina dipendente" onclick="event.stopPropagation(); eliminaDipendente(@nave.Id, 1, 'oggi', @dip.Id)" />
-                                                </div>
+                                                </button>
                                             }
                                             else
                                             {
@@ -156,15 +156,15 @@
                                         }
                                         @if (fasciaInArrivo && nave.DipendentiPomeriggio.Count < 5)
                                         {
-                                            <div class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 1, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                            <button type="button" class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 1, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                 + Seleziona dipendenti
-                                            </div>
+                                            </button>
                                         }
                                         @if (fasciaInArrivo && nave.DipendentiPomeriggio.Count >= 2)
                                         {
-                                            <div class="elimina-turno-btn" onclick="eliminaTurno(@nave.Id, 1, 'oggi')">
+                                            <button type="button" class="elimina-turno-btn" onclick="eliminaTurno(@nave.Id, 1, 'oggi')">
                                                 Elimina Turno
-                                            </div>
+                                            </button>
                                         }
                                     }
                                 </td>
@@ -177,13 +177,13 @@
                                         {
                                             @if (fasciaInArrivo)
                                             {
-                                                <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
+                                                <button type="button" class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
                                                      v-show="mostraDipendente('@dip.NomeCompleto')"
                                                      @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 2, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                     <span>@dip.NomeCompleto</span>
                                                     @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
                                                     <img src="~/images/cestino.png" class="cestino-icon" title="Elimina dipendente" onclick="event.stopPropagation(); eliminaDipendente(@nave.Id, 2, 'oggi', @dip.Id)" />
-                                                </div>
+                                                </button>
                                             }
                                             else
                                             {
@@ -196,15 +196,15 @@
                                         }
                                         @if (fasciaInArrivo && nave.DipendentiSera.Count < 5)
                                         {
-                                            <div class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 2, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                            <button type="button" class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 2, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                 + Seleziona dipendenti
-                                            </div>
+                                            </button>
                                         }
                                         @if (fasciaInArrivo && nave.DipendentiSera.Count >= 2)
                                         {
-                                            <div class="elimina-turno-btn" onclick="eliminaTurno(@nave.Id, 2, 'oggi')">
+                                            <button type="button" class="elimina-turno-btn" onclick="eliminaTurno(@nave.Id, 2, 'oggi')">
                                                 Elimina Turno
-                                            </div>
+                                            </button>
                                         }
                                     }
                                 </td>
@@ -259,25 +259,25 @@
                                     {
                                         @foreach (var dip in nave.DipendentiMattina)
                                         {
-                                            <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
+                                            <button type="button" class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
                                                  v-show="mostraDipendente('@dip.NomeCompleto')"
                                                  @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 0, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                 <span>@dip.NomeCompleto</span>
                                                 @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
                                                 <img src="~/images/cestino.png" class="cestino-icon" title="Elimina dipendente" onclick="event.stopPropagation(); eliminaDipendente(@nave.Id, 0, 'domani', @dip.Id)" />
-                                            </div>
+                                            </button>
                                         }
                                         @if (nave.DipendentiMattina.Count < 5)
                                         {
-                                            <div class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 0, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                            <button type="button" class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 0, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                 + Seleziona dipendenti
-                                            </div>
+                                            </button>
                                         }
                                         @if (nave.DipendentiMattina.Count >= 2)
                                         {
-                                            <div class="elimina-turno-btn" onclick="eliminaTurno(@nave.Id, 0, 'domani')">
+                                            <button type="button" class="elimina-turno-btn" onclick="eliminaTurno(@nave.Id, 0, 'domani')">
                                                 Elimina Turno
-                                            </div>
+                                            </button>
                                         }
                                     }
                                 </td>
@@ -287,25 +287,25 @@
                                     {
                                         @foreach (var dip in nave.DipendentiPomeriggio)
                                         {
-                                            <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
+                                            <button type="button" class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
                                                  v-show="mostraDipendente('@dip.NomeCompleto')"
                                                  @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 1, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                 <span>@dip.NomeCompleto</span>
                                                 @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
                                                 <img src="~/images/cestino.png" class="cestino-icon" title="Elimina dipendente" onclick="event.stopPropagation(); eliminaDipendente(@nave.Id, 1, 'domani', @dip.Id)" />
-                                            </div>
+                                            </button>
                                         }
                                         @if (nave.DipendentiPomeriggio.Count < 5)
                                         {
-                                            <div class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 1, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                            <button type="button" class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 1, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                 + Seleziona dipendenti
-                                            </div>
+                                            </button>
                                         }
                                         @if (nave.DipendentiPomeriggio.Count >= 2)
                                         {
-                                            <div class="elimina-turno-btn" onclick="eliminaTurno(@nave.Id, 1, 'domani')">
+                                            <button type="button" class="elimina-turno-btn" onclick="eliminaTurno(@nave.Id, 1, 'domani')">
                                                 Elimina Turno
-                                            </div>
+                                            </button>
                                         }
                                     }
                                 </td>
@@ -315,25 +315,25 @@
                                     {
                                         @foreach (var dip in nave.DipendentiSera)
                                         {
-                                            <div class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
+                                            <button type="button" class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
                                                  v-show="mostraDipendente('@dip.NomeCompleto')"
                                                  @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 2, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                 <span>@dip.NomeCompleto</span>
                                                 @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
                                                 <img src="~/images/cestino.png" class="cestino-icon" title="Elimina dipendente" onclick="event.stopPropagation(); eliminaDipendente(@nave.Id, 2, 'domani', @dip.Id)" />
-                                            </div>
+                                            </button>
                                         }
                                         @if (nave.DipendentiSera.Count < 5)
                                         {
-                                            <div class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 2, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                            <button type="button" class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 2, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
                                                 + Seleziona dipendenti
-                                            </div>
+                                            </button>
                                         }
                                         @if (nave.DipendentiSera.Count >= 2)
                                         {
-                                            <div class="elimina-turno-btn" onclick="eliminaTurno(@nave.Id, 2, 'domani')">
+                                            <button type="button" class="elimina-turno-btn" onclick="eliminaTurno(@nave.Id, 2, 'domani')">
                                                 Elimina Turno
-                                            </div>
+                                            </button>
                                         }
                                     }
                                 </td>
@@ -358,7 +358,7 @@
             <p class="text-center mb-3">Dipendente attuale: <strong>{{ dipendenteAttualeNome }}</strong></p>
             <label class="form-label">Seleziona sostituto:</label>
             <div style="max-height: 250px; overflow-y: auto;">
-                <div v-for="dip in dipendentiDisponibili" :key="dip.id"
+                <button type="button" v-for="dip in dipendentiDisponibili" :key="dip.id"
                      :class="['dipendente-option', { 'selected': dipendenteSelezionatoId === dip.id, 'non-disponibile': !dip.disponibile }]"
                      v-on:click="dip.disponibile && selezionaDipendente(dip.id)">
                     <div style="display: flex; align-items: center; gap: 5px;">
@@ -367,7 +367,7 @@
                         <span v-if="!dip.disponibile" style="font-size: 0.8rem;"> - Già assegnato</span>
                     </div>
                     <span class="dipendente-ruolo">{{ dip.ruolo }}</span>
-                </div>
+                </button>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" v-on:click="chiudiModalCambio()">Annulla</button>
@@ -382,7 +382,7 @@
             <div class="modal-title">Seleziona Dipendenti</div>
             <p class="text-muted text-center mb-3">Selezionati: <strong>{{ dipendentiSelezionatiIds.length }}/5</strong></p>
             <div style="max-height: 300px; overflow-y: auto;">
-                <div v-for="dip in dipendentiDisponibili" :key="dip.id"
+                <button type="button" v-for="dip in dipendentiDisponibili" :key="dip.id"
                      :class="['dipendente-option', { 'selected': dipendentiSelezionatiIds.includes(dip.id), 'non-disponibile': !dip.disponibile }]"
                      v-on:click="dip.disponibile && toggleDipendente(dip.id)">
                     <div style="display: flex; align-items: center; gap: 5px;">
@@ -391,7 +391,7 @@
                         <span v-if="!dip.disponibile" style="font-size: 0.8rem;"> - Già assegnato</span>
                     </div>
                     <span class="dipendente-ruolo">{{ dip.ruolo }}</span>
-                </div>
+                </button>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" v-on:click="chiudiModalSelezione()">Annulla</button>

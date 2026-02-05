@@ -483,56 +483,38 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
 
         [HttpPost]
         public virtual IActionResult SalvaNave(int id, string nome, int? pontile,
-            bool richiedeGruisti, bool richiedeMulettisti, string datePresenzaJson, string fascePerDataJson)
+            bool richiedeGruisti, bool richiedeMulettisti,
+            string dataArrivo, int orarioArrivo, string dataPartenza, int orarioPartenza)
         {
-            //parse date presenza da JSON
-            List<DateTime> datePresenza;
-            try
+            //parse date arrivo/partenza
+            if (!DateTime.TryParse(dataArrivo, out var parsedDataArrivo) || !DateTime.TryParse(dataPartenza, out var parsedDataPartenza))
             {
-                var dateStringList = System.Text.Json.JsonSerializer.Deserialize<List<string>>(datePresenzaJson ?? "[]");
-                datePresenza = dateStringList.Select(d => DateTime.Parse(d)).ToList();
-            }
-            catch
-            {
-                Alerts.AddError(this, "Errore nella selezione delle date");
+                Alerts.AddError(this, "Date arrivo/partenza non valide");
                 return RedirectToAction(Actions.GestioneNavi());
             }
 
-            if (datePresenza.Count == 0)
+            //validazione: partenza >= arrivo
+            if (parsedDataPartenza < parsedDataArrivo || (parsedDataPartenza == parsedDataArrivo && orarioPartenza <= orarioArrivo))
             {
-                Alerts.AddError(this, "Devi selezionare almeno un giorno");
+                Alerts.AddError(this, "La data/orario di partenza deve essere successiva all'arrivo");
                 return RedirectToAction(Actions.GestioneNavi());
             }
 
-            //parse fasce per data da JSON
-            Dictionary<string, List<int>> fascePerData;
-            try
+            //calcola DatePresenza e FascePerData dal range arrivo/partenza
+            var naveCalc = new NaveDetailViewModel
             {
-                fascePerData = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, List<int>>>(fascePerDataJson ?? "{}");
-            }
-            catch
+                DataArrivo = parsedDataArrivo,
+                OrarioArrivo = orarioArrivo,
+                DataPartenza = parsedDataPartenza,
+                OrarioPartenza = orarioPartenza
+            };
+            naveCalc.CalcolaDateEFasce();
+
+            if (naveCalc.DatePresenza.Count == 0)
             {
-                Alerts.AddError(this, "Errore nella selezione delle fasce orarie");
+                Alerts.AddError(this, "Nessun giorno di presenza calcolato");
                 return RedirectToAction(Actions.GestioneNavi());
             }
-
-            if (fascePerData == null || fascePerData.Count == 0)
-            {
-                Alerts.AddError(this, "Devi selezionare almeno una fascia oraria per ogni giorno");
-                return RedirectToAction(Actions.GestioneNavi());
-            }
-
-            //verifica che ogni data selezionata abbia almeno una fascia
-            foreach (var data in datePresenza)
-            {
-                var dataKey = data.ToString("yyyy-MM-dd");
-                if (!fascePerData.ContainsKey(dataKey) || fascePerData[dataKey].Count == 0)
-                {
-                    Alerts.AddError(this, $"Devi selezionare almeno una fascia per il giorno {data:dd/MM/yyyy}");
-                    return RedirectToAction(Actions.GestioneNavi());
-                }
-            }
-
 
             if (id == 0)
             {
@@ -541,8 +523,12 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                     Id = _nextNaveId++,
                     Nome = nome,
                     Tipo = TipoNave.Container,
-                    DatePresenza = datePresenza,
-                    FascePerData = fascePerData,
+                    DatePresenza = naveCalc.DatePresenza,
+                    FascePerData = naveCalc.FascePerData,
+                    DataArrivo = parsedDataArrivo,
+                    OrarioArrivo = orarioArrivo,
+                    DataPartenza = parsedDataPartenza,
+                    OrarioPartenza = orarioPartenza,
                     Pontile = pontile,
                     RichiedeGruisti = richiedeGruisti,
                     RichiedeMulettisti = richiedeMulettisti,
@@ -560,8 +546,12 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                 if (nave != null)
                 {
                     nave.Nome = nome;
-                    nave.DatePresenza = datePresenza;
-                    nave.FascePerData = fascePerData;
+                    nave.DatePresenza = naveCalc.DatePresenza;
+                    nave.FascePerData = naveCalc.FascePerData;
+                    nave.DataArrivo = parsedDataArrivo;
+                    nave.OrarioArrivo = orarioArrivo;
+                    nave.DataPartenza = parsedDataPartenza;
+                    nave.OrarioPartenza = orarioPartenza;
                     nave.Pontile = pontile;
                     nave.RichiedeGruisti = richiedeGruisti;
                     nave.RichiedeMulettisti = richiedeMulettisti;
