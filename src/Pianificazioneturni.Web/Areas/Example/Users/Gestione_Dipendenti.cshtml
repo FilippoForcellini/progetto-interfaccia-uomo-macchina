@@ -14,13 +14,16 @@
 }
 
 @section navbar {
-    <nav class="navbar navbar-expand-lg justify-content-md-center mb-4" style="background-color: #E3F2FD;">
+    <nav class="navbar navbar-expand-lg justify-content-md-center mb-4"
+         style="background-color: #E3F2FD;"
+         aria-label="Navigazione principale"
+         id="navbar">
         <div class="container-fluid">
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav gap-5 mx-auto">
                     <li class="nav-item"><a class="nav-link" href="@Url.Action(MVC.Example.Users.Index())">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="@Url.Action(MVC.Example.Users.GestioneNavi())">Gestione Navi</a></li>
-                    <li class="nav-item"><a class="nav-link active fw-bold" href="@Url.Action(MVC.Example.Users.GestioneDipendenti())">Gestione Dipendenti</a></li>
+                    <li class="nav-item"><a class="nav-link active fw-bold" href="@Url.Action(MVC.Example.Users.GestioneDipendenti())" aria-current="page">Gestione Dipendenti</a></li>
                 </ul>
             </div>
         </div>
@@ -28,30 +31,38 @@
 }
 
 <div id="appDipendenti">
+<main id="main-content" role="main">
 <div class="container">
     <div class="table-container">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">Storico Dipendenti</h4>
         @if (Model.FiltroPatentiScadute)
         {
-            <a href="@Url.Action(MVC.Example.Users.GestioneDipendenti(false))" class="btn btn-secondary btn-sm btn-filter active">
+            <a href="@Url.Action(MVC.Example.Users.GestioneDipendenti(false))"
+               class="btn btn-secondary btn-sm btn-filter active"
+               aria-pressed="true"
+               aria-label="Filtro patenti scadute attivo. Clicca per disattivare">
                 Patenti Scadute
             </a>
         }
         else
         {
-            <a href="@Url.Action(MVC.Example.Users.GestioneDipendenti(true))" class="btn btn-secondary btn-sm btn-filter">
+            <a href="@Url.Action(MVC.Example.Users.GestioneDipendenti(true))"
+               class="btn btn-secondary btn-sm btn-filter"
+               aria-pressed="false"
+               aria-label="Filtro patenti scadute non attivo. Clicca per attivare">
                 Patenti Scadute
             </a>
         }
     </div>
 
-    <table class="table table-bordered">
+    <table class="table table-bordered" role="table" aria-label="Elenco dipendenti">
+        <caption class="visually-hidden">Elenco completo dipendenti con informazioni su ruolo e scadenza patente. Clicca su una riga per modificare i dettagli del dipendente.</caption>
         <thead class="table-light">
             <tr>
-                <th>Dipendente</th>
-                <th>Ruolo</th>
-                <th>Scadenza</th>
+                <th scope="col">Dipendente</th>
+                <th scope="col">Ruolo</th>
+                <th scope="col">Scadenza</th>
             </tr>
         </thead>
         <tbody>
@@ -61,8 +72,15 @@
             @foreach (var dip in Model.GetDipendentiFiltrati())
             {
                 var scaduta = dip.RichiedePatente && dip.Patente && dip.Scadenza.HasValue && dip.Scadenza.Value.Date < oggi;
-                <tr class="dipendente-row @(scaduta ? "patente-scaduta" : "")" onclick="apriModal(@dip.Id)">
-                    <td>@dip.Nome</td>
+                var ruoloDisplay = string.IsNullOrEmpty(dip.Ruolo) ? "Nessun ruolo" : dip.Ruolo;
+                var ariaLabel = $"{dip.Nome}, {ruoloDisplay}" + (scaduta ? ", patente scaduta" : "") + ". Clicca per modificare dettagli.";
+                <tr class="dipendente-row @(scaduta ? "patente-scaduta" : "")"
+                    onclick="apriModal(@dip.Id)"
+                    onkeydown="if(event.key==='Enter' || event.key===' '){event.preventDefault(); apriModal(@dip.Id);}"
+                    tabindex="0"
+                    role="button"
+                    aria-label="@ariaLabel">
+                    <th scope="row">@dip.Nome</th>
                     <td>@(string.IsNullOrEmpty(dip.Ruolo) ? "-" : dip.Ruolo)</td>
                     <td>
                         @if (dip.RichiedePatente && dip.Patente && dip.Scadenza.HasValue)
@@ -70,7 +88,7 @@
                             @dip.ScadenzaFormattata
                             if (scaduta)
                             {
-                                <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" />
+                                <img src="~/images/patente.png" alt="" aria-hidden="true" role="presentation" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" />
                             }
                         }
                         else
@@ -84,12 +102,18 @@
     </table>
 
     <!-- modal dettaglio dipendente-->
-    <div v-if="modalVisible" class="modal-overlay" v-on:click="chiudiModalOverlay($event)">
+    <div v-if="modalVisible"
+         class="modal-overlay"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="modal-dipendente-title"
+         v-on:click="chiudiModalOverlay($event)">
         <div class="modal-box" v-html="modalContent">
         </div>
     </div>
     </div>
 </div>
+</main>
 </div>
 
 @section scripts {
@@ -103,20 +127,47 @@
         data() {
             return {
                 modalVisible: false,
-                modalContent: ''
+                modalContent: '',
+                previousFocusElement: null
             };
+        },
+        mounted() {
+            // Gestione tasto ESC per chiudere modal
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' || e.key === 'Esc') {
+                    if (this.modalVisible) {
+                        this.chiudiModal();
+                    }
+                }
+            });
         },
         methods: {
             async apriModal(id) {
+                // Salva focus corrente
+                this.previousFocusElement = document.activeElement;
+
                 const response = await fetch(`@Url.Action("DettaglioDipendente", "Users", new { Area = "Example" })?id=${id}`);
                 this.modalContent = await response.text();
                 this.modalVisible = true;
                 this.$nextTick(() => {
                     this.inizializzaCampiModal();
+                    // Sposta focus sul modal
+                    const modalTitle = document.querySelector('.modal-title');
+                    if (modalTitle) {
+                        modalTitle.setAttribute('tabindex', '-1');
+                        modalTitle.setAttribute('id', 'modal-dipendente-title');
+                        modalTitle.focus();
+                    }
                 });
             },
             chiudiModal() {
                 this.modalVisible = false;
+                // Ripristina focus
+                this.$nextTick(() => {
+                    if (this.previousFocusElement && this.previousFocusElement.focus) {
+                        this.previousFocusElement.focus();
+                    }
+                });
             },
             chiudiModalOverlay(event) {
                 if (event.target.classList.contains('modal-overlay')) {

@@ -17,11 +17,14 @@
 }
 
 @section navbar {
-    <nav class="navbar navbar-expand-lg justify-content-md-center mb-4" style="background-color: #E3F2FD;">
+    <nav class="navbar navbar-expand-lg justify-content-md-center mb-4"
+         style="background-color: #E3F2FD;"
+         aria-label="Navigazione principale"
+         id="navbar">
         <div class="container-fluid">
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav gap-5 mx-auto">
-                    <li class="nav-item"><a class="nav-link active fw-bold" href="@Url.Action(MVC.Example.Users.Index())">Home</a></li>
+                    <li class="nav-item"><a class="nav-link active fw-bold" href="@Url.Action(MVC.Example.Users.Index())" aria-current="page">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="@Url.Action(MVC.Example.Users.GestioneNavi())">Gestione Navi</a></li>
                     <li class="nav-item"><a class="nav-link" href="@Url.Action(MVC.Example.Users.GestioneDipendenti())">Gestione Dipendenti</a></li>
                 </ul>
@@ -31,10 +34,26 @@
 }
 
 <div id="app" v-cloak>
-<div class="container-fluid">
-    <div class="d-flex justify-content-end align-items-center mb-3">
-        <input type="text" class="form-control" style="max-width: 300px;" placeholder="Cerca dipendente..." v-model="filtroNome" />
-        <button v-if="filtroNome" class="btn btn-secondary btn-sm ms-2" @@click="filtroNome = ''">Mostra tutti</button>
+<main id="main-content" role="main">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-end align-items-center mb-3">
+        <label for="search-dipendente" class="visually-hidden">Cerca dipendente per nome</label>
+        <input type="text"
+               id="search-dipendente"
+               class="form-control"
+               style="max-width: 300px;"
+               placeholder="Cerca dipendente..."
+               v-model="filtroNome"
+               aria-describedby="search-help"
+               @@keydown.esc="filtroNome = ''" />
+        <span id="search-help" class="visually-hidden">Digita per filtrare i dipendenti. Premi ESC per cancellare</span>
+        <button v-if="filtroNome"
+                class="btn btn-secondary btn-sm ms-2"
+                @@click="filtroNome = ''"
+                aria-label="Cancella filtro e mostra tutti i dipendenti">Mostra tutti</button>
+    </div>
+    <div role="status" aria-live="polite" aria-atomic="true" class="visually-hidden">
+        {{ filtroNome ? 'Risultati filtrati per: ' + filtroNome : '' }}
     </div>
     <div class="row">
         <!-- Navi oggi -->
@@ -42,17 +61,18 @@
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5 class="fw-bold mb-0">NAVI OGGI</h5>
             </div>
-            <table class="table table-bordered table-hover">
+            <table class="table table-bordered" role="table" aria-label="Pianificazione navi oggi">
+                <caption class="visually-hidden">Navi in programma per oggi @Model.DataOggi.ToString("dd/MM/yyyy") con turni assegnati per fasce orarie</caption>
                 <thead class="table-light">
                     <tr>
-                        <th colspan="5" class="text-center" style="background-color: #0d6efd !important; color: white !important;">@Model.DataOggi.ToString("dd/MM/yyyy")</th>
+                        <th colspan="5" scope="colgroup" class="text-center" style="background-color: #0d6efd !important; color: white !important;">@Model.DataOggi.ToString("dd/MM/yyyy")</th>
                     </tr>
                     <tr>
-                        <th>Nome Nave</th>
-                        <th>Pontile</th>
-                        <th class="text-center fascia-header">00:00 - 08:00</th>
-                        <th class="text-center fascia-header">08:00 - 16:00</th>
-                        <th class="text-center fascia-header">16:00 - 24:00</th>
+                        <th scope="col">Nome Nave</th>
+                        <th scope="col">Pontile</th>
+                        <th scope="col" class="text-center fascia-header">00:00 - 08:00</th>
+                        <th scope="col" class="text-center fascia-header">08:00 - 16:00</th>
+                        <th scope="col" class="text-center fascia-header">16:00 - 24:00</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -68,7 +88,7 @@
                                 _ => ""
                             };
                             <tr>
-                                <td>
+                                <th scope="row">
                                     <div class="fw-bold">@nave.Nome</div>
                                     <span class="nave-stato @statoClasse">
                                         @nave.GetStatoDescrizione(oraCorrente)
@@ -80,13 +100,23 @@
                                                 StatoNave.InArrivo => "in_arrivo.png",
                                                 _ => ""
                                             };
+                                            var statoAlt = nave.GetStato(oraCorrente) switch
+                                            {
+                                                StatoNave.InLavorazione => "In lavorazione",
+                                                StatoNave.InPartenza => "In partenza",
+                                                StatoNave.InArrivo => "In arrivo",
+                                                _ => ""
+                                            };
                                         }
                                         @if (!string.IsNullOrEmpty(statoIcon))
                                         {
-                                            <img src="~/images/@statoIcon" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 5px;" />
+                                            <img src="~/images/@statoIcon"
+                                                 alt="@statoAlt"
+                                                 role="img"
+                                                 style="width: 20px; height: 20px; vertical-align: middle; margin-left: 5px;" />
                                         }
                                     </span>
-                                </td>
+                                </th>
                                 <td class="text-center">@nave.Pontile</td>
                                 <!-- Fascia Mattina -->
                                 <td class="col-fascia">
@@ -99,7 +129,8 @@
                                             {
                                                 <button type="button" class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
                                                      v-show="mostraDipendente('@dip.NomeCompleto')"
-                                                     @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 0, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                                     @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 0, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower(), @nave.RichiedeAddettiTerminal.ToString().ToLower(), @nave.RichiedeOrmeggiatori.ToString().ToLower(), @nave.RichiedeAddettiSicurezza.ToString().ToLower())"
+                                                     aria-label="@dip.NomeCompleto@(dip.PatenteScaduta ? ", patente scaduta" : "") - @dip.Ruolo. Clicca per cambiare dipendente">
                                                     <span>@dip.NomeCompleto</span>
                                                     @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
                                                     <img src="~/images/cestino.png" class="cestino-icon" title="Elimina dipendente" onclick="event.stopPropagation(); eliminaDipendente(@nave.Id, 0, 'oggi', @dip.Id)" />
@@ -116,7 +147,7 @@
                                         }
                                         @if (fasciaInArrivo && nave.DipendentiMattina.Count < 5)
                                         {
-                                            <button type="button" class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 0, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                            <button type="button" class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 0, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower(), @nave.RichiedeAddettiTerminal.ToString().ToLower(), @nave.RichiedeOrmeggiatori.ToString().ToLower(), @nave.RichiedeAddettiSicurezza.ToString().ToLower())">
                                                 + Seleziona dipendenti
                                             </button>
                                         }
@@ -139,7 +170,8 @@
                                             {
                                                 <button type="button" class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
                                                      v-show="mostraDipendente('@dip.NomeCompleto')"
-                                                     @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 1, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                                     @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 1, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower(), @nave.RichiedeAddettiTerminal.ToString().ToLower(), @nave.RichiedeOrmeggiatori.ToString().ToLower(), @nave.RichiedeAddettiSicurezza.ToString().ToLower())"
+                                                     aria-label="@dip.NomeCompleto@(dip.PatenteScaduta ? ", patente scaduta" : "") - @dip.Ruolo. Clicca per cambiare dipendente">
                                                     <span>@dip.NomeCompleto</span>
                                                     @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
                                                     <img src="~/images/cestino.png" class="cestino-icon" title="Elimina dipendente" onclick="event.stopPropagation(); eliminaDipendente(@nave.Id, 1, 'oggi', @dip.Id)" />
@@ -156,7 +188,7 @@
                                         }
                                         @if (fasciaInArrivo && nave.DipendentiPomeriggio.Count < 5)
                                         {
-                                            <button type="button" class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 1, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                            <button type="button" class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 1, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower(), @nave.RichiedeAddettiTerminal.ToString().ToLower(), @nave.RichiedeOrmeggiatori.ToString().ToLower(), @nave.RichiedeAddettiSicurezza.ToString().ToLower())">
                                                 + Seleziona dipendenti
                                             </button>
                                         }
@@ -179,7 +211,8 @@
                                             {
                                                 <button type="button" class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
                                                      v-show="mostraDipendente('@dip.NomeCompleto')"
-                                                     @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 2, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                                     @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 2, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower(), @nave.RichiedeAddettiTerminal.ToString().ToLower(), @nave.RichiedeOrmeggiatori.ToString().ToLower(), @nave.RichiedeAddettiSicurezza.ToString().ToLower())"
+                                                     aria-label="@dip.NomeCompleto@(dip.PatenteScaduta ? ", patente scaduta" : "") - @dip.Ruolo. Clicca per cambiare dipendente">
                                                     <span>@dip.NomeCompleto</span>
                                                     @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
                                                     <img src="~/images/cestino.png" class="cestino-icon" title="Elimina dipendente" onclick="event.stopPropagation(); eliminaDipendente(@nave.Id, 2, 'oggi', @dip.Id)" />
@@ -196,7 +229,7 @@
                                         }
                                         @if (fasciaInArrivo && nave.DipendentiSera.Count < 5)
                                         {
-                                            <button type="button" class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 2, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                            <button type="button" class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 2, 'oggi', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower(), @nave.RichiedeAddettiTerminal.ToString().ToLower(), @nave.RichiedeOrmeggiatori.ToString().ToLower(), @nave.RichiedeAddettiSicurezza.ToString().ToLower())">
                                                 + Seleziona dipendenti
                                             </button>
                                         }
@@ -226,17 +259,18 @@
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5 class="fw-bold mb-0">NAVI DOMANI</h5>
             </div>
-            <table class="table table-bordered table-hover">
+            <table class="table table-bordered" role="table" aria-label="Pianificazione navi domani">
+                <caption class="visually-hidden">Navi in programma per domani @Model.DataDomani.ToString("dd/MM/yyyy") con turni assegnati per fasce orarie</caption>
                 <thead class="table-light">
                     <tr>
-                            <th colspan="5" class="text-center" style="background-color: rgb(73, 80, 87) !important; color: white !important;">@Model.DataDomani.ToString("dd/MM/yyyy")</th>
+                            <th colspan="5" scope="colgroup" class="text-center" style="background-color: rgb(73, 80, 87) !important; color: white !important;">@Model.DataDomani.ToString("dd/MM/yyyy")</th>
                     </tr>
                     <tr>
-                        <th>Nome Nave</th>
-                        <th>Pontile</th>
-                        <th class="text-center fascia-header">00:00 - 08:00</th>
-                        <th class="text-center fascia-header">08:00 - 16:00</th>
-                        <th class="text-center fascia-header">16:00 - 24:00</th>
+                        <th scope="col">Nome Nave</th>
+                        <th scope="col">Pontile</th>
+                        <th scope="col" class="text-center fascia-header">00:00 - 08:00</th>
+                        <th scope="col" class="text-center fascia-header">08:00 - 16:00</th>
+                        <th scope="col" class="text-center fascia-header">16:00 - 24:00</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -245,13 +279,16 @@
                         @foreach (var nave in Model.NaviDomani)
                         {
                             <tr>
-                                <td>
+                                <th scope="row">
                                     <div class="fw-bold">@nave.Nome</div>
                                     <span class="nave-stato stato-arrivo">
                                         In arrivo
-                                        <img src="~/images/in_arrivo.png" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 5px;" />
+                                        <img src="~/images/in_arrivo.png"
+                                             alt="Nave in arrivo"
+                                             role="img"
+                                             style="width: 20px; height: 20px; vertical-align: middle; margin-left: 5px;" />
                                     </span>
-                                </td>
+                                </th>
                                 <td class="text-center">@nave.Pontile</td>
                                 <!-- fascia mattina -->
                                 <td class="col-fascia">
@@ -261,7 +298,8 @@
                                         {
                                             <button type="button" class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
                                                  v-show="mostraDipendente('@dip.NomeCompleto')"
-                                                 @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 0, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                                 @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 0, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower(), @nave.RichiedeAddettiTerminal.ToString().ToLower(), @nave.RichiedeOrmeggiatori.ToString().ToLower(), @nave.RichiedeAddettiSicurezza.ToString().ToLower())"
+                                                 aria-label="@dip.NomeCompleto@(dip.PatenteScaduta ? ", patente scaduta" : "") - @dip.Ruolo. Clicca per cambiare dipendente">
                                                 <span>@dip.NomeCompleto</span>
                                                 @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
                                                 <img src="~/images/cestino.png" class="cestino-icon" title="Elimina dipendente" onclick="event.stopPropagation(); eliminaDipendente(@nave.Id, 0, 'domani', @dip.Id)" />
@@ -269,7 +307,7 @@
                                         }
                                         @if (nave.DipendentiMattina.Count < 5)
                                         {
-                                            <button type="button" class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 0, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                            <button type="button" class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 0, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower(), @nave.RichiedeAddettiTerminal.ToString().ToLower(), @nave.RichiedeOrmeggiatori.ToString().ToLower(), @nave.RichiedeAddettiSicurezza.ToString().ToLower())">
                                                 + Seleziona dipendenti
                                             </button>
                                         }
@@ -289,7 +327,8 @@
                                         {
                                             <button type="button" class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
                                                  v-show="mostraDipendente('@dip.NomeCompleto')"
-                                                 @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 1, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                                 @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 1, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower(), @nave.RichiedeAddettiTerminal.ToString().ToLower(), @nave.RichiedeOrmeggiatori.ToString().ToLower(), @nave.RichiedeAddettiSicurezza.ToString().ToLower())"
+                                                 aria-label="@dip.NomeCompleto@(dip.PatenteScaduta ? ", patente scaduta" : "") - @dip.Ruolo. Clicca per cambiare dipendente">
                                                 <span>@dip.NomeCompleto</span>
                                                 @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
                                                 <img src="~/images/cestino.png" class="cestino-icon" title="Elimina dipendente" onclick="event.stopPropagation(); eliminaDipendente(@nave.Id, 1, 'domani', @dip.Id)" />
@@ -297,7 +336,7 @@
                                         }
                                         @if (nave.DipendentiPomeriggio.Count < 5)
                                         {
-                                            <button type="button" class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 1, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                            <button type="button" class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 1, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower(), @nave.RichiedeAddettiTerminal.ToString().ToLower(), @nave.RichiedeOrmeggiatori.ToString().ToLower(), @nave.RichiedeAddettiSicurezza.ToString().ToLower())">
                                                 + Seleziona dipendenti
                                             </button>
                                         }
@@ -317,7 +356,8 @@
                                         {
                                             <button type="button" class="dipendente cliccabile @(dip.PatenteScaduta ? "patente-scaduta" : "")"
                                                  v-show="mostraDipendente('@dip.NomeCompleto')"
-                                                 @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 2, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                                 @@click="apriModalCambio(@dip.Id, '@dip.NomeCompleto', @nave.Id, 2, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower(), @nave.RichiedeAddettiTerminal.ToString().ToLower(), @nave.RichiedeOrmeggiatori.ToString().ToLower(), @nave.RichiedeAddettiSicurezza.ToString().ToLower())"
+                                                 aria-label="@dip.NomeCompleto@(dip.PatenteScaduta ? ", patente scaduta" : "") - @dip.Ruolo. Clicca per cambiare dipendente">
                                                 <span>@dip.NomeCompleto</span>
                                                 @if (dip.PatenteScaduta) { <img src="~/images/patente.png" alt="Patente scaduta" title="Patente scaduta" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 8px;" /> }
                                                 <img src="~/images/cestino.png" class="cestino-icon" title="Elimina dipendente" onclick="event.stopPropagation(); eliminaDipendente(@nave.Id, 2, 'domani', @dip.Id)" />
@@ -325,7 +365,7 @@
                                         }
                                         @if (nave.DipendentiSera.Count < 5)
                                         {
-                                            <button type="button" class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 2, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower())">
+                                            <button type="button" class="seleziona-dipendente" @@click="apriModalSelezione(@nave.Id, 2, 'domani', @nave.RichiedeGruisti.ToString().ToLower(), @nave.RichiedeMulettisti.ToString().ToLower(), @nave.RichiedeAddettiTerminal.ToString().ToLower(), @nave.RichiedeOrmeggiatori.ToString().ToLower(), @nave.RichiedeAddettiSicurezza.ToString().ToLower())">
                                                 + Seleziona dipendenti
                                             </button>
                                         }
@@ -352,11 +392,16 @@
     </div>
 
     <!-- Modal cambio dipendente -->
-    <div v-if="modalCambioVisible" class="modal-overlay" v-on:click="chiudiModalOverlay($event, 'cambio')">
+    <div v-if="modalCambioVisible"
+         class="modal-overlay"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="modal-cambio-title"
+         v-on:click="chiudiModalOverlay($event, 'cambio')">
         <div class="modal-box">
-            <div class="modal-title">Variazione Dipendente</div>
+            <h2 id="modal-cambio-title" class="modal-title">Variazione Dipendente</h2>
             <p class="text-center mb-3">Dipendente attuale: <strong>{{ dipendenteAttualeNome }}</strong></p>
-            <label class="form-label">Seleziona sostituto:</label>
+            <label class="form-label" id="label-sostituto">Seleziona sostituto:</label>
             <div style="max-height: 250px; overflow-y: auto;">
                 <button type="button" v-for="dip in dipendentiDisponibili" :key="dip.id"
                      :class="['dipendente-option', { 'selected': dipendenteSelezionatoId === dip.id, 'non-disponibile': !dip.disponibile }]"
@@ -377,10 +422,15 @@
     </div>
 
     <!-- Modal selezione dipendenti -->
-    <div v-if="modalSelezioneVisible" class="modal-overlay" v-on:click="chiudiModalOverlay($event, 'selezione')">
+    <div v-if="modalSelezioneVisible"
+         class="modal-overlay"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="modal-selezione-title"
+         v-on:click="chiudiModalOverlay($event, 'selezione')">
         <div class="modal-box">
-            <div class="modal-title">Seleziona Dipendenti</div>
-            <p class="text-muted text-center mb-3">Selezionati: <strong>{{ dipendentiSelezionatiIds.length }}/5</strong></p>
+            <h2 id="modal-selezione-title" class="modal-title">Seleziona Dipendenti</h2>
+            <p class="text-muted text-center mb-3" role="status" aria-live="polite" aria-atomic="true">Selezionati: <strong>{{ dipendentiSelezionatiIds.length }}/5</strong></p>
             <div style="max-height: 300px; overflow-y: auto;">
                 <button type="button" v-for="dip in dipendentiDisponibili" :key="dip.id"
                      :class="['dipendente-option', { 'selected': dipendentiSelezionatiIds.includes(dip.id), 'non-disponibile': !dip.disponibile }]"
@@ -400,6 +450,7 @@
         </div>
     </div>
     </div>
+</main>
 </div>
 
 @section scripts {
@@ -414,6 +465,9 @@ if (typeof Vue === 'undefined') {
             return {
                 gruisti: @Html.Raw(Json.Serialize(Model.Gruisti)),
                 mulettisti: @Html.Raw(Json.Serialize(Model.Mulettisti)),
+                addettiTerminal: @Html.Raw(Json.Serialize(Model.AddettiTerminal)),
+                ormeggiatori: @Html.Raw(Json.Serialize(Model.Ormeggiatori)),
+                addettiSicurezza: @Html.Raw(Json.Serialize(Model.AddettiSicurezza)),
                 tuttiDipendenti: @Html.Raw(Json.Serialize(Model.TuttiDipendenti)),
                 assegnazioni: @Html.Raw(Json.Serialize(Model.Assegnazioni)),
 
@@ -428,11 +482,16 @@ if (typeof Vue === 'undefined') {
 
                 richiedeGruistiCorrente: false,
                 richiedeMulettistiCorrente: false,
+                richiedeAddettiTerminalCorrente: false,
+                richiedeOrmeggiatoriCorrente: false,
+                richiedeAddettiSicurezzaCorrente: false,
 
                 dipendenteSelezionatoId: null,
                 dipendentiSelezionatiIds: [],
                 dipendentiGiaAssegnatiCorrente: [], //dipendenti già nella lista corrente
-                filtroNome: ''
+                filtroNome: '',
+
+                previousFocusElement: null // Elemento che aveva focus prima dell'apertura del modal
             };
         },
         computed: {
@@ -440,7 +499,10 @@ if (typeof Vue === 'undefined') {
                 let lista = [];
                 if (this.richiedeGruistiCorrente) lista = lista.concat(this.gruisti);
                 if (this.richiedeMulettistiCorrente) lista = lista.concat(this.mulettisti);
-                if (!this.richiedeGruistiCorrente && !this.richiedeMulettistiCorrente) lista = this.tuttiDipendenti;
+                if (this.richiedeAddettiTerminalCorrente) lista = lista.concat(this.addettiTerminal);
+                if (this.richiedeOrmeggiatoriCorrente) lista = lista.concat(this.ormeggiatori);
+                if (this.richiedeAddettiSicurezzaCorrente) lista = lista.concat(this.addettiSicurezza);
+                if (!this.richiedeGruistiCorrente && !this.richiedeMulettistiCorrente && !this.richiedeAddettiTerminalCorrente && !this.richiedeOrmeggiatoriCorrente && !this.richiedeAddettiSicurezzaCorrente) lista = this.tuttiDipendenti;
                 return lista;
             },
             dipendentiDisponibili() {
@@ -451,6 +513,18 @@ if (typeof Vue === 'undefined') {
                         && d.id !== this.vecchioDipendenteId
                 }));
             }
+        },
+        mounted() {
+            // Gestione tasto ESC per chiudere i modal
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' || e.key === 'Esc') {
+                    if (this.modalCambioVisible) {
+                        this.chiudiModalCambio();
+                    } else if (this.modalSelezioneVisible) {
+                        this.chiudiModalSelezione();
+                    }
+                }
+            });
         },
         methods: {
             mostraDipendente(dipNomeCompleto) {
@@ -484,7 +558,7 @@ if (typeof Vue === 'undefined') {
 
                 return !dipendentiOccupati.includes(dipId);
             },
-            apriModalCambio(dipId, dipNome, naveId, fascia, giorno, richiedeGruisti, richiedeMulettisti) {
+            apriModalCambio(dipId, dipNome, naveId, fascia, giorno, richiedeGruisti, richiedeMulettisti, richiedeAddettiTerminal, richiedeOrmeggiatori, richiedeAddettiSicurezza) {
                 this.vecchioDipendenteId = dipId;
                 this.dipendenteAttualeNome = dipNome;
                 this.naveIdCorrente = naveId;
@@ -492,27 +566,57 @@ if (typeof Vue === 'undefined') {
                 this.giornoCorrente = giorno;
                 this.richiedeGruistiCorrente = richiedeGruisti;
                 this.richiedeMulettistiCorrente = richiedeMulettisti;
+                this.richiedeAddettiTerminalCorrente = richiedeAddettiTerminal;
+                this.richiedeOrmeggiatoriCorrente = richiedeOrmeggiatori;
+                this.richiedeAddettiSicurezzaCorrente = richiedeAddettiSicurezza;
                 this.dipendenteSelezionatoId = null;
 
                 //ottieni dipendenti già assegnati a questa nave/fascia (escluso quello da cambiare)
                 const chiave = `${naveId}_${fascia}_${giorno}`;
                 this.dipendentiGiaAssegnatiCorrente = (this.assegnazioni[chiave] || []).filter(id => id !== dipId);
 
+                // Salva elemento con focus corrente
+                this.previousFocusElement = document.activeElement;
+
                 this.modalCambioVisible = true;
+
+                // Sposta focus sul modal dopo che Vue lo ha renderizzato
+                this.$nextTick(() => {
+                    const modalTitle = document.getElementById('modal-cambio-title');
+                    if (modalTitle) {
+                        modalTitle.setAttribute('tabindex', '-1');
+                        modalTitle.focus();
+                    }
+                });
             },
-            apriModalSelezione(naveId, fascia, giorno, richiedeGruisti, richiedeMulettisti) {
+            apriModalSelezione(naveId, fascia, giorno, richiedeGruisti, richiedeMulettisti, richiedeAddettiTerminal, richiedeOrmeggiatori, richiedeAddettiSicurezza) {
                 this.naveIdCorrente = naveId;
                 this.fasciaCorrente = fascia;
                 this.giornoCorrente = giorno;
                 this.richiedeGruistiCorrente = richiedeGruisti;
                 this.richiedeMulettistiCorrente = richiedeMulettisti;
+                this.richiedeAddettiTerminalCorrente = richiedeAddettiTerminal;
+                this.richiedeOrmeggiatoriCorrente = richiedeOrmeggiatori;
+                this.richiedeAddettiSicurezzaCorrente = richiedeAddettiSicurezza;
                 this.vecchioDipendenteId = null;
 
                 const chiave = `${naveId}_${fascia}_${giorno}`;
                 this.dipendentiGiaAssegnatiCorrente = this.assegnazioni[chiave] || [];
                 this.dipendentiSelezionatiIds = [...this.dipendentiGiaAssegnatiCorrente];
 
+                // Salva elemento con focus corrente
+                this.previousFocusElement = document.activeElement;
+
                 this.modalSelezioneVisible = true;
+
+                // Sposta focus sul modal dopo che Vue lo ha renderizzato
+                this.$nextTick(() => {
+                    const modalTitle = document.getElementById('modal-selezione-title');
+                    if (modalTitle) {
+                        modalTitle.setAttribute('tabindex', '-1');
+                        modalTitle.focus();
+                    }
+                });
             },
             selezionaDipendente(dipId) {
                 this.dipendenteSelezionatoId = dipId;
@@ -601,9 +705,21 @@ if (typeof Vue === 'undefined') {
             },
             chiudiModalCambio() {
                 this.modalCambioVisible = false;
+                // Ripristina focus sull'elemento che l'aveva prima
+                this.$nextTick(() => {
+                    if (this.previousFocusElement && this.previousFocusElement.focus) {
+                        this.previousFocusElement.focus();
+                    }
+                });
             },
             chiudiModalSelezione() {
                 this.modalSelezioneVisible = false;
+                // Ripristina focus sull'elemento che l'aveva prima
+                this.$nextTick(() => {
+                    if (this.previousFocusElement && this.previousFocusElement.focus) {
+                        this.previousFocusElement.focus();
+                    }
+                });
             },
             chiudiModalOverlay(event, modalType) {
                 if (event.target.classList.contains('modal-overlay')) {

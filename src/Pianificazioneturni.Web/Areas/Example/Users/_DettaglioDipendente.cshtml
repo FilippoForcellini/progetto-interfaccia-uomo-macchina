@@ -1,18 +1,18 @@
 @model Pianificazioneturni.Web.Areas.Example.Users.DipendenteDetailViewModel
 
-<div class="modal-title">Dettaglio Dipendente</div>
+<h2 id="modal-dipendente-title" class="modal-title">Dettaglio Dipendente</h2>
 
 <form asp-action="SalvaDipendente" method="post" id="formDettaglio" onsubmit="return validaForm()">
     <input type="hidden" asp-for="Id" />
 
     <div class="form-group mb-3">
         <label asp-for="Nome" class="form-label"></label>
-        <input type="text" class="form-control" asp-for="Nome" readonly style="background-color: #e9ecef;" />
+        <input type="text" class="form-control" asp-for="Nome" readonly style="background-color: #e9ecef;" aria-readonly="true" />
     </div>
 
     <div class="form-group mb-3">
         <label asp-for="Ruolo" class="form-label"></label>
-        <select class="form-select" asp-for="Ruolo" id="selectRuolo">
+        <select class="form-select" asp-for="Ruolo" id="selectRuolo" aria-label="Seleziona ruolo dipendente">
             @foreach (var ruolo in (List<string>)ViewBag.Ruoli)
             {
                 <option value="@ruolo">@ruolo</option>
@@ -23,9 +23,11 @@
     <input type="hidden" asp-for="Patente" id="checkPatente" value="true" />
 
     <div class="form-group mb-3" id="scadenzaGroup">
-        <label class="form-label">Scadenza Patente</label>
+        <label for="inputScadenza" class="form-label">Scadenza Patente</label>
         <input type="date" class="form-control" asp-for="Scadenza" id="inputScadenza"
-               value="@(Model.Scadenza.HasValue ? Model.Scadenza.Value.ToString("yyyy-MM-dd") : "")" />
+               value="@(Model.Scadenza.HasValue ? Model.Scadenza.Value.ToString("yyyy-MM-dd") : "")"
+               aria-describedby="scadenza-help" />
+        <span id="scadenza-help" class="visually-hidden">Campo disponibile solo per Gruisti e Mulettisti</span>
     </div>
 
     <div class="modal-footer d-flex justify-content-center gap-2 mt-4">

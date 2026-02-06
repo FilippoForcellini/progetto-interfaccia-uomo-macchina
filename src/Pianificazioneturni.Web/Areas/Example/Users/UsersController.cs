@@ -296,6 +296,9 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
             //filtra gruisti e mulettisti disponibili
             model.Gruisti = model.TuttiDipendenti.Where(d => d.Ruolo == "Gruista").ToList();
             model.Mulettisti = model.TuttiDipendenti.Where(d => d.Ruolo == "Mulettista").ToList();
+            model.AddettiTerminal = model.TuttiDipendenti.Where(d => d.Ruolo == "Addetto terminal").ToList();
+            model.Ormeggiatori = model.TuttiDipendenti.Where(d => d.Ruolo == "Ormeggiatore").ToList();
+            model.AddettiSicurezza = model.TuttiDipendenti.Where(d => d.Ruolo == "Addetto alla Sicurezza").ToList();
 
             //Navi oggi da Gestione Navi
             var naviOggiDb = _navi.Where(n => n.DatePresenza.Any(d => d.Date == oggi)).ToList();
@@ -342,7 +345,10 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                 FasciaPomeriggio = naveDb.HasFasciaInData(data, 1),
                 FasciaSera = naveDb.HasFasciaInData(data, 2),
                 RichiedeGruisti = naveDb.RichiedeGruisti,
-                RichiedeMulettisti = naveDb.RichiedeMulettisti
+                RichiedeMulettisti = naveDb.RichiedeMulettisti,
+                RichiedeAddettiTerminal = naveDb.RichiedeAddettiTerminal,
+                RichiedeOrmeggiatori = naveDb.RichiedeOrmeggiatori,
+                RichiedeAddettiSicurezza = naveDb.RichiedeAddettiSicurezza
             };
 
             //Carica dipendenti salvati
@@ -478,12 +484,26 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                 };
             }
 
-            return PartialView("_DettaglioNave", nave);
+            return Json(new
+            {
+                id = nave.Id,
+                nome = nave.Nome ?? "",
+                pontile = nave.Pontile ?? 1,
+                richiedeGruisti = nave.RichiedeGruisti,
+                richiedeMulettisti = nave.RichiedeMulettisti,
+                richiedeAddettiTerminal = nave.RichiedeAddettiTerminal,
+                richiedeOrmeggiatori = nave.RichiedeOrmeggiatori,
+                richiedeAddettiSicurezza = nave.RichiedeAddettiSicurezza,
+                dataArrivo = nave.DataArrivo?.ToString("yyyy-MM-dd") ?? "",
+                orarioArrivo = nave.OrarioArrivo,
+                dataPartenza = nave.DataPartenza?.ToString("yyyy-MM-dd") ?? "",
+                orarioPartenza = nave.OrarioPartenza
+            });
         }
 
         [HttpPost]
         public virtual IActionResult SalvaNave(int id, string nome, int? pontile,
-            bool richiedeGruisti, bool richiedeMulettisti,
+            bool richiedeGruisti, bool richiedeMulettisti, bool richiedeAddettiTerminal, bool richiedeOrmeggiatori, bool richiedeAddettiSicurezza,
             string dataArrivo, int orarioArrivo, string dataPartenza, int orarioPartenza)
         {
             //parse date arrivo/partenza
@@ -532,6 +552,9 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                     Pontile = pontile,
                     RichiedeGruisti = richiedeGruisti,
                     RichiedeMulettisti = richiedeMulettisti,
+                    RichiedeAddettiTerminal = richiedeAddettiTerminal,
+                    RichiedeOrmeggiatori = richiedeOrmeggiatori,
+                    RichiedeAddettiSicurezza = richiedeAddettiSicurezza,
                     Colore = ColoriNavi.GetColore(_navi.Count)
                 };
                 _navi.Add(nuovaNave);
@@ -555,6 +578,9 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                     nave.Pontile = pontile;
                     nave.RichiedeGruisti = richiedeGruisti;
                     nave.RichiedeMulettisti = richiedeMulettisti;
+                    nave.RichiedeAddettiTerminal = richiedeAddettiTerminal;
+                    nave.RichiedeOrmeggiatori = richiedeOrmeggiatori;
+                    nave.RichiedeAddettiSicurezza = richiedeAddettiSicurezza;
                     SaveNavi();
                     Alerts.AddSuccess(this, "Nave aggiornata con successo");
                 }

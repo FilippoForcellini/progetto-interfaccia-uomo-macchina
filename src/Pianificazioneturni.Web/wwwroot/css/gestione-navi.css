@@ -1,3 +1,44 @@
+/* Accessibility utilities */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+.skip-link {
+    position: absolute;
+    left: -9999px;
+    z-index: 10000;
+}
+
+.skip-link:focus {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background: #000;
+    color: #fff;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
+    outline: 3px solid #0066cc;
+    outline-offset: 2px;
+}
+
 /* Titolo pagina */
 .page-title {
     top: 50px;
@@ -6,9 +47,63 @@
 }
 
 /* Filtri */
-.btn-filter.active {
-    background-color: #ffc107;
-    border-color: #ffc107;
+.btn-filter {
+    border-radius: 12px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-filter-gruisti {
+    background-color: #64B5F6;
+    border-color: #64B5F6;
+    color: #000;
+}
+
+.btn-filter-gruisti:hover {
+    background-color: #42A5F5;
+    border-color: #42A5F5;
+    color: #000;
+}
+
+.btn-filter-gruisti.active {
+    background-color: #e0e0e0;
+    border-color: #e0e0e0;
+    color: #000;
+}
+
+.btn-filter-mulettisti {
+    background-color: #FFCC80;
+    border-color: #FFCC80;
+    color: #000;
+}
+
+.btn-filter-mulettisti:hover {
+    background-color: #FFB74D;
+    border-color: #FFB74D;
+    color: #000;
+}
+
+.btn-filter-mulettisti.active {
+    background-color: #e0e0e0;
+    border-color: #e0e0e0;
+    color: #000;
+}
+
+.btn-filter-entrambi {
+    background-color: #CE93D8;
+    border-color: #CE93D8;
+    color: #000;
+}
+
+.btn-filter-entrambi:hover {
+    background-color: #BA68C8;
+    border-color: #BA68C8;
+    color: #000;
+}
+
+.btn-filter-entrambi.active {
+    background-color: #e0e0e0;
+    border-color: #e0e0e0;
     color: #000;
 }
 
@@ -105,8 +200,19 @@
     width: 100%;
     height: 100%;
     border-radius: 4px;
-    background-color: #FFEB3B !important;
     opacity: 0.8;
+}
+
+.fascia-marker.gruisti {
+    background-color: #90CAF9 !important;
+}
+
+.fascia-marker.mulettisti {
+    background-color: #FFCC80 !important;
+}
+
+.fascia-marker.entrambi {
+    background-color: #CE93D8 !important;
 }
 
 .fascia-occupata {
@@ -120,6 +226,11 @@
 
 .nave-row:hover .fascia-cell {
     background-color: #e3f2fd !important;
+}
+
+.nave-row:focus-visible {
+    outline: 3px solid #0066cc;
+    outline-offset: -3px;
 }
 
 /* Modal */

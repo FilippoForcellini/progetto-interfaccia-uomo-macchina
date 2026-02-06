@@ -1,3 +1,45 @@
+/* Accessibility utilities */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+.skip-link {
+    position: absolute;
+    left: -9999px;
+    z-index: 10000;
+}
+
+.skip-link:focus {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background: #000;
+    color: #fff;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+/* Focus visible styles for keyboard navigation */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
+    outline: 3px solid #0066cc;
+    outline-offset: 2px;
+}
+
 [v-cloak] {
     display: none;
 }
@@ -30,36 +72,48 @@
     gap: 5px;
     padding: 4px 8px;
     margin: 2px 0;
-    background: #e3f2fd;
+    background: #bbdefb;
     border-radius: 4px;
     font-size: 0.85rem;
+    border: 1px solid transparent;
+    width: 100%;
+    text-align: left;
 }
-.dipendente.cliccabile { 
-    cursor: pointer; 
+.dipendente.cliccabile {
+    cursor: pointer;
 }
-.dipendente.cliccabile:hover { 
-    background: #bbdefb; 
+    .dipendente.cliccabile:hover {
+        background: #84C5FB;
+    }
+.dipendente:focus-visible {
+    outline: 3px solid #0066cc;
+    outline-offset: 2px;
 }
 .dipendente.non-cliccabile {
     cursor: default; opacity: 0.8; 
 }
 .dipendente.patente-scaduta {
-    background: #FFF06C;
+    background: #ffd54f;
+    color: #000;
+    font-weight: 500;
 }
 .dipendente.patente-scaduta:hover {
-    background: #FFEB3B;
+    background: #ffca28;
 }
 .nave-stato { 
     font-size: 0.8rem; font-weight: 500; padding: 2px 6px; border-radius: 3px; 
 }
-.stato-lavorazione { 
-    background: #4caf50; color: white; 
+.stato-lavorazione {
+    background: #2e7d32;
+    color: white;
 }
-.stato-partenza { 
-   background: #2196f3; color: white; 
+.stato-partenza {
+    background: #1565c0;
+    color: white;
 }
-.stato-arrivo { 
-   background: #ff9800; color: white; 
+.stato-arrivo {
+    background: #e65100;
+    color: white;
 }
 .col-fascia { 
     vertical-align: top; min-width: 150px; 
@@ -108,9 +162,17 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border: none;
+    outline: none;
 }
-.dipendente-option:hover { 
-    background: #e3f2fd; 
+.dipendente-option:hover {
+    background: #e3f2fd;
+}
+.dipendente-option:focus,
+.dipendente-option:active {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 .dipendente-option.selected {
     background: #2196f3; color: white; 
@@ -167,20 +229,34 @@
 
 /* Bottone Elimina Turno */
 .elimina-turno-btn {
-    background: #dc3545;
-    border: 2px dashed #c82333;
-    padding: 8px;
+    background: #ff6b6b;
+    border: 1px dashed #ff6b6b;
+    padding: 4px 8px;
     text-align: center;
     cursor: pointer;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    color: white;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    color: #000;
     font-weight: bold;
     margin-top: 4px;
+    display: block;
+    width: 40%;
+    white-space: nowrap;
+    display: flex;
+    align-items: center; /* centro verticale */
+    justify-content: center;
 }
 
 .elimina-turno-btn:hover {
-    background: #c82333;
-    border-color: #bd2130;
+    background: #ff5252;
+    border-color: #ff4444;
+}
+
+
+/* Delete icon button accessibility */
+
+.cestino-icon {
+    width: 16px;
+    height: 16px;
 }
 

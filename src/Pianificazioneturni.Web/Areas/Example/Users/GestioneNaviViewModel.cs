@@ -171,6 +171,15 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         [Display(Name = "Richiede Mulettisti")]
         public bool RichiedeMulettisti { get; set; }
 
+        [Display(Name = "Richiede Addetti Terminal")]
+        public bool RichiedeAddettiTerminal { get; set; }
+
+        [Display(Name = "Richiede Ormeggiatori")]
+        public bool RichiedeOrmeggiatori { get; set; }
+
+        [Display(Name = "Richiede Addetti Sicurezza")]
+        public bool RichiedeAddettiSicurezza { get; set; }
+
         public string TipoDescrizione => Tipo switch
         {
             TipoNave.Container => "Container",
@@ -188,6 +197,9 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                 var ruoli = new List<string>();
                 if (RichiedeGruisti) ruoli.Add("Gruisti");
                 if (RichiedeMulettisti) ruoli.Add("Mulettisti");
+                if (RichiedeAddettiTerminal) ruoli.Add("Addetto terminal");
+                if (RichiedeOrmeggiatori) ruoli.Add("Ormeggiatore");
+                if (RichiedeAddettiSicurezza) ruoli.Add("Addetto alla sicurezza");
                 return ruoli.Count > 0 ? string.Join("\n", ruoli) : "-";
             }
         }

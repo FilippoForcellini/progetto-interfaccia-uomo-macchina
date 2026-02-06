@@ -36,6 +36,9 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         public List<DipendenteViewModel> TuttiDipendenti { get; set; }
         public List<DipendenteViewModel> Gruisti { get; set; } = new List<DipendenteViewModel>();
         public List<DipendenteViewModel> Mulettisti { get; set; } = new List<DipendenteViewModel>();
+        public List<DipendenteViewModel> AddettiTerminal { get; set; } = new List<DipendenteViewModel>();
+        public List<DipendenteViewModel> Ormeggiatori { get; set; } = new List<DipendenteViewModel>();
+        public List<DipendenteViewModel> AddettiSicurezza { get; set; } = new List<DipendenteViewModel>();
 
         //assegnazioni per filtrare dipendenti disponibili (chiave: "naveId_fascia_giorno", valore: lista id dipendenti)
         public Dictionary<string, List<int>> Assegnazioni { get; set; } = new Dictionary<string, List<int>>();
@@ -103,6 +106,9 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         public bool FasciaSera { get; set; }
         public bool RichiedeGruisti { get; set; }
         public bool RichiedeMulettisti { get; set; }
+        public bool RichiedeAddettiTerminal { get; set; }
+        public bool RichiedeOrmeggiatori { get; set; }
+        public bool RichiedeAddettiSicurezza { get; set; }
 
         //dipendenti assegnati per fascia
         public List<DipendenteViewModel> DipendentiMattina { get; set; } = new List<DipendenteViewModel>();
