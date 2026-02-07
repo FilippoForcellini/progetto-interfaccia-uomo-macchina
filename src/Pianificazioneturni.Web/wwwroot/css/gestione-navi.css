@@ -211,6 +211,10 @@ textarea:focus-visible,
     background-color: #CE93D8 !important;
 }
 
+.fascia-marker.altri {
+    background-color: #BDBDBD !important;
+}
+
 .fascia-occupata {
     background-color: #f0f0f0;
 }

@@ -107,23 +107,30 @@ table.table tbody tr.patente-scaduta:hover td {
     border-radius: 12px;
     font-weight: 500;
     transition: all 0.2s ease;
-    background-color: #FFD54F;
-    border-color: #FFD54F;
+    background-color: #e0e0e0;
+    border-color: #e0e0e0;
     color: #000;
 }
 
     .btn-filter:hover {
-        background-color: #FFCA28;
-        border-color: #FFCA28;
+        background-color: #C2C2C2;
+        border-color: #C2C2C2;
         color: #000;
     }
 
-.btn-filter.active {
-    background-color: #e0e0e0;
-    border-color: #e0e0e0;
-    color: #000;
-    font-weight: 600;
-}
+    .btn-filter.active {
+        background-color: #FFD54F;
+        border-color: #FFD54F;
+        color: #000;
+        font-weight: 600;
+    }
+        .btn-filter.active:hover {
+            background-color: #FFCA28;
+            border-color: #FFCA28;
+            color: #000;
+            font-weight: 600;
+        }
+
 .campo-disabilitato { 
     background-color: #e9ecef !important; pointer-events: none; 
 }

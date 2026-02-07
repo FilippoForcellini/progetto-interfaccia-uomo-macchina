@@ -118,19 +118,25 @@
                                 var hasMattina = nave.HasFasciaInData(giorno.Data, 0);
                                 var hasPomeriggio = nave.HasFasciaInData(giorno.Data, 1);
                                 var hasSera = nave.HasFasciaInData(giorno.Data, 2);
-                                var classeRuolo = nave.RichiedeGruisti && nave.RichiedeMulettisti ? "entrambi" : (nave.RichiedeGruisti ? "gruisti" : "mulettisti");
+                                var classeRuolo = nave.RichiedeGruisti && nave.RichiedeMulettisti ? "entrambi" :
+                                                  (nave.RichiedeGruisti ? "gruisti" :
+                                                  (nave.RichiedeMulettisti ? "mulettisti" : "altri"));
 
                                 <td class="fascia-cell @(hasMattina ? "fascia-occupata" : "")" aria-label="@(hasMattina ? "Fascia mattina occupata" : "Fascia mattina libera")">
                                     @if (hasMattina)
                                     {
-                                        var testoRuolo = classeRuolo == "entrambi" ? "Richiede sia gruisti che mulettisti" : (classeRuolo == "gruisti" ? "Richiede gruisti" : "Richiede mulettisti");
+                                        var testoRuolo = classeRuolo == "entrambi" ? "Richiede sia gruisti che mulettisti" :
+                                                        (classeRuolo == "gruisti" ? "Richiede gruisti" :
+                                                        (classeRuolo == "mulettisti" ? "Richiede mulettisti" : "Richiede altri ruoli"));
                                         <div class="fascia-marker @classeRuolo" role="img" aria-label="@testoRuolo"></div>
                                     }
                                 </td>
                                 <td class="fascia-cell @(hasPomeriggio ? "fascia-occupata" : "")" aria-label="@(hasPomeriggio ? "Fascia pomeriggio occupata" : "Fascia pomeriggio libera")">
                                     @if (hasPomeriggio)
                                     {
-                                        var testoRuolo = classeRuolo == "entrambi" ? "Richiede sia gruisti che mulettisti" : (classeRuolo == "gruisti" ? "Richiede gruisti" : "Richiede mulettisti");
+                                        var testoRuolo = classeRuolo == "entrambi" ? "Richiede sia gruisti che mulettisti" :
+                                                        (classeRuolo == "gruisti" ? "Richiede gruisti" :
+                                                        (classeRuolo == "mulettisti" ? "Richiede mulettisti" : "Richiede altri ruoli"));
                                         <div class="fascia-marker @classeRuolo" role="img" aria-label="@testoRuolo"></div>
                                     }
                                 </td>
@@ -139,7 +145,9 @@
                                 <td class="fascia-cell @(hasSera ? "fascia-occupata" : "")" style="@(isUltimaCella ? "" : "border-right: 3px solid #495057 !important;")" aria-label="@(hasSera ? "Fascia sera occupata" : "Fascia sera libera")">
                                     @if (hasSera)
                                     {
-                                        var testoRuolo = classeRuolo == "entrambi" ? "Richiede sia gruisti che mulettisti" : (classeRuolo == "gruisti" ? "Richiede gruisti" : "Richiede mulettisti");
+                                        var testoRuolo = classeRuolo == "entrambi" ? "Richiede sia gruisti che mulettisti" :
+                                                        (classeRuolo == "gruisti" ? "Richiede gruisti" :
+                                                        (classeRuolo == "mulettisti" ? "Richiede mulettisti" : "Richiede altri ruoli"));
                                         <div class="fascia-marker @classeRuolo" role="img" aria-label="@testoRuolo"></div>
                                     }
                                 </td>
@@ -189,23 +197,23 @@
             <fieldset class="form-group mb-3">
                 <legend class="form-label fw-bold">Ruoli Richiesti:</legend>
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input" name="richiedeGruisti" id="naveGruisti" value="true" />
+                    <input type="checkbox" class="form-check-input ruolo-checkbox" name="richiedeGruisti" id="naveGruisti" value="true" />
                     <label class="form-check-label" for="naveGruisti">Gruisti</label>
                 </div>
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input" name="richiedeMulettisti" id="naveMulettisti" value="true" />
+                    <input type="checkbox" class="form-check-input ruolo-checkbox" name="richiedeMulettisti" id="naveMulettisti" value="true" />
                     <label class="form-check-label" for="naveMulettisti">Mulettisti</label>
                 </div>
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input" name="richiedeAddettiTerminal" id="naveAddettiTerminal" value="true" />
+                    <input type="checkbox" class="form-check-input ruolo-checkbox" name="richiedeAddettiTerminal" id="naveAddettiTerminal" value="true" />
                     <label class="form-check-label" for="naveAddettiTerminal">Addetto terminal</label>
                 </div>
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input" name="richiedeOrmeggiatori" id="naveOrmeggiatori" value="true" />
+                    <input type="checkbox" class="form-check-input ruolo-checkbox" name="richiedeOrmeggiatori" id="naveOrmeggiatori" value="true" />
                     <label class="form-check-label" for="naveOrmeggiatori">Ormeggiatore</label>
                 </div>
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input" name="richiedeAddettiSicurezza" id="naveAddettiSicurezza" value="true" />
+                    <input type="checkbox" class="form-check-input ruolo-checkbox" name="richiedeAddettiSicurezza" id="naveAddettiSicurezza" value="true" />
                     <label class="form-check-label" for="naveAddettiSicurezza">Addetto alla sicurezza</label>
                 </div>
             </fieldset>
@@ -261,13 +269,67 @@
         }
     }
 
+    function setupRuoliValidation() {
+        const form = document.getElementById('formNave');
+        const ruoliCheckboxes = document.querySelectorAll('.ruolo-checkbox');
+        const primoCheckbox = document.getElementById('naveGruisti');
+
+        ruoliCheckboxes.forEach(cb => {
+            cb.addEventListener('change', () => {
+                const almenoUnoSelezionato = Array.from(ruoliCheckboxes).some(c => c.checked);
+                if (almenoUnoSelezionato) {
+                    primoCheckbox.setCustomValidity('');
+                } else {
+                    primoCheckbox.setCustomValidity('Seleziona almeno un ruolo');
+                }
+            });
+        });
+
+        form.addEventListener('submit', (e) => {
+            const almenoUnoSelezionato = Array.from(ruoliCheckboxes).some(c => c.checked);
+            if (!almenoUnoSelezionato) {
+                e.preventDefault();
+                primoCheckbox.setCustomValidity('Seleziona almeno un ruolo');
+                primoCheckbox.reportValidity();
+            }
+        });
+    }
+
+    // data partenza >= data arrivo
+    function setupDateValidation() {
+        const dataArrivo = document.getElementById('naveDataArrivo');
+        const dataPartenza = document.getElementById('naveDataPartenza');
+
+        function validateDataPartenza() {
+            if (dataArrivo.value && dataPartenza.value) {
+                if (dataPartenza.value < dataArrivo.value) {
+                    dataPartenza.setCustomValidity('La data di partenza non può essere precedente alla data di arrivo');
+                } else {
+                    dataPartenza.setCustomValidity('');
+                }
+            }
+        }
+
+        dataArrivo.addEventListener('change', () => {
+            // Imposta la data minima per partenza
+            dataPartenza.setAttribute('min', dataArrivo.value);
+            validateDataPartenza();
+        });
+
+        dataPartenza.addEventListener('change', validateDataPartenza);
+    }
+
     function mostraModal() {
         // salva focus corrente
         previousFocusElement = document.activeElement;
 
         document.getElementById('modalNave').style.display = 'flex';
 
-        // Sposta focus sul titolo del modal
+        // Setup validazioni
+        setupRuoliValidation();
+        setupDateValidation();
+
+        //Sposta focus sul titolo del modal
         setTimeout(() => {
             const modalTitle = document.getElementById('modal-nave-title');
             if (modalTitle) {
@@ -397,6 +459,11 @@
                 document.getElementById('naveDataPartenza').value = data.dataPartenza || '';
                 document.getElementById('naveOrarioPartenza').value = data.orarioPartenza;
 
+                // Imposta data minima a oggi per entrambi i campi
+                const oggi = new Date().toISOString().split('T')[0];
+                document.getElementById('naveDataArrivo').setAttribute('min', oggi);
+                document.getElementById('naveDataPartenza').setAttribute('min', oggi);
+
                 // Mostra bottone Elimina se è una nave esistente
                 if (data.id && data.id !== 0) {
                     document.getElementById('btnElimina').style.display = 'inline-block';
@@ -417,6 +484,11 @@
                 document.getElementById('naveOrarioArrivo').value = 0;
                 document.getElementById('naveDataPartenza').value = '';
                 document.getElementById('naveOrarioPartenza').value = 8;
+
+                // Imposta data minima a oggi per entrambi i campi
+                const oggi = new Date().toISOString().split('T')[0];
+                document.getElementById('naveDataArrivo').setAttribute('min', oggi);
+                document.getElementById('naveDataPartenza').setAttribute('min', oggi);
 
                 // Nascondi bottone 'Elimina' per una nuova nave
                 document.getElementById('btnElimina').style.display = 'none';
