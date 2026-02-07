@@ -168,7 +168,6 @@
 </main>
 </div>
 
-<!-- Modal FUORI da Vue, controllato da JavaScript -->
 <div id="modalNave"
      style="display:none;"
      class="modal-overlay"
@@ -236,7 +235,7 @@
                         <select class="form-select" name="orarioPartenza" id="naveOrarioPartenza" required>
                             <option value="8">08:00</option>
                             <option value="16">16:00</option>
-                            <option value="24">24:00</option>
+                            <option value="24">00:00</option>
                         </select>
                     </div>
                 </div>
@@ -252,7 +251,6 @@
 
 @section scripts {
     <script>
-    // Funzioni modal SENZA Vue - DEVONO essere globali
     let previousFocusElement = null;
 
     function chiudiModal() {
@@ -264,7 +262,7 @@
     }
 
     function mostraModal() {
-        // Salva focus corrente
+        // salva focus corrente
         previousFocusElement = document.activeElement;
 
         document.getElementById('modalNave').style.display = 'flex';
@@ -279,7 +277,7 @@
         }, 100);
     }
 
-    // Gestione ESC per chiudere modal
+    //gestione ESC per chiudere modal
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' || e.key === 'Esc') {
             const modal = document.getElementById('modalNave');
@@ -342,7 +340,7 @@
                     { value: 16, label: '16:00' }
                 ];
 
-                // Se la data di arrivo è oggi, filtra gli orari passati
+                // se la data di arrivo è oggi, filtra gli orari passati
                 if (this.naveCorrente.dataArrivo === this.dataMinima) {
                     return orari.filter(ora => ora.value >= this.oraCorrente);
                 }
@@ -420,7 +418,7 @@
                 document.getElementById('naveDataPartenza').value = '';
                 document.getElementById('naveOrarioPartenza').value = 8;
 
-                // Nascondi bottone Elimina per nuova nave
+                // Nascondi bottone 'Elimina' per una nuova nave
                 document.getElementById('btnElimina').style.display = 'none';
 
                 mostraModal();

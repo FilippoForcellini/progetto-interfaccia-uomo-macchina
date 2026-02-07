@@ -121,12 +121,6 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
             return FascePerData.ContainsKey(dataKey) && FascePerData[dataKey].Contains(fascia);
         }
 
-        /// <summary>
-        /// Calcola DatePresenza e FascePerData a partire da DataArrivo/OrarioArrivo e DataPartenza/OrarioPartenza.
-        /// Fascia 0=Mattina(00-08), 1=Pomeriggio(08-16), 2=Sera(16-24)
-        /// OrarioArrivo: 0→fascia 0, 8→fascia 1, 16→fascia 2
-        /// OrarioPartenza: 8→fascia 0, 16→fascia 1, 24→fascia 2
-        /// </summary>
         public void CalcolaDateEFasce()
         {
             DatePresenza = new List<DateTime>();

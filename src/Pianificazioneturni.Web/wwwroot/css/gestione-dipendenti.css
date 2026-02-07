@@ -1,4 +1,4 @@
-/* Accessibility utilities */
+
 .visually-hidden {
     position: absolute;
     width: 1px;
@@ -39,20 +39,18 @@ textarea:focus-visible,
     outline-offset: 2px;
 }
 
-/* Titolo pagina */
+/* titolo pagina */
 .page-title {
     top: 50px;
     font-size: 30px;
     font-weight: bold;
 }
 
-/* Tabella più stretta */
 .table-container {
     max-width: 800px;
     margin: 0 auto;
 }
 
-/* Stile tabella abbellito */
 .table-container table.table {
     border-radius: 8px;
     overflow: hidden;
@@ -60,7 +58,6 @@ textarea:focus-visible,
     border: 1px solid #dee2e6;
 }
 
-/* Rimuovi bordi verticali, mantieni solo orizzontali */
         .table-container table.table td,
         .table-container table.table th {
             border-left: none !important;
@@ -68,14 +65,12 @@ textarea:focus-visible,
             border-top: 2px solid #f0f0f0 !important;
         }
 
-/* Header con bordo più marcato */
     .table-container table.table thead th {
         border-bottom: 2px solid #dee2e6 !important;
         border-top: none !important;
         background-color: #e9ecef !important;
     }
 
-/* Prima riga del tbody senza bordo sopra */
         .table-container table.table tbody tr:first-child td {
             border-top: none !important;
         }
@@ -136,7 +131,6 @@ table.table tbody tr.patente-scaduta:hover td {
     opacity: 0.5;
 }
 
-/* Navbar styling */
 .nav-link {
     padding: 10px 20px;
     border-radius: 8px;

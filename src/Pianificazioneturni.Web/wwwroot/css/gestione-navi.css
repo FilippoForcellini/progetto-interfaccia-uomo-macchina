@@ -1,4 +1,4 @@
-/* Accessibility utilities */
+
 .visually-hidden {
     position: absolute;
     width: 1px;
@@ -39,14 +39,12 @@ textarea:focus-visible,
     outline-offset: 2px;
 }
 
-/* Titolo pagina */
 .page-title {
     top: 50px;
     font-size: 30px;
     font-weight: bold;
 }
 
-/* Filtri */
 .btn-filter {
     border-radius: 12px;
     font-weight: 500;
@@ -107,7 +105,6 @@ textarea:focus-visible,
     color: #000;
 }
 
-/* Navbar styling */
 .nav-link {
     padding: 10px 20px;
     border-radius: 8px;
@@ -130,7 +127,6 @@ textarea:focus-visible,
     position: relative;
 }
 
-/* Tabella Timeline - STESSO STILE DI GESTIONE DIPENDENTI */
 .timeline-table {
     width: 100%;
     border-collapse: collapse;

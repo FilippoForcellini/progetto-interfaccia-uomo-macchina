@@ -1,5 +1,4 @@
-﻿//using Pianificazioneturni.Web.Hubs;
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Razor;
@@ -10,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Pianificazioneturni.Web.Infrastructure;
 using Pianificazioneturni.Web.SignalR.Hubs;
 using PianificazioneTurni.Services;
+using PianificazioneTurni.Services.Pianificazione;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -37,7 +37,11 @@ namespace Pianificazioneturni.Web
                 options.UseInMemoryDatabase(databaseName: "Template");
             });
 
-            // SERVICES FOR AUTHENTICATION
+            services.AddDbContext<PianificazioneDbContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("PianificazioneDb"));
+            });
+
             services.AddSession();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
             {
@@ -48,7 +52,7 @@ namespace Pianificazioneturni.Web
             var builder = services.AddMvc()
                 .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
                 .AddDataAnnotationsLocalization(options =>
-                {                        // Enable loading SharedResource for ModelLocalizer
+                {                       
                     options.DataAnnotationLocalizerProvider = (type, factory) =>
                         factory.Create(typeof(SharedResource));
                 });
@@ -72,10 +76,8 @@ namespace Pianificazioneturni.Web
                 options.ViewLocationFormats.Add("/Views/Shared/{0}.cshtml");
             });
 
-            // SIGNALR FOR COLLABORATIVE PAGES
             services.AddSignalR();
 
-            // CONTAINER FOR ALL EXTRA CUSTOM SERVICES
             Container.RegisterTypes(services);
         }
 

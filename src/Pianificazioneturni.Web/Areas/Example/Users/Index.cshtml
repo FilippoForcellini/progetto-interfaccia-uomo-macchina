@@ -609,7 +609,7 @@ if (typeof Vue === 'undefined') {
 
                 this.modalSelezioneVisible = true;
 
-                // Sposta focus sul modal dopo che Vue lo ha renderizzato
+                //Sposta focus sul modal dopo che Vue lo ha renderizzato
                 this.$nextTick(() => {
                     const modalTitle = document.getElementById('modal-selezione-title');
                     if (modalTitle) {
@@ -705,7 +705,6 @@ if (typeof Vue === 'undefined') {
             },
             chiudiModalCambio() {
                 this.modalCambioVisible = false;
-                // Ripristina focus sull'elemento che l'aveva prima
                 this.$nextTick(() => {
                     if (this.previousFocusElement && this.previousFocusElement.focus) {
                         this.previousFocusElement.focus();
@@ -714,7 +713,6 @@ if (typeof Vue === 'undefined') {
             },
             chiudiModalSelezione() {
                 this.modalSelezioneVisible = false;
-                // Ripristina focus sull'elemento che l'aveva prima
                 this.$nextTick(() => {
                     if (this.previousFocusElement && this.previousFocusElement.focus) {
                         this.previousFocusElement.focus();

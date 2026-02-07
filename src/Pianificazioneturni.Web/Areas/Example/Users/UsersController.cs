@@ -4,11 +4,10 @@ using Pianificazioneturni.Web.Infrastructure;
 using Pianificazioneturni.Web.SignalR;
 using Pianificazioneturni.Web.SignalR.Hubs.Events;
 using PianificazioneTurni.Services.Shared;
+using PianificazioneTurni.Services.Pianificazione;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Pianificazioneturni.Web.Areas.Example.Users
@@ -19,248 +18,48 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         private readonly SharedService _sharedService;
         private readonly IPublishDomainEvents _publisher;
         private readonly IStringLocalizer<SharedResource> _sharedLocalizer;
+        private readonly PianificazioneDbContext _context; //_context -> istanza di Entity Framework che connette il codice al database SQL Server.
 
-        //percorsi file JSON per la persistenza dei dati
-        private static readonly string DataFolder = Path.Combine(Directory.GetCurrentDirectory(), "Data");
-        private static readonly string NaviFilePath = Path.Combine(DataFolder, "navi.json");
-        private static readonly string DipendentiFilePath = Path.Combine(DataFolder, "dipendenti.json");
-        private static readonly string AssegnazioniFilePath = Path.Combine(DataFolder, "assegnazioni.json");
-        private static readonly string NextNaveIdFilePath = Path.Combine(DataFolder, "next_nave_id.json");
-
-        //lista statica dipendenti (simula database)
-        private static List<DipendenteDetailViewModel> _dipendenti = LoadDipendenti();
-
-        //lista statica navi (simula database)
-        private static List<NaveDetailViewModel> _navi = LoadNavi();
-        private static int _nextNaveId = LoadNextNaveId();
-
-        private static List<NaveDetailViewModel> InitNavi()
+        private NaveDetailViewModel MapToNaveViewModel(Nave nave)
         {
-            return new List<NaveDetailViewModel>();
+            var vm = new NaveDetailViewModel
+            {
+                Id = nave.Id,
+                Nome = nave.Nome,
+                Tipo = (TipoNave)nave.Tipo,
+                Pontile = nave.Pontile,
+                DataArrivo = nave.DataArrivo,
+                OrarioArrivo = nave.OrarioArrivo,
+                DataPartenza = nave.DataPartenza,
+                OrarioPartenza = nave.OrarioPartenza,
+                RichiedeGruisti = nave.RichiedeGruisti,
+                RichiedeMulettisti = nave.RichiedeMulettisti,
+                RichiedeAddettiTerminal = nave.RichiedeAddettiTerminal,
+                RichiedeOrmeggiatori = nave.RichiedeOrmeggiatori,
+                RichiedeAddettiSicurezza = nave.RichiedeAddettiSicurezza
+            };
+            vm.CalcolaDateEFasce();
+            return vm;
         }
 
-        private static List<DipendenteDetailViewModel> InitDipendenti()
+        private DipendenteDetailViewModel MapToDipendenteViewModel(Dipendente dipendente)
         {
-            return new List<DipendenteDetailViewModel>
+            return new DipendenteDetailViewModel
             {
-                new DipendenteDetailViewModel { Id = 1, Nome = "Rossi Mario", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2027, 6, 15) },
-                new DipendenteDetailViewModel { Id = 2, Nome = "Blu Marco", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2027, 8, 20) },
-                new DipendenteDetailViewModel { Id = 3, Nome = "Bianchi Filippo", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2026, 1, 10) }, 
-                new DipendenteDetailViewModel { Id = 4, Nome = "Cortesi Giulia", Ruolo = "Addetto terminal", Patente = false, Scadenza = null },
-                new DipendenteDetailViewModel { Id = 5, Nome = "Gialli Monica", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2027, 3, 20) },
-                new DipendenteDetailViewModel { Id = 6, Nome = "Verdi Luca", Ruolo = "Ormeggiatore", Patente = false, Scadenza = null },
-                new DipendenteDetailViewModel { Id = 7, Nome = "Azzurri Margherita", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2027, 9, 10) },
-                new DipendenteDetailViewModel { Id = 8, Nome = "Viola Riccardo", Ruolo = "Addetto alla Sicurezza", Patente = false, Scadenza = null },
-                new DipendenteDetailViewModel { Id = 9, Nome = "Arancioni Sofia", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2027, 11, 30) },
-                new DipendenteDetailViewModel { Id = 10, Nome = "Celeste Lorenzo", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2027, 8, 25) },
-                new DipendenteDetailViewModel { Id = 11, Nome = "Rosa Alex", Ruolo = "Addetto terminal", Patente = false, Scadenza = null },
-                new DipendenteDetailViewModel { Id = 12, Nome = "Neri Federico", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2025, 12, 5) }, 
-                new DipendenteDetailViewModel { Id = 13, Nome = "Marroni Eleonora", Ruolo = "Ormeggiatore", Patente = false, Scadenza = null },
-                new DipendenteDetailViewModel { Id = 14, Nome = "Grigi Roberto", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2027, 4, 18) },
-                new DipendenteDetailViewModel { Id = 15, Nome = "Lavanda Francesco", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2027, 5, 12) },
-                new DipendenteDetailViewModel { Id = 16, Nome = "Giannini Matteo", Ruolo = "Addetto alla Sicurezza", Patente = false, Scadenza = null },
-                new DipendenteDetailViewModel { Id = 17, Nome = "Forcellini Filippo", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2027, 7, 22) },
-                new DipendenteDetailViewModel { Id = 18, Nome = "Limoni Marta", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2027, 2, 14) },
-                new DipendenteDetailViewModel { Id = 19, Nome = "Acqua Filomena", Ruolo = "Addetto terminal", Patente = false, Scadenza = null },
-                new DipendenteDetailViewModel { Id = 20, Nome = "Fuochi Davide", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2027, 10, 8) },
-                new DipendenteDetailViewModel { Id = 21, Nome = "Lampone Federica", Ruolo = "Ormeggiatore", Patente = false, Scadenza = null },
-                new DipendenteDetailViewModel { Id = 22, Nome = "Agnelli Lucia", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2027, 3, 30) },
-                new DipendenteDetailViewModel { Id = 23, Nome = "Rinaldi Martina", Ruolo = "Addetto alla Sicurezza", Patente = false, Scadenza = null },
-                new DipendenteDetailViewModel { Id = 24, Nome = "Tonelli Alessandro", Ruolo = "Gruista", Patente = true, Scadenza = new DateTime(2027, 7, 19) },
-                new DipendenteDetailViewModel { Id = 25, Nome = "Nardelli Tommaso", Ruolo = "Mulettista", Patente = true, Scadenza = new DateTime(2027, 12, 25) }
+                Id = dipendente.Id,
+                Nome = dipendente.Nome,
+                Ruolo = dipendente.Ruolo,
+                Patente = dipendente.Patente,
+                Scadenza = dipendente.Scadenza
             };
         }
 
-        //Assegnazioni dipendenti alle navi
-        private static Dictionary<string, List<int>> _assegnazioniDipendenti = LoadAssegnazioni();
-
-        #region Persistenza Dati JSON
-
-        private static void EnsureDataFolderExists()
-        {
-            if (!Directory.Exists(DataFolder))
-            {
-                Directory.CreateDirectory(DataFolder);
-            }
-        }
-
-        private static List<NaveDetailViewModel> LoadNavi()
-        {
-            try
-            {
-                EnsureDataFolderExists();
-                if (System.IO.File.Exists(NaviFilePath))
-                {
-                    var json = System.IO.File.ReadAllText(NaviFilePath);
-                    if (!string.IsNullOrWhiteSpace(json))
-                    {
-                        var options = new System.Text.Json.JsonSerializerOptions
-                        {
-                            PropertyNameCaseInsensitive = true
-                        };
-                        return System.Text.Json.JsonSerializer.Deserialize<List<NaveDetailViewModel>>(json, options) ?? InitNavi();
-                    }
-                }
-            }
-            catch
-            {
-                try { System.IO.File.Delete(NaviFilePath); } catch { }
-            }
-            return InitNavi();
-        }
-
-        private static void SaveNavi()
-        {
-            try
-            {
-                EnsureDataFolderExists();
-                var options = new System.Text.Json.JsonSerializerOptions
-                {
-                    WriteIndented = true,
-                    PropertyNameCaseInsensitive = true
-                };
-                var json = System.Text.Json.JsonSerializer.Serialize(_navi, options);
-                System.IO.File.WriteAllText(NaviFilePath, json);
-            }
-            catch
-            {   
-                
-            }
-        }
-
-        private static List<DipendenteDetailViewModel> LoadDipendenti()
-        {
-            try
-            {
-                EnsureDataFolderExists();
-                if (System.IO.File.Exists(DipendentiFilePath))
-                {
-                    var json = System.IO.File.ReadAllText(DipendentiFilePath);
-                    if (!string.IsNullOrWhiteSpace(json))
-                    {
-                        var options = new System.Text.Json.JsonSerializerOptions
-                        {
-                            PropertyNameCaseInsensitive = true
-                        };
-                        return System.Text.Json.JsonSerializer.Deserialize<List<DipendenteDetailViewModel>>(json, options) ?? InitDipendenti();
-                    }
-                }
-            }
-            catch
-            {
-                try { System.IO.File.Delete(DipendentiFilePath); } catch { }
-            }
-            return InitDipendenti();
-        }
-
-        private static void SaveDipendenti()
-        {
-            try
-            {
-                EnsureDataFolderExists();
-                var options = new System.Text.Json.JsonSerializerOptions
-                {
-                    WriteIndented = true,
-                    PropertyNameCaseInsensitive = true
-                };
-                var json = System.Text.Json.JsonSerializer.Serialize(_dipendenti, options);
-                System.IO.File.WriteAllText(DipendentiFilePath, json);
-            }
-            catch
-            {
-
-            }
-        }
-
-        private static Dictionary<string, List<int>> LoadAssegnazioni()
-        {
-            try
-            {
-                EnsureDataFolderExists();
-                if (System.IO.File.Exists(AssegnazioniFilePath))
-                {
-                    var json = System.IO.File.ReadAllText(AssegnazioniFilePath);
-                    if (!string.IsNullOrWhiteSpace(json))
-                    {
-                        var options = new System.Text.Json.JsonSerializerOptions
-                        {
-                            PropertyNameCaseInsensitive = true
-                        };
-                        return System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, List<int>>>(json, options) ?? InitAssegnazioni();
-                    }
-                }
-            }
-            catch
-            {
-                try { System.IO.File.Delete(AssegnazioniFilePath); } catch { }
-            }
-            return InitAssegnazioni();
-        }
-
-        private static void SaveAssegnazioni()
-        {
-            try
-            {
-                EnsureDataFolderExists();
-                var options = new System.Text.Json.JsonSerializerOptions
-                {
-                    WriteIndented = true,
-                    PropertyNameCaseInsensitive = true
-                };
-                var json = System.Text.Json.JsonSerializer.Serialize(_assegnazioniDipendenti, options);
-                System.IO.File.WriteAllText(AssegnazioniFilePath, json);
-            }
-            catch
-            {
-               
-            }
-        }
-
-
-        private static int LoadNextNaveId()
-        {
-            try
-            {
-                EnsureDataFolderExists();
-                if (System.IO.File.Exists(NextNaveIdFilePath))
-                {
-                    var json = System.IO.File.ReadAllText(NextNaveIdFilePath);
-                    if (!string.IsNullOrWhiteSpace(json))
-                    {
-                        return System.Text.Json.JsonSerializer.Deserialize<int>(json);
-                    }
-                }
-            }
-            catch
-            {
-                try { System.IO.File.Delete(NextNaveIdFilePath); } catch { }
-            }
-            return 4;
-        }
-
-        private static void SaveNextNaveId()
-        {
-            try
-            {
-                EnsureDataFolderExists();
-                var json = System.Text.Json.JsonSerializer.Serialize(_nextNaveId);
-                System.IO.File.WriteAllText(NextNaveIdFilePath, json);
-            }
-            catch { }
-        }
-
-        #endregion
-
-        private static Dictionary<string, List<int>> InitAssegnazioni()
-        {
-            return new Dictionary<string, List<int>>();
-        }
-
-        public UsersController(SharedService sharedService, IPublishDomainEvents publisher, IStringLocalizer<SharedResource> sharedLocalizer)
+        public UsersController(SharedService sharedService, IPublishDomainEvents publisher, IStringLocalizer<SharedResource> sharedLocalizer, PianificazioneDbContext context)
         {
             _sharedService = sharedService;
             _publisher = publisher;
             _sharedLocalizer = sharedLocalizer;
+            _context = context; //usato per tutte le operazioni su navi/dipendenti
 
             ModelUnbinderHelpers.ModelUnbinders.Add(typeof(IndexViewModel), new SimplePropertyModelUnbinder());
         }
@@ -283,8 +82,9 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
             var domani = DateTime.Today.AddDays(1);
             var random = new Random();
 
-            //converte dipendenti da Gestione Dipendenti a DipendenteViewModel
-            model.TuttiDipendenti = _dipendenti.Select(d => new DipendenteViewModel
+            //carica dipendenti da DbContext
+            var dipendentiDb = _context.Dipendenti.ToList();
+            model.TuttiDipendenti = dipendentiDb.Select(d => new DipendenteViewModel
             {
                 Id = d.Id,
                 Nome = d.Nome.Split(' ').Length > 1 ? d.Nome.Split(' ')[1] : d.Nome,
@@ -300,12 +100,16 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
             model.Ormeggiatori = model.TuttiDipendenti.Where(d => d.Ruolo == "Ormeggiatore").ToList();
             model.AddettiSicurezza = model.TuttiDipendenti.Where(d => d.Ruolo == "Addetto alla Sicurezza").ToList();
 
+            //carica le navi da DbContext
+            var tutteLeNavi = _context.Navi.ToList();
+            var tutteLeNaviVm = tutteLeNavi.Select(n => MapToNaveViewModel(n)).ToList();
+
             //Navi oggi da Gestione Navi
-            var naviOggiDb = _navi.Where(n => n.DatePresenza.Any(d => d.Date == oggi)).ToList();
+            var naviOggiDb = tutteLeNaviVm.Where(n => n.DatePresenza.Any(d => d.Date == oggi)).ToList();
             model.NaviOggi = naviOggiDb.Select(n => CreaNaveViewModel(n, model.TuttiDipendenti, random, oggi)).ToList();
 
             //Navi domani da Gestione Navi
-            var naviDomaniDb = _navi.Where(n => n.DatePresenza.Any(d => d.Date == domani)).ToList();
+            var naviDomaniDb = tutteLeNaviVm.Where(n => n.DatePresenza.Any(d => d.Date == domani)).ToList();
             model.NaviDomani = naviDomaniDb.Select(n => CreaNaveViewModel(n, model.TuttiDipendenti, random, domani)).ToList();
 
             model.OraCorrente = DateTime.Now.Hour;
@@ -361,66 +165,87 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
 
         private List<DipendenteViewModel> GetDipendentiAssegnati(int naveId, int fascia, List<DipendenteViewModel> tuttiDipendenti)
         {
-            var chiave = $"{naveId}_{fascia}";
-            if (_assegnazioniDipendenti.TryGetValue(chiave, out var idDipendenti))
-            {
-                //Mantiene l'ordine degli ID in idDipendenti
-                return idDipendenti
-                    .Select(id => tuttiDipendenti.FirstOrDefault(d => d.Id == id))
-                    .Where(d => d != null)
-                    .ToList();
-            }
-            return new List<DipendenteViewModel>();
+            var assegnazioni = _context.Assegnazioni
+                .Where(a => a.NaveId == naveId && a.Fascia == fascia)
+                .OrderBy(a => a.Id)
+                .ToList();
+
+            return assegnazioni
+                .Select(a => tuttiDipendenti.FirstOrDefault(d => d.Id == a.DipendenteId))
+                .Where(d => d != null)
+                .ToList();
         }
 
         [HttpPost]
         public virtual IActionResult SalvaAssegnazione(int naveId, int fascia, [FromBody] List<int> dipendentiIds)
         {
-            var chiave = $"{naveId}_{fascia}";
-            _assegnazioniDipendenti[chiave] = dipendentiIds ?? new List<int>();
-            SaveAssegnazioni();
+            var existing = _context.Assegnazioni
+                .Where(a => a.NaveId == naveId && a.Fascia == fascia)
+                .ToList();
+            _context.Assegnazioni.RemoveRange(existing);
+
+            if (dipendentiIds != null && dipendentiIds.Any())
+            {
+                foreach (var dipId in dipendentiIds)
+                {
+                    _context.Assegnazioni.Add(new Assegnazione
+                    {
+                        NaveId = naveId,
+                        DipendenteId = dipId,
+                        Fascia = fascia
+                    });
+                }
+            }
+
+            _context.SaveChanges();
             return Json(new { success = true });
         }
 
         [HttpPost]
         public virtual IActionResult CambiaDipendente(int naveId, int fascia, int vecchioDipendenteId, int nuovoDipendenteId)
         {
-            var chiave = $"{naveId}_{fascia}";
-            if (_assegnazioniDipendenti.TryGetValue(chiave, out var idDipendenti))
+            var assegnazione = _context.Assegnazioni
+                .FirstOrDefault(a => a.NaveId == naveId && a.Fascia == fascia && a.DipendenteId == vecchioDipendenteId);
+
+            if (assegnazione != null)
             {
-                var index = idDipendenti.IndexOf(vecchioDipendenteId);
-                if (index >= 0)
-                {
-                    idDipendenti[index] = nuovoDipendenteId;
-                    SaveAssegnazioni();
-                }
+                assegnazione.DipendenteId = nuovoDipendenteId;
+                _context.SaveChanges();
             }
+
             return Json(new { success = true });
         }
 
         [HttpPost]
         public virtual IActionResult EliminaDipendente(int naveId, int fascia, int dipendenteId)
         {
-            var chiave = $"{naveId}_{fascia}";
-            if (_assegnazioniDipendenti.TryGetValue(chiave, out var idDipendenti))
+            var assegnazione = _context.Assegnazioni
+                .FirstOrDefault(a => a.NaveId == naveId && a.Fascia == fascia && a.DipendenteId == dipendenteId);
+
+            if (assegnazione != null)
             {
-                idDipendenti.Remove(dipendenteId);
-                SaveAssegnazioni();
+                _context.Assegnazioni.Remove(assegnazione);
+                _context.SaveChanges();
                 return Json(new { success = true });
             }
+
             return Json(new { success = false });
         }
 
         [HttpPost]
         public virtual IActionResult EliminaTurno(int naveId, int fascia)
         {
-            var chiave = $"{naveId}_{fascia}";
-            if (_assegnazioniDipendenti.ContainsKey(chiave))
+            var assegnazioni = _context.Assegnazioni
+                .Where(a => a.NaveId == naveId && a.Fascia == fascia)
+                .ToList();
+
+            if (assegnazioni.Any())
             {
-                _assegnazioniDipendenti[chiave] = new List<int>();
-                SaveAssegnazioni();
+                _context.Assegnazioni.RemoveRange(assegnazioni);
+                _context.SaveChanges();
                 return Json(new { success = true });
             }
+
             return Json(new { success = false });
         }
 
@@ -440,21 +265,18 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                 }
             }
 
-            if (_navi == null)
-            {
-                _navi = InitNavi();
-            }
+            var tutteLeNavi = _context.Navi.ToList().Select(n => MapToNaveViewModel(n)).ToList();
 
             var model = new GestioneNaviViewModel
             {
                 DataOggi = oggi,
                 DataDomani = domani,
                 GiornoSelezionato = giornoSelezionato,
-                TutteLeNavi = _navi ?? new List<NaveDetailViewModel>(),
-                NaviOggi = _navi.Where(n => n.DatePresenza.Any(d => d.Date == oggi)).ToList(),
-                NaviDomani = _navi.Where(n => n.DatePresenza.Any(d => d.Date == domani)).ToList(),
+                TutteLeNavi = tutteLeNavi,
+                NaviOggi = tutteLeNavi.Where(n => n.DatePresenza.Any(d => d.Date == oggi)).ToList(),
+                NaviDomani = tutteLeNavi.Where(n => n.DatePresenza.Any(d => d.Date == domani)).ToList(),
                 NaviGiornoSelezionato = giornoSelezionato.HasValue
-                    ? _navi.Where(n => n.DatePresenza.Any(d => d.Date == giornoSelezionato.Value)).ToList()
+                    ? tutteLeNavi.Where(n => n.DatePresenza.Any(d => d.Date == giornoSelezionato.Value)).ToList()
                     : null
             };
             return View("Gestione_Navi", model);
@@ -467,11 +289,12 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
 
             if (id.HasValue)
             {
-                nave = _navi.FirstOrDefault(n => n.Id == id.Value);
-                if (nave == null)
+                var naveDb = _context.Navi.FirstOrDefault(n => n.Id == id.Value);
+                if (naveDb == null)
                 {
                     return NotFound();
                 }
+                nave = MapToNaveViewModel(naveDb);
             }
             else
             {
@@ -538,50 +361,43 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
 
             if (id == 0)
             {
-                var nuovaNave = new NaveDetailViewModel
+                var nuovaNave = new Nave
                 {
-                    Id = _nextNaveId++,
                     Nome = nome,
-                    Tipo = TipoNave.Container,
-                    DatePresenza = naveCalc.DatePresenza,
-                    FascePerData = naveCalc.FascePerData,
+                    Tipo = (int)TipoNave.Container,
+                    Pontile = pontile,
                     DataArrivo = parsedDataArrivo,
                     OrarioArrivo = orarioArrivo,
                     DataPartenza = parsedDataPartenza,
                     OrarioPartenza = orarioPartenza,
-                    Pontile = pontile,
                     RichiedeGruisti = richiedeGruisti,
                     RichiedeMulettisti = richiedeMulettisti,
                     RichiedeAddettiTerminal = richiedeAddettiTerminal,
                     RichiedeOrmeggiatori = richiedeOrmeggiatori,
-                    RichiedeAddettiSicurezza = richiedeAddettiSicurezza,
-                    Colore = ColoriNavi.GetColore(_navi.Count)
+                    RichiedeAddettiSicurezza = richiedeAddettiSicurezza
                 };
-                _navi.Add(nuovaNave);
-                SaveNavi();
-                SaveNextNaveId();
+                _context.Navi.Add(nuovaNave);
+                _context.SaveChanges();
                 Alerts.AddSuccess(this, "Nave aggiunta con successo");
             }
             else
             {
                 //Modifica nave esistente
-                var nave = _navi.FirstOrDefault(n => n.Id == id);
+                var nave = _context.Navi.FirstOrDefault(n => n.Id == id);
                 if (nave != null)
                 {
                     nave.Nome = nome;
-                    nave.DatePresenza = naveCalc.DatePresenza;
-                    nave.FascePerData = naveCalc.FascePerData;
+                    nave.Pontile = pontile;
                     nave.DataArrivo = parsedDataArrivo;
                     nave.OrarioArrivo = orarioArrivo;
                     nave.DataPartenza = parsedDataPartenza;
                     nave.OrarioPartenza = orarioPartenza;
-                    nave.Pontile = pontile;
                     nave.RichiedeGruisti = richiedeGruisti;
                     nave.RichiedeMulettisti = richiedeMulettisti;
                     nave.RichiedeAddettiTerminal = richiedeAddettiTerminal;
                     nave.RichiedeOrmeggiatori = richiedeOrmeggiatori;
                     nave.RichiedeAddettiSicurezza = richiedeAddettiSicurezza;
-                    SaveNavi();
+                    _context.SaveChanges();
                     Alerts.AddSuccess(this, "Nave aggiornata con successo");
                 }
             }
@@ -592,11 +408,11 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         [HttpPost]
         public virtual IActionResult EliminaNave(int id)
         {
-            var nave = _navi.FirstOrDefault(n => n.Id == id);
+            var nave = _context.Navi.FirstOrDefault(n => n.Id == id);
             if (nave != null)
             {
-                _navi.Remove(nave);
-                SaveNavi();
+                _context.Navi.Remove(nave);
+                _context.SaveChanges();
                 Alerts.AddSuccess(this, "Nave eliminata con successo");
             }
 
@@ -607,9 +423,13 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         [HttpGet]
         public virtual IActionResult GestioneDipendenti(bool filtroPatentiScadute = false)
         {
+            var dipendenti = _context.Dipendenti.ToList()
+                .Select(d => MapToDipendenteViewModel(d))
+                .ToList();
+
             var model = new GestioneDipendentiViewModel
             {
-                Dipendenti = _dipendenti,
+                Dipendenti = dipendenti,
                 FiltroPatentiScadute = filtroPatentiScadute
             };
 
@@ -619,12 +439,13 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         [HttpGet]
         public virtual IActionResult DettaglioDipendente(int id)
         {
-            var dipendente = _dipendenti.FirstOrDefault(d => d.Id == id);
-            if (dipendente == null)
+            var dipendenteDb = _context.Dipendenti.FirstOrDefault(d => d.Id == id);
+            if (dipendenteDb == null)
             {
                 return NotFound();
             }
 
+            var dipendente = MapToDipendenteViewModel(dipendenteDb);
             ViewBag.Ruoli = RuoliDipendente.GetRuoli();
             return PartialView("_DettaglioDipendente", dipendente);
         }
@@ -632,7 +453,7 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
         [HttpPost]
         public virtual IActionResult SalvaDipendente(DipendenteDetailViewModel model)
         {
-            var dipendente = _dipendenti.FirstOrDefault(d => d.Id == model.Id);
+            var dipendente = _context.Dipendenti.FirstOrDefault(d => d.Id == model.Id);
             if (dipendente == null)
             {
                 return NotFound();
@@ -640,8 +461,10 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
 
             dipendente.Ruolo = model.Ruolo;
 
-            //solo per Gruista e Mulettista si gestisce patente e scadenza
-            if (dipendente.RichiedePatente)
+            //determina se il ruolo richiede la patente
+            var richiedePatente = model.Ruolo == "Gruista" || model.Ruolo == "Mulettista";
+
+            if (richiedePatente)
             {
                 dipendente.Patente = model.Patente;
                 dipendente.Scadenza = model.Scadenza;
@@ -652,7 +475,7 @@ namespace Pianificazioneturni.Web.Areas.Example.Users
                 dipendente.Scadenza = null;
             }
 
-            SaveDipendenti();
+            _context.SaveChanges();
             Alerts.AddSuccess(this, "Dipendente aggiornato con successo");
             return RedirectToAction(Actions.GestioneDipendenti());
         }

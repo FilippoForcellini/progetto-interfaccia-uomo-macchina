@@ -1,4 +1,4 @@
-/* Accessibility utilities */
+
 .visually-hidden {
     position: absolute;
     width: 1px;
@@ -28,7 +28,6 @@
     border-radius: 4px;
 }
 
-/* Focus visible styles for keyboard navigation */
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
@@ -208,14 +207,12 @@ textarea:focus-visible,
     position: relative;
 }
 
-/* Titolo pagina */
 .page-title {
     top: 50px;
     font-size: 30px;
     font-weight: bold;
 }
 
-/* Icona cestino */
 .cestino-icon {
     width: 20px;
     height: 20px;
@@ -227,7 +224,6 @@ textarea:focus-visible,
     opacity: 0.7;
 }
 
-/* Bottone Elimina Turno */
 .elimina-turno-btn {
     background: #ff6b6b;
     border: 1px dashed #ff6b6b;
@@ -243,7 +239,7 @@ textarea:focus-visible,
     width: 40%;
     white-space: nowrap;
     display: flex;
-    align-items: center; /* centro verticale */
+    align-items: center;
     justify-content: center;
 }
 
@@ -251,9 +247,6 @@ textarea:focus-visible,
     background: #ff5252;
     border-color: #ff4444;
 }
-
-
-/* Delete icon button accessibility */
 
 .cestino-icon {
     width: 16px;

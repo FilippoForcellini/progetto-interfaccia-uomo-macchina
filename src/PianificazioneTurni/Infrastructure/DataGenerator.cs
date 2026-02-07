@@ -2,6 +2,7 @@
 using System.Linq;
 using PianificazioneTurni.Services;
 using PianificazioneTurni.Services.Shared;
+using PianificazioneTurni.Services.Pianificazione;
 
 namespace PianificazioneTurni.Infrastructure
 {
@@ -44,6 +45,10 @@ namespace PianificazioneTurni.Infrastructure
                 });
 
             context.SaveChanges();
+        }
+
+        public static void InitializePianificazione(PianificazioneDbContext context)
+        {          
         }
     }
 }

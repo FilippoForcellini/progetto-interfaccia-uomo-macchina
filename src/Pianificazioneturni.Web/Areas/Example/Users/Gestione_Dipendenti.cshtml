@@ -151,7 +151,7 @@
                 this.modalVisible = true;
                 this.$nextTick(() => {
                     this.inizializzaCampiModal();
-                    // Sposta focus sul modal
+                    //sposta focus sul modal.
                     const modalTitle = document.querySelector('.modal-title');
                     if (modalTitle) {
                         modalTitle.setAttribute('tabindex', '-1');
@@ -162,7 +162,7 @@
             },
             chiudiModal() {
                 this.modalVisible = false;
-                // Ripristina focus
+                // ripristina focus
                 this.$nextTick(() => {
                     if (this.previousFocusElement && this.previousFocusElement.focus) {
                         this.previousFocusElement.focus();
@@ -189,12 +189,12 @@
                     const richiedePatente = this.richiedePatente(ruolo);
 
                     if (richiedePatente) {
-                        // Campo modificabile per Gruista e Mulettista
+                        // campo modificabile per gruista e mulettista
                         inputScadenza.disabled = false;
                         inputScadenza.style.backgroundColor = 'white';
                         inputScadenza.style.cursor = 'text';
                     } else {
-                        // Campo non modificabile per altri ruoli
+                        //Campo non modificabile per gli altri ruoli
                         inputScadenza.disabled = true;
                         inputScadenza.style.backgroundColor = '#f8f9fa';
                         inputScadenza.style.cursor = 'not-allowed';
