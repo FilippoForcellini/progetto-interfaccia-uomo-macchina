@@ -17,13 +17,17 @@ Questo progetto prevede la gestione dei turni di lavoro dei dipendenti di un por
 - Persistenza dei dati su file JSON
 
 ## Tecnologie utilizzate
+ ### Backend
+ - ASP.NET Core MVC
+ - Entity Framework Core
+ - C#
+ - SignalR
 
-- ASP.NET Core MVC
+ ### Database
+- SQL Server LocalDB
 
-- Vue.js
-
-- Bootstrap
-
-- JSON per persistenza dati
+ ### Frontend
+  - Vue.js
+  - Bootstrap
 
 
