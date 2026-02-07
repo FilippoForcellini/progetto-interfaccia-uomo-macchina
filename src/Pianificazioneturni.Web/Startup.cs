@@ -81,8 +81,11 @@ namespace Pianificazioneturni.Web
             Container.RegisterTypes(services);
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, PianificazioneDbContext pianificazioneDb)
         {
+            // Controlla se il db esiste. Se non esiste lo crea e applica tutte le migration (crea tabella navi,dipendenti ecc.)
+            pianificazioneDb.Database.Migrate();
+
             // Configure the HTTP request pipeline.
             if (!env.IsDevelopment())
             {
