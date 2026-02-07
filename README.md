@@ -24,7 +24,7 @@ Questo progetto prevede la gestione dei turni di lavoro dei dipendenti di un por
  - SignalR
 
  ### Database
-- SQL Server LocalDB
+- SQL Server LocalDB per persistenza dati e connessioni multi-utente
 
  ### Frontend
   - Vue.js
